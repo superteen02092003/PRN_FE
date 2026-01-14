@@ -1,0 +1,14 @@
+/* ===== TAILWIND CSS ===== */
+@import "tailwindcss";
+
+/* ===== BASE STYLES ===== */
+@import "./styles/base/variables.css";
+@import "./styles/base/global.css";
+
+/* ===== COMPONENT STYLES ===== */
+@import "./styles/components/buttons.css";
+/* Add more component styles here */
+
+/* ===== PAGE STYLES ===== */
+@import "./styles/pages/home.css";
+/* Add more page styles here */

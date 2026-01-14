@@ -1,0 +1,37 @@
+/* ===== HEADER STYLES ===== */
+.header {
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+}
+
+.header__logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.header__menu {
+    display: flex;
+    gap: var(--spacing-xl);
+    list-style: none;
+}
+
+.header__menu a {
+    color: var(--color-text);
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.header__menu a:hover {
+    color: var(--color-accent);
+}

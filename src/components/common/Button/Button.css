@@ -1,0 +1,80 @@
+/* Button Component Styles */
+
+/* Base Button */
+.button {
+    @apply font-medium rounded-lg transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply active:scale-95;
+}
+
+/* Sizes */
+.button--sm {
+    @apply px-3 py-1.5 text-sm;
+}
+
+.button--md {
+    @apply px-6 py-2 text-base;
+}
+
+.button--lg {
+    @apply px-8 py-3 text-lg;
+}
+
+/* Variants */
+.button--primary {
+    @apply bg-primary-600 text-white;
+    @apply hover:bg-primary-700 focus:ring-primary-500;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.button--primary:hover {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.button--secondary {
+    @apply bg-secondary-600 text-white;
+    @apply hover:bg-secondary-700 focus:ring-secondary-500;
+    box-shadow: 0 2px 8px rgba(168, 85, 247, 0.2);
+}
+
+.button--secondary:hover {
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.button--outline {
+    @apply bg-transparent text-primary-600 border-2 border-primary-600;
+    @apply hover:bg-primary-50 focus:ring-primary-500;
+}
+
+.button--ghost {
+    @apply bg-transparent text-gray-700;
+    @apply hover:bg-gray-100 focus:ring-gray-500;
+}
+
+/* Loading state */
+.button--loading {
+    @apply relative text-transparent;
+}
+
+.button--loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: button-spin 0.6s linear infinite;
+}
+
+@keyframes button-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
