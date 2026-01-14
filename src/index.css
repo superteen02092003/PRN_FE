@@ -7,6 +7,8 @@
 
 /* ===== COMPONENT STYLES ===== */
 @import "./styles/components/buttons.css";
+@import "./styles/components/header.css";
+@import "./styles/components/footer.css";
 /* Add more component styles here */
 
 /* ===== PAGE STYLES ===== */
