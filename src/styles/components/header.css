@@ -159,6 +159,39 @@
     background-color: rgb(51, 65, 85);
 }
 
+.header__register {
+    display: none;
+    height: 2.25rem;
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background-color: #2463eb;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: background-color 200ms;
+}
+
+.header__register:hover {
+    background-color: #1d4ed8;
+}
+
+@media (min-width: 640px) {
+    .header__register {
+        display: flex;
+    }
+}
+
+.dark .header__register {
+    background-color: #2463eb;
+    color: white;
+}
+
+.dark .header__register:hover {
+    background-color: #1d4ed8;
+}
+
 .header__cart {
     width: 2.25rem;
     height: 2.25rem;

@@ -1,19 +1,21 @@
+import { Link } from 'react-router-dom';
+
 const Header = () => {
     return (
         <header className="header">
             <div className="header__container">
                 <div className="header__content">
                     {/* Logo */}
-                    <div className="header__logo-wrapper">
+                    <Link to="/" className="header__logo-wrapper">
                         <div className="header__logo-icon">
                             <span className="material-symbols-outlined">precision_manufacturing</span>
                         </div>
                         <span className="header__logo-text">STEM Gear</span>
-                    </div>
+                    </Link>
 
                     {/* Desktop Nav Links */}
                     <nav className="header__nav">
-                        <a className="header__nav-link" href="#">Components</a>
+                        <Link to="/components" className="header__nav-link">Components</Link>
                         <a className="header__nav-link" href="#">Projects</a>
                         <a className="header__nav-link" href="#">Forums</a>
                         <a className="header__nav-link header__nav-link--quick-order" href="#">
@@ -24,9 +26,12 @@ const Header = () => {
 
                     {/* Actions */}
                     <div className="header__actions">
-                        <button className="header__sign-in">
+                        <Link to="/login" className="header__sign-in">
                             Sign In
-                        </button>
+                        </Link>
+                        <Link to="/register" className="header__register">
+                            Sign Up
+                        </Link>
                         <button className="header__cart">
                             <span className="material-symbols-outlined">shopping_cart</span>
                             <span className="header__cart-badge">2</span>
@@ -42,4 +47,3 @@ const Header = () => {
 };
 
 export default Header;
-
