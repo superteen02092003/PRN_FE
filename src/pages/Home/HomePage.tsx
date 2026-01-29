@@ -1,9 +1,66 @@
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '@components/common/Header';
 import Footer from '@components/common/Footer';
 
 const HomePage = () => {
+    const location = useLocation();
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+    // Check for success message from login/register
+    useEffect(() => {
+        if (location.state?.message) {
+            setSuccessMessage(location.state.message);
+            // Clear the state to prevent showing message on refresh
+            window.history.replaceState({}, document.title);
+            // Auto dismiss after 3 seconds
+            const timer = setTimeout(() => {
+                setSuccessMessage(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [location.state]);
+
     return (
         <div className="home-page">
+            {/* Success Toast Notification */}
+            {successMessage && (
+                <div style={{
+                    position: 'fixed',
+                    top: '80px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                    padding: '16px 24px',
+                    backgroundColor: '#16A34A',
+                    color: 'white',
+                    borderRadius: '8px',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    animation: 'slideDown 0.3s ease-out',
+                }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
+                    {successMessage}
+                </div>
+            )}
+
+            <style>{`
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+            `}</style>
+
             <Header />
             <main className="home-page__main">
                 <div className="home-page__sections">
