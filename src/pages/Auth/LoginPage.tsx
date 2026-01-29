@@ -1,17 +1,69 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import authService from '../../services/authService';
+import axios from 'axios';
 
 const LoginPage = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         rememberDevice: false,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // Check for success message from registration
+    useEffect(() => {
+        if (location.state?.message) {
+            setSuccessMessage(location.state.message);
+            // Clear the state to prevent showing message on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log(formData);
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            const response = await authService.login({
+                email: formData.email,
+                password: formData.password,
+            });
+
+            if (response.success && response.data) {
+                // Store token
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify({
+                    userId: response.data.userId,
+                    username: response.data.username,
+                    email: response.data.email,
+                    role: response.data.role,
+                }));
+
+                // Notify Header component to update
+                window.dispatchEvent(new Event('authChange'));
+
+                // Redirect to home page with success message
+                navigate('/', { state: { message: 'Login successful! Welcome back.' } });
+            } else {
+                setError(response.message || 'Login failed');
+            }
+        } catch (err) {
+            if (axios.isAxiosError(err) && err.response?.data) {
+                const apiError = err.response.data;
+                setError(apiError.message || 'Login failed');
+            } else {
+                setError('Network error. Please try again.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -248,6 +300,36 @@ const LoginPage = () => {
                         <div style={{ flexGrow: 1, borderTop: '1px solid #e5e7eb' }}></div>
                     </div>
 
+                    {/* Success Message */}
+                    {successMessage && (
+                        <div style={{
+                            padding: '12px 16px',
+                            backgroundColor: '#DCFCE7',
+                            border: '1px solid #86EFAC',
+                            borderRadius: '8px',
+                            color: '#16A34A',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                        }}>
+                            {successMessage}
+                        </div>
+                    )}
+
+                    {/* Error Message */}
+                    {error && (
+                        <div style={{
+                            padding: '12px 16px',
+                            backgroundColor: '#FEE2E2',
+                            border: '1px solid #FCA5A5',
+                            borderRadius: '8px',
+                            color: '#DC2626',
+                            fontSize: '13px',
+                            fontWeight: 500,
+                        }}>
+                            {error}
+                        </div>
+                    )}
+
                     {/* Form */}
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                         {/* Email Input */}
@@ -366,6 +448,7 @@ const LoginPage = () => {
                         {/* Main CTA Button */}
                         <button
                             type="submit"
+                            disabled={isLoading}
                             style={{
                                 marginTop: '6px',
                                 display: 'flex',
@@ -375,25 +458,29 @@ const LoginPage = () => {
                                 justifyContent: 'center',
                                 overflow: 'hidden',
                                 borderRadius: '8px',
-                                backgroundColor: '#2463eb',
+                                backgroundColor: isLoading ? '#93c5fd' : '#2463eb',
                                 color: 'white',
                                 fontSize: '14px',
                                 fontWeight: 'bold',
                                 letterSpacing: '0.015em',
                                 border: 'none',
-                                cursor: 'pointer',
+                                cursor: isLoading ? 'not-allowed' : 'pointer',
                                 transition: 'all 0.2s'
                             }}
                             onMouseOver={(e) => {
-                                e.currentTarget.style.backgroundColor = '#1d4ed8';
-                                e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(36,99,235,0.25)';
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = '#1d4ed8';
+                                    e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(36,99,235,0.25)';
+                                }
                             }}
                             onMouseOut={(e) => {
-                                e.currentTarget.style.backgroundColor = '#2463eb';
-                                e.currentTarget.style.boxShadow = 'none';
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = '#2463eb';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }
                             }}
                         >
-                            Log In
+                            {isLoading ? 'Logging in...' : 'Log In'}
                         </button>
                     </form>
 

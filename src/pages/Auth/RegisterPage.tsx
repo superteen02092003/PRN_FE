@@ -1,14 +1,20 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import authService, { RegisterRequest, ApiError } from '../../services/authService';
 
 const RegisterPage = () => {
-    const [accountType, setAccountType] = useState<'personal' | 'business'>('personal');
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const [password, setPassword] = useState('');
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
-        fullName: '',
+        username: '',
         email: '',
         password: '',
+        confirmPassword: '',
+        phone: '',
+        address: '',
         agreeTerms: false,
     });
 
@@ -22,12 +28,55 @@ const RegisterPage = () => {
         return strength;
     };
 
-    const passwordStrength = getPasswordStrength(password);
+    const passwordStrength = getPasswordStrength(formData.password);
     const strengthLabels = ['Weak', 'Fair', 'Medium', 'Strong'];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log({ ...formData, accountType });
+        setError(null);
+
+        // Validation
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+
+        if (!formData.agreeTerms) {
+            setError('Please agree to the Terms of Service and Privacy Policy');
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const registerData: RegisterRequest = {
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                confirmPassword: formData.confirmPassword,
+                phone: formData.phone,
+                address: formData.address,
+            };
+
+            const response = await authService.register(registerData);
+            console.log('Registration successful:', response);
+
+            // Redirect to login page on success
+            navigate('/login', { state: { message: 'Registration successful! Please login.' } });
+        } catch (err: unknown) {
+            console.error('Registration failed:', err);
+            const axiosError = err as { response?: { data?: ApiError } };
+            if (axiosError.response?.data?.message) {
+                setError(axiosError.response.data.message);
+            } else if (axiosError.response?.data?.errors) {
+                const errorMessages = Object.values(axiosError.response.data.errors).flat();
+                setError(errorMessages.join(', '));
+            } else {
+                setError('Registration failed. Please try again.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -180,102 +229,70 @@ const RegisterPage = () => {
                         }}>Already have an ID? <Link to="/login" style={{ color: '#2463eb', fontWeight: 600 }}>Log in</Link></p>
                     </div>
 
-                    {/* Account Type Toggle */}
-                    <div style={{
-                        backgroundColor: '#e5e7eb',
-                        padding: '4px',
-                        borderRadius: '8px',
-                        display: 'flex'
-                    }}>
-                        <label style={{ flex: 1, position: 'relative', cursor: 'pointer' }}>
-                            <input
-                                type="radio"
-                                name="account_type"
-                                value="personal"
-                                checked={accountType === 'personal'}
-                                onChange={() => setAccountType('personal')}
-                                style={{ display: 'none' }}
-                            />
-                            <div style={{
-                                width: '100%',
-                                padding: '8px 0',
-                                textAlign: 'center',
-                                fontSize: '13px',
-                                fontWeight: 600,
-                                color: accountType === 'personal' ? '#2463eb' : '#4d6599',
-                                backgroundColor: accountType === 'personal' ? 'white' : 'transparent',
-                                borderRadius: '6px',
-                                boxShadow: accountType === 'personal' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-                                transition: 'all 0.2s'
-                            }}>
-                                Personal
-                            </div>
-                        </label>
-                        <label style={{ flex: 1, position: 'relative', cursor: 'pointer' }}>
-                            <input
-                                type="radio"
-                                name="account_type"
-                                value="business"
-                                checked={accountType === 'business'}
-                                onChange={() => setAccountType('business')}
-                                style={{ display: 'none' }}
-                            />
-                            <div style={{
-                                width: '100%',
-                                padding: '8px 0',
-                                textAlign: 'center',
-                                fontSize: '13px',
-                                fontWeight: 600,
-                                color: accountType === 'business' ? '#2463eb' : '#4d6599',
-                                backgroundColor: accountType === 'business' ? 'white' : 'transparent',
-                                borderRadius: '6px',
-                                boxShadow: accountType === 'business' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
-                                transition: 'all 0.2s'
-                            }}>
-                                Business / Enterprise
-                            </div>
-                        </label>
-                    </div>
+                    {/* Error Message */}
+                    {error && (
+                        <div style={{
+                            padding: '12px',
+                            backgroundColor: '#fef2f2',
+                            border: '1px solid #fecaca',
+                            borderRadius: '8px',
+                            color: '#dc2626',
+                            fontSize: '13px'
+                        }}>
+                            {error}
+                        </div>
+                    )}
 
                     {/* Registration Form */}
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {/* Full Name */}
+                        {/* Username */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <label style={{
                                 color: '#0e121b',
                                 fontSize: '13px',
                                 fontWeight: 600,
                                 letterSpacing: '0.025em'
-                            }} htmlFor="fullname">Full Name</label>
-                            <input
-                                type="text"
-                                id="fullname"
-                                placeholder="e.g. Alex Chen"
-                                value={formData.fullName}
-                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                style={{
-                                    height: '42px',
-                                    width: '100%',
-                                    borderRadius: '8px',
-                                    border: '1px solid #d1d5db',
-                                    backgroundColor: 'white',
-                                    padding: '0 14px',
-                                    fontSize: '14px',
-                                    color: '#0e121b',
-                                    outline: 'none',
-                                    transition: 'all 0.2s'
-                                }}
-                            />
+                            }} htmlFor="username">Username</label>
+                            <div style={{ position: 'relative' }}>
+                                <span className="material-symbols-outlined" style={{
+                                    position: 'absolute',
+                                    left: '14px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#9ca3af',
+                                    fontSize: '18px'
+                                }}>person</span>
+                                <input
+                                    type="text"
+                                    id="username"
+                                    placeholder="e.g. tumiz"
+                                    value={formData.username}
+                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    required
+                                    style={{
+                                        height: '42px',
+                                        width: '100%',
+                                        borderRadius: '8px',
+                                        border: '1px solid #d1d5db',
+                                        backgroundColor: 'white',
+                                        padding: '0 14px 0 40px',
+                                        fontSize: '14px',
+                                        color: '#0e121b',
+                                        outline: 'none',
+                                        transition: 'all 0.2s'
+                                    }}
+                                />
+                            </div>
                         </div>
 
-                        {/* Work Email */}
+                        {/* Email */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <label style={{
                                 color: '#0e121b',
                                 fontSize: '13px',
                                 fontWeight: 600,
                                 letterSpacing: '0.025em'
-                            }} htmlFor="email">Work Email</label>
+                            }} htmlFor="email">Email</label>
                             <div style={{ position: 'relative' }}>
                                 <span className="material-symbols-outlined" style={{
                                     position: 'absolute',
@@ -288,9 +305,90 @@ const RegisterPage = () => {
                                 <input
                                     type="email"
                                     id="email"
-                                    placeholder="name@company.com"
+                                    placeholder="name@example.com"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
+                                    style={{
+                                        height: '42px',
+                                        width: '100%',
+                                        borderRadius: '8px',
+                                        border: '1px solid #d1d5db',
+                                        backgroundColor: 'white',
+                                        padding: '0 14px 0 40px',
+                                        fontSize: '14px',
+                                        color: '#0e121b',
+                                        outline: 'none',
+                                        transition: 'all 0.2s'
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Phone */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <label style={{
+                                color: '#0e121b',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                letterSpacing: '0.025em'
+                            }} htmlFor="phone">Phone</label>
+                            <div style={{ position: 'relative' }}>
+                                <span className="material-symbols-outlined" style={{
+                                    position: 'absolute',
+                                    left: '14px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#9ca3af',
+                                    fontSize: '18px'
+                                }}>phone</span>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    placeholder="e.g. 0917213712"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    required
+                                    style={{
+                                        height: '42px',
+                                        width: '100%',
+                                        borderRadius: '8px',
+                                        border: '1px solid #d1d5db',
+                                        backgroundColor: 'white',
+                                        padding: '0 14px 0 40px',
+                                        fontSize: '14px',
+                                        color: '#0e121b',
+                                        outline: 'none',
+                                        transition: 'all 0.2s'
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Address */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <label style={{
+                                color: '#0e121b',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                letterSpacing: '0.025em'
+                            }} htmlFor="address">Address</label>
+                            <div style={{ position: 'relative' }}>
+                                <span className="material-symbols-outlined" style={{
+                                    position: 'absolute',
+                                    left: '14px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#9ca3af',
+                                    fontSize: '18px'
+                                }}>location_on</span>
+                                <input
+                                    type="text"
+                                    id="address"
+                                    placeholder="e.g. HCM"
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                    required
                                     style={{
                                         height: '42px',
                                         width: '100%',
@@ -328,11 +426,9 @@ const RegisterPage = () => {
                                     type={showPassword ? 'text' : 'password'}
                                     id="password"
                                     placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => {
-                                        setPassword(e.target.value);
-                                        setFormData({ ...formData, password: e.target.value });
-                                    }}
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    required
                                     style={{
                                         height: '42px',
                                         width: '100%',
@@ -395,9 +491,74 @@ const RegisterPage = () => {
                                     fontWeight: 600,
                                     color: passwordStrength >= 3 ? '#22c55e' : '#2463eb'
                                 }}>
-                                    {password ? strengthLabels[passwordStrength - 1] || 'Weak' : 'Medium'}
+                                    {formData.password ? strengthLabels[passwordStrength - 1] || 'Weak' : 'Medium'}
                                 </span>
                             </p>
+                        </div>
+
+                        {/* Confirm Password */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <label style={{
+                                color: '#0e121b',
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                letterSpacing: '0.025em'
+                            }} htmlFor="confirmPassword">Confirm Password</label>
+                            <div style={{ position: 'relative' }}>
+                                <span className="material-symbols-outlined" style={{
+                                    position: 'absolute',
+                                    left: '14px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#9ca3af',
+                                    fontSize: '18px'
+                                }}>lock</span>
+                                <input
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    id="confirmPassword"
+                                    placeholder="••••••••"
+                                    value={formData.confirmPassword}
+                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                    required
+                                    style={{
+                                        height: '42px',
+                                        width: '100%',
+                                        borderRadius: '8px',
+                                        border: '1px solid #d1d5db',
+                                        backgroundColor: 'white',
+                                        padding: '0 40px 0 40px',
+                                        fontSize: '14px',
+                                        color: '#0e121b',
+                                        outline: 'none',
+                                        transition: 'all 0.2s'
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: 0,
+                                        bottom: 0,
+                                        padding: '0 12px',
+                                        color: '#4d6599',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        transition: 'color 0.2s'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.color = '#2463eb'}
+                                    onMouseOut={(e) => e.currentTarget.style.color = '#4d6599'}
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                                        {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                                    </span>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Terms Checkbox */}
@@ -425,6 +586,7 @@ const RegisterPage = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
+                            disabled={isLoading}
                             style={{
                                 marginTop: '6px',
                                 display: 'flex',
@@ -434,25 +596,29 @@ const RegisterPage = () => {
                                 justifyContent: 'center',
                                 overflow: 'hidden',
                                 borderRadius: '8px',
-                                backgroundColor: '#2463eb',
+                                backgroundColor: isLoading ? '#93c5fd' : '#2463eb',
                                 color: 'white',
                                 fontSize: '14px',
                                 fontWeight: 'bold',
                                 letterSpacing: '0.015em',
                                 border: 'none',
-                                cursor: 'pointer',
+                                cursor: isLoading ? 'not-allowed' : 'pointer',
                                 transition: 'all 0.2s'
                             }}
                             onMouseOver={(e) => {
-                                e.currentTarget.style.backgroundColor = '#1d4ed8';
-                                e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(36,99,235,0.25)';
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = '#1d4ed8';
+                                    e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(36,99,235,0.25)';
+                                }
                             }}
                             onMouseOut={(e) => {
-                                e.currentTarget.style.backgroundColor = '#2463eb';
-                                e.currentTarget.style.boxShadow = 'none';
+                                if (!isLoading) {
+                                    e.currentTarget.style.backgroundColor = '#2463eb';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }
                             }}
                         >
-                            Create Account
+                            {isLoading ? 'Creating Account...' : 'Create Account'}
                         </button>
                     </form>
 

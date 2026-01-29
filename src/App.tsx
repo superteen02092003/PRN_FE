@@ -1,22 +1,44 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { AnimatePresence } from 'framer-motion';
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from './pages/Home/index';
 import { RegisterPage, LoginPage } from './pages/Auth';
 import ComponentsPage from './pages/Components';
+import PageTransition from './components/common/PageTransition';
 
 function App() {
+    const location = useLocation();
+
     return (
         <div>
             <ToastContainer position="top-right" autoClose={5000} />
 
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/components" element={<ComponentsPage />} />
-                {/* Add more routes here */}
-            </Routes>
+            <AnimatePresence mode="wait">
+                <Routes location={location} key={location.pathname}>
+                    <Route path="/" element={
+                        <PageTransition>
+                            <HomePage />
+                        </PageTransition>
+                    } />
+                    <Route path="/register" element={
+                        <PageTransition>
+                            <RegisterPage />
+                        </PageTransition>
+                    } />
+                    <Route path="/login" element={
+                        <PageTransition>
+                            <LoginPage />
+                        </PageTransition>
+                    } />
+                    <Route path="/components" element={
+                        <PageTransition>
+                            <ComponentsPage />
+                        </PageTransition>
+                    } />
+                    {/* Add more routes here */}
+                </Routes>
+            </AnimatePresence>
         </div>
     );
 }
