@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import authService from '../../services/authService';
+import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { login, isAuthenticated, user } = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -15,6 +16,16 @@ const LoginPage = () => {
         password: '',
         rememberDevice: false,
     });
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            const redirectPath = user.role?.toLowerCase() === 'admin'
+                ? '/admin/dashboard'
+                : '/';
+            navigate(redirectPath, { replace: true });
+        }
+    }, [isAuthenticated, user, navigate]);
 
     // Check for success message from registration
     useEffect(() => {
@@ -31,26 +42,17 @@ const LoginPage = () => {
         setIsLoading(true);
 
         try {
-            const response = await authService.login({
+            const response = await login({
                 email: formData.email,
                 password: formData.password,
             });
 
             if (response.success && response.data) {
-                // Store token
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('user', JSON.stringify({
-                    userId: response.data.userId,
-                    username: response.data.username,
-                    email: response.data.email,
-                    role: response.data.role,
-                }));
-
-                // Notify Header component to update
-                window.dispatchEvent(new Event('authChange'));
-
-                // Redirect to home page with success message
-                navigate('/', { state: { message: 'Login successful! Welcome back.' } });
+                // Redirect based on role
+                const redirectPath = response.data.role?.toLowerCase() === 'admin'
+                    ? '/admin/dashboard'
+                    : '/';
+                navigate(redirectPath, { state: { message: 'Login successful! Welcome back.' } });
             } else {
                 setError(response.message || 'Login failed');
             }
