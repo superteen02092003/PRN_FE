@@ -24,6 +24,16 @@ export interface AuthResponseData {
     expiresIn?: number;
 }
 
+export interface UserProfile {
+    userId: number;
+    username: string;
+    email: string;
+    role: string;
+    phone?: string;
+    address?: string;
+    createdAt?: string;
+}
+
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
@@ -46,6 +56,37 @@ const authService = {
     login: async (data: LoginRequest): Promise<ApiResponse<AuthResponseData>> => {
         const response = await api.post<ApiResponse<AuthResponseData>>('/Auth/login', data);
         return response.data;
+    },
+
+    getProfile: async (): Promise<ApiResponse<UserProfile>> => {
+        const response = await api.get<ApiResponse<UserProfile>>('/Auth/profile');
+        return response.data;
+    },
+
+    logout: () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new Event('authChange'));
+    },
+
+    getStoredUser: (): UserProfile | null => {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                return JSON.parse(userStr);
+            } catch {
+                return null;
+            }
+        }
+        return null;
+    },
+
+    getToken: (): string | null => {
+        return localStorage.getItem('token');
+    },
+
+    isAuthenticated: (): boolean => {
+        return !!localStorage.getItem('token');
     },
 };
 

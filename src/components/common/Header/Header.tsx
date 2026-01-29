@@ -47,6 +47,8 @@ const Header = () => {
         localStorage.removeItem('user');
         setUser(null);
         setShowDropdown(false);
+        // Dispatch authChange event to notify AuthContext
+        window.dispatchEvent(new Event('authChange'));
         navigate('/');
     };
 
@@ -128,6 +130,31 @@ const Header = () => {
                                             </p>
                                         </div>
                                         <div style={{ padding: '8px' }}>
+                                            {/* Dashboard link for Admin */}
+                                            {user.role?.toLowerCase() === 'admin' && (
+                                                <Link
+                                                    to="/admin/dashboard"
+                                                    onClick={() => setShowDropdown(false)}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '8px',
+                                                        padding: '10px 12px',
+                                                        borderRadius: '6px',
+                                                        color: '#2463eb',
+                                                        textDecoration: 'none',
+                                                        fontSize: '14px',
+                                                        fontWeight: 600,
+                                                        backgroundColor: '#eff6ff',
+                                                        marginBottom: '4px',
+                                                    }}
+                                                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#dbeafe'}
+                                                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#eff6ff'}
+                                                >
+                                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>dashboard</span>
+                                                    Admin Dashboard
+                                                </Link>
+                                            )}
                                             <Link
                                                 to="/profile"
                                                 onClick={() => setShowDropdown(false)}
