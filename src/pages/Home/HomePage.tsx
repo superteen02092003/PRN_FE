@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@components/common/Header';
 import Footer from '@components/common/Footer';
@@ -6,6 +6,7 @@ import Footer from '@components/common/Footer';
 const HomePage = () => {
     const location = useLocation();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const sectionsRef = useRef<HTMLDivElement>(null);
 
     // Check for success message from login/register
     useEffect(() => {
@@ -20,6 +21,36 @@ const HomePage = () => {
             return () => clearTimeout(timer);
         }
     }, [location.state]);
+
+    // Scroll reveal animation using Intersection Observer
+    useEffect(() => {
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -50px 0px',
+            threshold: 0.1
+        };
+
+        const observerCallback: IntersectionObserverCallback = (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        // Observe all cards that need reveal animation
+        const sectionsContainer = sectionsRef.current;
+        if (sectionsContainer) {
+            const revealElements = sectionsContainer.querySelectorAll(
+                '.category-card, .product-card, .arrival-card, .reveal'
+            );
+            revealElements.forEach((el) => observer.observe(el));
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <div className="home-page">
@@ -63,7 +94,7 @@ const HomePage = () => {
 
             <Header />
             <main className="home-page__main">
-                <div className="home-page__sections">
+                <div className="home-page__sections" ref={sectionsRef}>
                     {/* Hero Search Section */}
                     <section className="hero-search">
                         <div
