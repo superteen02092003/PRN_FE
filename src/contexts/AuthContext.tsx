@@ -1,11 +1,11 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import authService, { UserProfile, LoginRequest, AuthResponseData, ApiResponse } from '../services/authService';
+import authService, { UserProfile, LoginRequest, AuthResponseData } from '../services/authService';
 
 interface AuthContextType {
     user: UserProfile | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (data: LoginRequest) => Promise<ApiResponse<AuthResponseData>>;
+    login: (data: LoginRequest) => Promise<AuthResponseData>;
     logout: () => void;
     refreshUser: () => Promise<void>;
 }
@@ -47,21 +47,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
-    const login = async (data: LoginRequest): Promise<ApiResponse<AuthResponseData>> => {
+    const login = async (data: LoginRequest): Promise<AuthResponseData> => {
         const response = await authService.login(data);
 
-        if (response.success && response.data) {
-            localStorage.setItem('token', response.data.token);
-            const userProfile: UserProfile = {
-                userId: response.data.userId,
-                username: response.data.username,
-                email: response.data.email,
-                role: response.data.role,
-            };
-            localStorage.setItem('user', JSON.stringify(userProfile));
-            setUser(userProfile);
-            window.dispatchEvent(new Event('authChange'));
-        }
+        // Response is now directly AuthResponseData
+        localStorage.setItem('token', response.accessToken);
+        const userProfile: UserProfile = {
+            userId: response.userId,
+            username: response.username,
+            email: response.email,
+            role: response.role,
+        };
+        localStorage.setItem('user', JSON.stringify(userProfile));
+        setUser(userProfile);
+        window.dispatchEvent(new Event('authChange'));
 
         return response;
     };
