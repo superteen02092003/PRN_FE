@@ -5,7 +5,6 @@ export interface RegisterRequest {
     username: string;
     email: string;
     password: string;
-    confirmPassword: string;
     phone: string;
     address: string;
 }
@@ -20,7 +19,7 @@ export interface AuthResponseData {
     username: string;
     email: string;
     role: string;
-    token: string;
+    accessToken: string;
     expiresIn?: number;
 }
 
@@ -48,13 +47,13 @@ export interface ApiError {
 
 // Auth Service
 const authService = {
-    register: async (data: RegisterRequest): Promise<ApiResponse<AuthResponseData>> => {
-        const response = await api.post<ApiResponse<AuthResponseData>>('/Auth/register', data);
+    register: async (data: RegisterRequest): Promise<string> => {
+        const response = await api.post<string>('/users/register', data);
         return response.data;
     },
 
-    login: async (data: LoginRequest): Promise<ApiResponse<AuthResponseData>> => {
-        const response = await api.post<ApiResponse<AuthResponseData>>('/Auth/login', data);
+    login: async (data: LoginRequest): Promise<AuthResponseData> => {
+        const response = await api.post<AuthResponseData>('/users/login', data);
         return response.data;
     },
 

@@ -49,24 +49,26 @@ const RegisterPage = () => {
         setIsLoading(true);
 
         try {
+            // Note: confirmPassword is only for frontend validation, not sent to API
             const registerData: RegisterRequest = {
                 username: formData.username,
                 email: formData.email,
                 password: formData.password,
-                confirmPassword: formData.confirmPassword,
                 phone: formData.phone,
                 address: formData.address,
             };
 
-            const response = await authService.register(registerData);
-            console.log('Registration successful:', response);
+            await authService.register(registerData);
+            // Response is just a success string message from BE
 
             // Redirect to login page on success
             navigate('/login', { state: { message: 'Registration successful! Please login.' } });
         } catch (err: unknown) {
             console.error('Registration failed:', err);
-            const axiosError = err as { response?: { data?: ApiError } };
-            if (axiosError.response?.data?.message) {
+            const axiosError = err as { response?: { data?: string | ApiError } };
+            if (typeof axiosError.response?.data === 'string') {
+                setError(axiosError.response.data);
+            } else if (axiosError.response?.data?.message) {
                 setError(axiosError.response.data.message);
             } else if (axiosError.response?.data?.errors) {
                 const errorMessages = Object.values(axiosError.response.data.errors).flat();

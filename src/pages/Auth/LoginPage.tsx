@@ -47,19 +47,16 @@ const LoginPage = () => {
                 password: formData.password,
             });
 
-            if (response.success && response.data) {
-                // Redirect based on role
-                const redirectPath = response.data.role?.toLowerCase() === 'admin'
-                    ? '/admin/dashboard'
-                    : '/';
-                navigate(redirectPath, { state: { message: 'Login successful! Welcome back.' } });
-            } else {
-                setError(response.message || 'Login failed');
-            }
+            // Response is now directly AuthResponseData, no need to check success
+            // Redirect based on role - Admin goes to dashboard
+            const redirectPath = response.role?.toLowerCase() === 'admin'
+                ? '/admin/dashboard'
+                : '/';
+            navigate(redirectPath, { state: { message: 'Login successful! Welcome back.' } });
         } catch (err) {
             if (axios.isAxiosError(err) && err.response?.data) {
                 const apiError = err.response.data;
-                setError(apiError.message || 'Login failed');
+                setError(typeof apiError === 'string' ? apiError : (apiError.message || 'Login failed'));
             } else {
                 setError('Network error. Please try again.');
             }
