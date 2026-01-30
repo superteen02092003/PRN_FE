@@ -3,6 +3,7 @@
 
 /* ===== BASE STYLES ===== */
 @import "./styles/base/variables.css";
+@import "./styles/base/animations.css";
 @import "./styles/base/global.css";
 
 /* ===== COMPONENT STYLES ===== */
