@@ -4,7 +4,8 @@ import { AnimatePresence } from 'framer-motion';
 import 'react-toastify/dist/ReactToastify.css';
 import HomePage from './pages/Home/index';
 import { RegisterPage, LoginPage } from './pages/Auth';
-import ComponentsPage from './pages/Components';
+import ProductsPage from './pages/Products';
+import ProductDetailPage from './pages/Products/ProductDetail';
 import PageTransition from './components/common/PageTransition';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -36,9 +37,14 @@ function App() {
                                 <LoginPage />
                             </PageTransition>
                         } />
-                        <Route path="/components" element={
+                        <Route path="/products" element={
                             <PageTransition>
-                                <ComponentsPage />
+                                <ProductsPage />
+                            </PageTransition>
+                        } />
+                        <Route path="/products/:id" element={
+                            <PageTransition>
+                                <ProductDetailPage />
                             </PageTransition>
                         } />
 
