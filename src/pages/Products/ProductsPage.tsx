@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import Header from '../../components/common/Header/Header';
 import Footer from '../../components/common/Footer/Footer';
 import { useProducts, useCategories, useBrands } from '../../hooks/useProducts';
@@ -400,7 +400,11 @@ const ProductsPage = () => {
                             <>
                                 <div className={`products-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
                                     {products.map(product => (
-                                        <div key={product.productId} className="product-card">
+                                        <Link
+                                            key={product.productId}
+                                            to={`/products/${product.productId}`}
+                                            className="product-card"
+                                        >
                                             {/* Stock Badge */}
                                             <div className={`product-card__badge badge--${product.inStock ? 'green' : 'gray'}`}>
                                                 {product.inStock ? 'IN STOCK' : 'OUT OF STOCK'}
@@ -408,14 +412,22 @@ const ProductsPage = () => {
 
                                             {/* Image */}
                                             <div className="product-card__image">
-                                                <img
-                                                    src={product.primaryImage || '/placeholder-product.png'}
-                                                    alt={product.name}
-                                                    onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = '/placeholder-product.png';
-                                                    }}
-                                                />
-                                                <button className="quick-view-btn">Quick View</button>
+                                                {product.primaryImage ? (
+                                                    <img
+                                                        src={product.primaryImage}
+                                                        alt={product.name}
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).style.display = 'none';
+                                                            (e.target as HTMLImageElement).parentElement?.classList.add('no-image');
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="image-placeholder">
+                                                        <span className="material-symbols-outlined">image</span>
+                                                        <span>No Image</span>
+                                                    </div>
+                                                )}
+                                                <span className="quick-view-btn">View Details</span>
                                             </div>
 
                                             {/* Content */}
@@ -434,20 +446,19 @@ const ProductsPage = () => {
                                                 {/* Price & Action */}
                                                 <div className="product-card__footer">
                                                     <div className="price-info">
-                                                        <span className="price">{formatPrice(product.price)}</span>
+                                                        <span className="product-price">{formatPrice(product.price)}</span>
                                                         <span className="stock-qty">
                                                             {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
                                                         </span>
                                                     </div>
-                                                    <button
-                                                        className="add-to-cart-btn"
-                                                        disabled={!product.inStock}
+                                                    <div
+                                                        className={`cart-btn ${!product.inStock ? 'disabled' : ''}`}
                                                     >
                                                         <span className="material-symbols-outlined">add_shopping_cart</span>
-                                                    </button>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </Link>
                                     ))}
                                 </div>
 

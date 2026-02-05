@@ -1,12 +1,18 @@
 import api from './api';
 import type {
     ProductResponseDto,
+    ProductDetailDto,
     CategoryResponseDto,
     BrandResponseDto,
     ProductFilterParams,
     ProductType,
     ApiResponse,
     PaginatedResponse,
+    ReviewsResponse,
+    ReviewFilterParams,
+    ReviewDto,
+    CreateReviewDto,
+    ProductBundleDto,
 } from '../types/product.types';
 
 // ===== Response Types from API =====
@@ -111,6 +117,104 @@ export const getBrands = async (): Promise<BrandResponseDto[]> => {
 
     if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Failed to fetch brands');
+    }
+
+    return response.data.data;
+};
+
+// ===== Product Detail APIs =====
+
+type ReviewsApiResponse = ApiResponse<ReviewsResponse>;
+type BundleApiResponse = ApiResponse<ProductBundleDto>;
+type ReviewApiResponse = ApiResponse<ReviewDto>;
+
+/**
+ * Lấy chi tiết sản phẩm theo ID
+ */
+export const getProductDetail = async (productId: number): Promise<ProductDetailDto> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await api.get<ApiResponse<any>>(`/Product/${productId}`);
+
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to fetch product detail');
+    }
+
+    const data = response.data.data;
+
+    // Normalize data: handle case where API returns primaryImage instead of images array
+    const normalizedData: ProductDetailDto = {
+        ...data,
+        // Tính inStock từ stockQuantity nếu không có
+        inStock: data.inStock ?? (data.stockQuantity > 0),
+        // Nếu không có images array, tạo từ primaryImage
+        images: data.images ?? (data.primaryImage ? [{
+            imageId: 1,
+            imageUrl: data.primaryImage,
+            isPrimary: true,
+            sortOrder: 0,
+        }] : []),
+        // Default values
+        averageRating: data.averageRating ?? 0,
+        totalReviews: data.totalReviews ?? 0,
+        categories: data.categories ?? [],
+        description: data.description ?? '',
+    };
+
+    return normalizedData;
+};
+
+/**
+ * Lấy danh sách reviews của sản phẩm
+ */
+export const getProductReviews = async (
+    productId: number,
+    params: ReviewFilterParams = {}
+): Promise<ReviewsResponse> => {
+    const queryParams: Record<string, string | number> = {};
+
+    queryParams.PageNumber = params.pageNumber || 1;
+    queryParams.PageSize = params.pageSize || 10;
+    if (params.sortBy) queryParams.SortBy = params.sortBy;
+
+    const response = await api.get<ReviewsApiResponse>(
+        `/Product/${productId}/reviews`,
+        { params: queryParams }
+    );
+
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to fetch reviews');
+    }
+
+    return response.data.data;
+};
+
+/**
+ * Lấy danh sách components trong bundle (cho KIT products)
+ */
+export const getProductBundle = async (productId: number): Promise<ProductBundleDto> => {
+    const response = await api.get<BundleApiResponse>(`/Product/${productId}/bundle`);
+
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to fetch bundle');
+    }
+
+    return response.data.data;
+};
+
+/**
+ * Tạo review mới cho sản phẩm (cần đăng nhập và đã mua sản phẩm)
+ */
+export const createProductReview = async (
+    productId: number,
+    review: CreateReviewDto
+): Promise<ReviewDto> => {
+    const response = await api.post<ReviewApiResponse>(
+        `/Product/${productId}/reviews`,
+        review
+    );
+
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to create review');
     }
 
     return response.data.data;

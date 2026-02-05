@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import HomePage from './pages/Home/index';
 import { RegisterPage, LoginPage } from './pages/Auth';
 import ProductsPage from './pages/Products';
+import ProductDetailPage from './pages/Products/ProductDetail';
 import PageTransition from './components/common/PageTransition';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -39,6 +40,11 @@ function App() {
                         <Route path="/products" element={
                             <PageTransition>
                                 <ProductsPage />
+                            </PageTransition>
+                        } />
+                        <Route path="/products/:id" element={
+                            <PageTransition>
+                                <ProductDetailPage />
                             </PageTransition>
                         } />
 
