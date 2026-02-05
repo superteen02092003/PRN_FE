@@ -66,7 +66,7 @@ const Header = () => {
 
                     {/* Desktop Nav Links */}
                     <nav className="header__nav">
-                        <Link to="/components" className="header__nav-link">Components</Link>
+                        <Link to="/products" className="header__nav-link">Products</Link>
                         <a className="header__nav-link" href="#">Projects</a>
                         <a className="header__nav-link" href="#">Forums</a>
                         <a className="header__nav-link header__nav-link--quick-order" href="#">

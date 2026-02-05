@@ -1,19 +1,19 @@
 /* ===== COMPONENTS PAGE STYLES ===== */
 
-.components-page {
+.products-page {
     min-height: 100vh;
     background-color: #f6f6f8;
     font-family: 'Inter', sans-serif;
 }
 
-.components-main {
+.products-main {
     max-width: 1440px;
     margin: 0 auto;
     padding: 1.5rem 1rem;
 }
 
 @media (min-width: 1024px) {
-    .components-main {
+    .products-main {
         padding: 1.5rem 2.5rem;
     }
 }

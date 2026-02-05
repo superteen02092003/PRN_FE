@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import Header from '../../components/common/Header/Header';
 import Footer from '../../components/common/Footer/Footer';
-import './ComponentsPage.css';
+import './ProductsPage.css';
 
 // Mock product data
 const mockProducts = [
@@ -70,17 +69,17 @@ const mockProducts = [
 ];
 
 const categories = [
-    { name: 'Dev Boards', count: 124 },
-    { name: 'ICs / Chips', count: 86 },
-    { name: 'Accessories', count: 42 }
+    { name: 'Kit', count: 124 },
+    { name: 'Component', count: 86 },
+    { name: 'Module', count: 42 }
 ];
 
 const brands = ['Arduino', 'Espressif', 'Raspberry Pi', 'Adafruit', 'SparkFun'];
 
-const ComponentsPage = () => {
+const ProductsPage = () => {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showFilters, setShowFilters] = useState(false);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>(['Dev Boards']);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(['Kit']);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const [activeFilters, setActiveFilters] = useState<string[]>(['In Stock']);
 
@@ -89,24 +88,17 @@ const ComponentsPage = () => {
     };
 
     return (
-        <div className="components-page">
+        <div className="products-page">
             <Header />
 
-            <main className="components-main">
-                {/* Breadcrumbs */}
-                <div className="breadcrumbs">
-                    <Link to="/" className="breadcrumb-link">Home</Link>
-                    <span className="breadcrumb-separator">/</span>
-                    <Link to="/components" className="breadcrumb-link">Components</Link>
-                    <span className="breadcrumb-separator">/</span>
-                    <span className="breadcrumb-current">Microcontrollers</span>
-                </div>
+            <main className="products-main">
+
 
                 {/* Page Header */}
                 <div className="page-header">
                     <div className="page-header__info">
-                        <h1 className="page-header__title">Microcontrollers & Processors</h1>
-                        <p className="page-header__subtitle">Power your next project with our wide selection of dev boards and chips.</p>
+                        <h1 className="page-header__title">Product</h1>
+                        <p className="page-header__subtitle">Explore our wide range of STEM gear and electronics components.</p>
                     </div>
                     <div className="page-header__actions">
                         <button className="sort-button">
@@ -305,4 +297,4 @@ const ComponentsPage = () => {
     );
 };
 
-export default ComponentsPage;
+export default ProductsPage;
