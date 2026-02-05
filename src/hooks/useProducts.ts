@@ -9,12 +9,14 @@ import type {
     CategoryResponseDto,
     BrandResponseDto,
     ProductFilterParams,
+    PaginationInfo,
 } from '../types/product.types';
 
 // ===== useProducts Hook =====
 
 interface UseProductsResult {
     products: ProductResponseDto[];
+    pagination: PaginationInfo | null;
     loading: boolean;
     error: string | null;
     refetch: () => void;
@@ -24,6 +26,7 @@ export const useProducts = (
     filter: ProductFilterParams = {}
 ): UseProductsResult => {
     const [products, setProducts] = useState<ProductResponseDto[]>([]);
+    const [pagination, setPagination] = useState<PaginationInfo | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -31,10 +34,18 @@ export const useProducts = (
         try {
             setLoading(true);
             setError(null);
-            const data = await getProducts(filter);
-            setProducts(data);
+            const result = await getProducts(filter);
+            setProducts(result.items);
+            setPagination({
+                pageNumber: result.pageNumber,
+                pageSize: result.pageSize,
+                totalCount: result.totalCount,
+                totalPages: result.totalPages,
+            });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to fetch products');
+            setProducts([]);
+            setPagination(null);
         } finally {
             setLoading(false);
         }
@@ -44,7 +55,7 @@ export const useProducts = (
         fetchProducts();
     }, [fetchProducts]);
 
-    return { products, loading, error, refetch: fetchProducts };
+    return { products, pagination, loading, error, refetch: fetchProducts };
 };
 
 // ===== useCategories Hook =====

@@ -1,110 +1,219 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '../../components/common/Header/Header';
 import Footer from '../../components/common/Footer/Footer';
+import { useProducts, useCategories, useBrands } from '../../hooks/useProducts';
+import type { ProductFilterParams } from '../../types/product.types';
 import './ProductsPage.css';
 
-// Mock product data
-const mockProducts = [
-    {
-        id: 1,
-        name: 'Arduino Uno R3',
-        brand: 'Arduino',
-        price: 23.00,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBeYn-nNzvZ0TAAw4bV7S4VQRf-a_GGIMzShyfn6F9LtcJ6OV2dJbyNBv9_8dlbG-XvuRVrf306gSXM9EDadDBfFxEIUtEuxGCTw93qrrY8i_dJb8ThTVoHwt10T5WkmphGRf3uCG0pWSIZfNI2SObqh_t2X4ftgkP_g7-1MkRq-OZsfU79Cm15tPSdGkiBkSK7NGVvgzZLIqmtV-TtBH4BGrVrHtxpeIkcz9LX7hO0kz5u368eX51OGpXSZWWEpmxx69QEMh27pZk',
-        specs: ['5V Logic', 'DIP'],
-        sku: 'A000066',
-        badge: 'IN STOCK',
-        badgeColor: 'green'
-    },
-    {
-        id: 2,
-        name: 'ESP32-WROOM-32',
-        brand: 'Espressif',
-        price: 5.50,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCdbyIAa-xUdjXiOWaE2RJ-TkXBhL1-AkHlurO9KOjGFLxU6ey6fr7Ljf3QrOV9WwC2u8ciVrmTx00peURfRVxUtHy_ShLASRaQUVo-B50J8CwA9hWmFEZZtusbrKOKf8YJ-Xb_Fbe4wIu32rcWTgLfQa-7UPJw0n_9gaPXHMvZXTZo8756NpAHoFBUXu3jsZ71tEuAuhDfEJVoUwWVGvDpWLNrfy-CFuYYj3G6iRGKbX6xuWjfmO4GapQ1HRQvG5PX7mSWGIZ45is',
-        specs: ['3.3V Logic', 'SMD'],
-        sku: 'ESP-32',
-        badge: 'BEST SELLER',
-        badgeColor: 'orange',
-        volumePricing: true
-    },
-    {
-        id: 3,
-        name: 'Raspberry Pi Pico',
-        brand: 'Raspberry Pi',
-        price: 4.00,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCBAzyq_DCjRqJggDJXXLs6mmnVkjAogL53InOOFP-F-00fyIjP1MluvWxD-IuSDWLBVi3gP8HUwzep7HbKiXeAbf1nCv6ARTRbJCH9_6b9LGUAS175wA9bC39igZT1qbngeRYh1nTrveJejBGSyf5RspditEdorLuw46AT6_wCU4I0LOGT2VQpEAAWHHJfcHTCcTIXtWhgTX2i8yKjQaAuoLObFRnInkspGalTM-6KsGFdZHDhGQHR-8kucoD6k1XHZJGgVyAo9iI',
-        specs: ['3.3V Logic', 'SMD/TH'],
-        sku: 'SC0915',
-        badge: 'LOW STOCK',
-        badgeColor: 'gray'
-    },
-    {
-        id: 4,
-        name: 'Nucleo-64 STM32F401',
-        brand: 'STMicroelectronics',
-        price: 14.50,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAjnbgkMHFKoWAh5pLRUOL4Ra01yen6_8dbXQeyf-PTeuhlxEvUM7s56PND7rHTk0WEoqPuX_gmi7lbgJKL3OkRZo8MNNOcIeaHP_3CKk6oCiYFBQiILpjKbhIZP-rmYyiEEcWb_Im3NcHPFSL4-gcLBfiIqaORYY2OTSiBpwpkIpMTNdXN1icFbonJb897pk4Qp03YFep5ECucZhHjwky0g0NpVW_YrA_8VKenzruItJ2BMlGH9I0utb0VaBFWuQ_WU7L0lDmqS4w',
-        specs: ['3.3V Logic', 'Dev Board'],
-        sku: 'NUC-F401RE'
-    },
-    {
-        id: 5,
-        name: 'ATmega328P-PU',
-        brand: 'Microchip',
-        price: 2.95,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDIuE93cq5cxq_9QX7M4mwkHbIAe4vJal-GT7gY-LTmm6eH-mzAR58ZShehI6O6YjK3hYe33Q3028vbO7klcbhwBclG7Vb4krgRrLjaFJSht_cUc50LfgvVEx-Qdxc5x4Y3e8ZokPwTUKo_-AHAE-BlBtbPMyg1pl_uQb-cjdO-K-z_B84mZg9IEaC_oH-2KX8Zj6cqrKm8rZA47R_0vq8zjCC3vr93TvFEEmTgqf5h_O69YuJTWNE0MDCSRCPOyRduk-E4kPaLvhc',
-        specs: ['5V Logic', 'DIP-28'],
-        sku: 'ATM-328P'
-    },
-    {
-        id: 6,
-        name: 'Teensy 4.0',
-        brand: 'PJRC',
-        price: 21.95,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjXHz5zCPncBFV5iD_4z89faGHi2XuWr2xBpGKfUrvPnWfp9o4u8hh9Iaq1A2oU2IV9Xv2pqiZh6MwK5puQulYupQgmTqpOft6O7a0GuG_QBfl1iVxyf60zi-R8uSatRvZmH8yq5J7EPEKdOejXq6gibGcm3TBsMopRSSwO6TwCtirru2I7iHPzG1895YcFRcpCOqYoq_rZoKEs-ueY0PU1lrf_iw9Mx_wb57mQGve_oT67J_RUfVqH24MvZbuBRXsze2nNplba50',
-        specs: ['3.3V Logic', '600MHz'],
-        sku: 'TSY-40'
-    }
-];
+// Debounce hook
+const useDebounce = <T,>(value: T, delay: number): T => {
+    const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
-const categories = [
-    { name: 'Kit', count: 124 },
-    { name: 'Component', count: 86 },
-    { name: 'Module', count: 42 }
-];
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
 
-const brands = ['Arduino', 'Espressif', 'Raspberry Pi', 'Adafruit', 'SparkFun'];
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+
+    return debouncedValue;
+};
+
+// Format price to VND
+const formatPrice = (price: number): string => {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+    }).format(price);
+};
 
 const ProductsPage = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // UI State
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showFilters, setShowFilters] = useState(false);
-    const [selectedCategories, setSelectedCategories] = useState<string[]>(['Kit']);
-    const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-    const [activeFilters, setActiveFilters] = useState<string[]>(['In Stock']);
 
-    const removeFilter = (filter: string) => {
-        setActiveFilters(activeFilters.filter(f => f !== filter));
-    };
+    // Filter State (from URL or defaults)
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+        searchParams.get('categoryId') ? Number(searchParams.get('categoryId')) : null
+    );
+    const [selectedBrandId, setSelectedBrandId] = useState<number | null>(
+        searchParams.get('brandId') ? Number(searchParams.get('brandId')) : null
+    );
+    const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
+    const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
+    const [pageNumber, setPageNumber] = useState(
+        searchParams.get('page') ? Number(searchParams.get('page')) : 1
+    );
+    const pageSize = 12;
+
+    // Debounced search term
+    const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+    // Build filter params for API
+    const filterParams: ProductFilterParams = useMemo(() => {
+        const params: ProductFilterParams = {
+            pageNumber,
+            pageSize,
+        };
+
+        if (debouncedSearchTerm) params.searchTerm = debouncedSearchTerm;
+        if (selectedCategoryId) params.categoryId = selectedCategoryId;
+        if (selectedBrandId) params.brandId = selectedBrandId;
+        if (minPrice) params.minPrice = Number(minPrice);
+        if (maxPrice) params.maxPrice = Number(maxPrice);
+
+        return params;
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice, pageNumber, pageSize]);
+
+    // Fetch data using hooks
+    const { products, pagination, loading: productsLoading, error: productsError } = useProducts(filterParams);
+    const { categories, loading: categoriesLoading } = useCategories();
+    const { brands, loading: brandsLoading } = useBrands();
+
+    // Update URL when filters change
+    useEffect(() => {
+        const params = new URLSearchParams();
+
+        if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
+        if (selectedCategoryId) params.set('categoryId', String(selectedCategoryId));
+        if (selectedBrandId) params.set('brandId', String(selectedBrandId));
+        if (minPrice) params.set('minPrice', minPrice);
+        if (maxPrice) params.set('maxPrice', maxPrice);
+        if (pageNumber > 1) params.set('page', String(pageNumber));
+
+        setSearchParams(params, { replace: true });
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice, pageNumber, setSearchParams]);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setPageNumber(1);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice]);
+
+    // Handlers
+    const handleCategoryChange = useCallback((categoryId: number) => {
+        setSelectedCategoryId(prev => prev === categoryId ? null : categoryId);
+    }, []);
+
+    const handleBrandChange = useCallback((brandId: number) => {
+        setSelectedBrandId(prev => prev === brandId ? null : brandId);
+    }, []);
+
+    const handlePriceFilter = useCallback(() => {
+        // Price filter is applied immediately through state
+        setPageNumber(1);
+    }, []);
+
+    const handleClearFilters = useCallback(() => {
+        setSearchTerm('');
+        setSelectedCategoryId(null);
+        setSelectedBrandId(null);
+        setMinPrice('');
+        setMaxPrice('');
+        setPageNumber(1);
+    }, []);
+
+    const handlePageChange = useCallback((page: number) => {
+        setPageNumber(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    // Active filters for display
+    const activeFilters = useMemo(() => {
+        const filters: { label: string; onRemove: () => void }[] = [];
+
+        if (debouncedSearchTerm) {
+            filters.push({
+                label: `Search: "${debouncedSearchTerm}"`,
+                onRemove: () => setSearchTerm(''),
+            });
+        }
+
+        if (selectedCategoryId) {
+            const category = categories.find(c => c.categoryId === selectedCategoryId);
+            if (category) {
+                filters.push({
+                    label: `Category: ${category.name}`,
+                    onRemove: () => setSelectedCategoryId(null),
+                });
+            }
+        }
+
+        if (selectedBrandId) {
+            const brand = brands.find(b => b.brandId === selectedBrandId);
+            if (brand) {
+                filters.push({
+                    label: `Brand: ${brand.name}`,
+                    onRemove: () => setSelectedBrandId(null),
+                });
+            }
+        }
+
+        if (minPrice || maxPrice) {
+            const priceLabel = minPrice && maxPrice
+                ? `Price: ${formatPrice(Number(minPrice))} - ${formatPrice(Number(maxPrice))}`
+                : minPrice
+                    ? `Price: from ${formatPrice(Number(minPrice))}`
+                    : `Price: up to ${formatPrice(Number(maxPrice))}`;
+            filters.push({
+                label: priceLabel,
+                onRemove: () => {
+                    setMinPrice('');
+                    setMaxPrice('');
+                },
+            });
+        }
+
+        return filters;
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice, categories, brands]);
+
+    // Generate pagination pages
+    const paginationPages = useMemo(() => {
+        if (!pagination) return [];
+
+        const { totalPages } = pagination;
+        const pages: (number | 'dots')[] = [];
+
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1);
+
+            if (pageNumber > 3) pages.push('dots');
+
+            const start = Math.max(2, pageNumber - 1);
+            const end = Math.min(totalPages - 1, pageNumber + 1);
+
+            for (let i = start; i <= end; i++) pages.push(i);
+
+            if (pageNumber < totalPages - 2) pages.push('dots');
+
+            pages.push(totalPages);
+        }
+
+        return pages;
+    }, [pagination, pageNumber]);
 
     return (
         <div className="products-page">
             <Header />
 
             <main className="products-main">
-
-
                 {/* Page Header */}
                 <div className="page-header">
                     <div className="page-header__info">
-                        <h1 className="page-header__title">Product</h1>
-                        <p className="page-header__subtitle">Explore our wide range of STEM gear and electronics components.</p>
+                        <h1 className="page-header__title">Products</h1>
+                        <p className="page-header__subtitle">
+                            {pagination
+                                ? `Showing ${products.length} of ${pagination.totalCount} products`
+                                : 'Explore our wide range of STEM gear and electronics components.'}
+                        </p>
                     </div>
                     <div className="page-header__actions">
-                        <button className="sort-button">
-                            <span className="material-symbols-outlined">sort</span>
-                            Sort: Relevance
-                        </button>
                         <div className="view-toggle">
                             <button
                                 className={`view-toggle__btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -137,68 +246,62 @@ const ProductsPage = () => {
                         {/* Active Filters */}
                         {activeFilters.length > 0 && (
                             <div className="active-filters">
-                                {activeFilters.map(filter => (
-                                    <div key={filter} className="active-filter-tag">
-                                        {filter}
-                                        <button onClick={() => removeFilter(filter)} className="remove-filter">
+                                {activeFilters.map((filter, index) => (
+                                    <div key={index} className="active-filter-tag">
+                                        {filter.label}
+                                        <button onClick={filter.onRemove} className="remove-filter">
                                             <span className="material-symbols-outlined">close</span>
                                         </button>
                                     </div>
                                 ))}
+                                <button onClick={handleClearFilters} className="clear-all-filters">
+                                    Clear All
+                                </button>
                             </div>
                         )}
+
+                        {/* Search Filter */}
+                        <div className="filter-group">
+                            <h3 className="filter-group__title">Search</h3>
+                            <div className="search-input-wrapper">
+                                <span className="material-symbols-outlined search-icon">search</span>
+                                <input
+                                    type="text"
+                                    className="search-input"
+                                    placeholder="Search products..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                {searchTerm && (
+                                    <button
+                                        className="search-clear"
+                                        onClick={() => setSearchTerm('')}
+                                    >
+                                        <span className="material-symbols-outlined">close</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
                         {/* Category Filter */}
                         <div className="filter-group">
                             <h3 className="filter-group__title">Category</h3>
                             <div className="filter-group__options">
-                                {categories.map(cat => (
-                                    <label key={cat.name} className="filter-option">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedCategories.includes(cat.name)}
-                                            onChange={() => {
-                                                if (selectedCategories.includes(cat.name)) {
-                                                    setSelectedCategories(selectedCategories.filter(c => c !== cat.name));
-                                                } else {
-                                                    setSelectedCategories([...selectedCategories, cat.name]);
-                                                }
-                                            }}
-                                        />
-                                        <span className="filter-option__label">{cat.name}</span>
-                                        <span className="filter-option__count">{cat.count}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Logic Voltage Filter */}
-                        <div className="filter-group">
-                            <h3 className="filter-group__title">Logic Voltage</h3>
-                            <div className="filter-group__options">
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span className="filter-option__label">3.3V Logic</span>
-                                </label>
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span className="filter-option__label">5V Logic</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Mounting Type Filter */}
-                        <div className="filter-group">
-                            <h3 className="filter-group__title">Mounting Type</h3>
-                            <div className="filter-group__options">
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span className="filter-option__label">SMD / SMT</span>
-                                </label>
-                                <label className="filter-option">
-                                    <input type="checkbox" />
-                                    <span className="filter-option__label">Through-Hole (DIP)</span>
-                                </label>
+                                {categoriesLoading ? (
+                                    <div className="filter-loading">Loading...</div>
+                                ) : (
+                                    categories.map(cat => (
+                                        <label key={cat.categoryId} className="filter-option">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedCategoryId === cat.categoryId}
+                                                onChange={() => handleCategoryChange(cat.categoryId)}
+                                            />
+                                            <span className="filter-option__label">{cat.name}</span>
+                                            <span className="filter-option__count">{cat.productCount}</span>
+                                        </label>
+                                    ))
+                                )}
                             </div>
                         </div>
 
@@ -206,88 +309,184 @@ const ProductsPage = () => {
                         <div className="filter-group">
                             <h3 className="filter-group__title">Brand</h3>
                             <div className="filter-group__options">
-                                {brands.map(brand => (
-                                    <label key={brand} className="filter-option">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedBrands.includes(brand)}
-                                            onChange={() => {
-                                                if (selectedBrands.includes(brand)) {
-                                                    setSelectedBrands(selectedBrands.filter(b => b !== brand));
-                                                } else {
-                                                    setSelectedBrands([...selectedBrands, brand]);
-                                                }
-                                            }}
-                                        />
-                                        <span className="filter-option__label">{brand}</span>
-                                    </label>
-                                ))}
+                                {brandsLoading ? (
+                                    <div className="filter-loading">Loading...</div>
+                                ) : (
+                                    brands.map(brand => (
+                                        <label key={brand.brandId} className="filter-option">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedBrandId === brand.brandId}
+                                                onChange={() => handleBrandChange(brand.brandId)}
+                                            />
+                                            <span className="filter-option__label">{brand.name}</span>
+                                            <span className="filter-option__count">{brand.productCount}</span>
+                                        </label>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Price Filter */}
+                        <div className="filter-group">
+                            <h3 className="filter-group__title">Price Range</h3>
+                            <div className="price-filter">
+                                <div className="price-inputs">
+                                    <input
+                                        type="number"
+                                        className="price-input"
+                                        placeholder="Min"
+                                        value={minPrice}
+                                        onChange={(e) => setMinPrice(e.target.value)}
+                                        min="0"
+                                    />
+                                    <span className="price-separator">-</span>
+                                    <input
+                                        type="number"
+                                        className="price-input"
+                                        placeholder="Max"
+                                        value={maxPrice}
+                                        onChange={(e) => setMaxPrice(e.target.value)}
+                                        min="0"
+                                    />
+                                </div>
+                                <button
+                                    className="price-apply-btn"
+                                    onClick={handlePriceFilter}
+                                >
+                                    Apply
+                                </button>
                             </div>
                         </div>
                     </aside>
 
                     {/* Product Grid */}
                     <div className="products-section">
-                        <div className={`products-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
-                            {mockProducts.map(product => (
-                                <div key={product.id} className="product-card">
-                                    {/* Badge */}
-                                    {product.badge && (
-                                        <div className={`product-card__badge badge--${product.badgeColor}`}>
-                                            {product.badge}
-                                        </div>
-                                    )}
+                        {/* Loading State */}
+                        {productsLoading && (
+                            <div className="products-loading">
+                                <div className="loading-spinner"></div>
+                                <p>Loading products...</p>
+                            </div>
+                        )}
 
-                                    {/* Image */}
-                                    <div className="product-card__image">
-                                        <img src={product.image} alt={product.name} />
-                                        <button className="quick-view-btn">Quick View</button>
-                                    </div>
+                        {/* Error State */}
+                        {productsError && !productsLoading && (
+                            <div className="products-error">
+                                <span className="material-symbols-outlined">error</span>
+                                <p>{productsError}</p>
+                                <button onClick={() => window.location.reload()} className="retry-btn">
+                                    Try Again
+                                </button>
+                            </div>
+                        )}
 
-                                    {/* Content */}
-                                    <div className="product-card__content">
-                                        <div className="product-card__brand">{product.brand}</div>
-                                        <h3 className="product-card__name">{product.name}</h3>
+                        {/* Empty State */}
+                        {!productsLoading && !productsError && products.length === 0 && (
+                            <div className="products-empty">
+                                <span className="material-symbols-outlined">inventory_2</span>
+                                <h3>No products found</h3>
+                                <p>Try adjusting your filters or search term</p>
+                                {activeFilters.length > 0 && (
+                                    <button onClick={handleClearFilters} className="clear-filters-btn">
+                                        Clear All Filters
+                                    </button>
+                                )}
+                            </div>
+                        )}
 
-                                        {/* Specs */}
-                                        <div className="product-card__specs">
-                                            {product.specs.map((spec, idx) => (
-                                                <span key={idx} className="spec-tag">{spec}</span>
-                                            ))}
-                                            <span className="sku">SKU: {product.sku}</span>
-                                        </div>
-
-                                        {/* Price & Action */}
-                                        <div className="product-card__footer">
-                                            <div className="price-info">
-                                                <span className="price">${product.price.toFixed(2)}</span>
-                                                {product.volumePricing && (
-                                                    <span className="volume-note">Vol pricing available</span>
-                                                )}
+                        {/* Products Grid */}
+                        {!productsLoading && !productsError && products.length > 0 && (
+                            <>
+                                <div className={`products-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
+                                    {products.map(product => (
+                                        <div key={product.productId} className="product-card">
+                                            {/* Stock Badge */}
+                                            <div className={`product-card__badge badge--${product.inStock ? 'green' : 'gray'}`}>
+                                                {product.inStock ? 'IN STOCK' : 'OUT OF STOCK'}
                                             </div>
-                                            <button className="add-to-cart-btn">
-                                                <span className="material-symbols-outlined">add_shopping_cart</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
 
-                        {/* Pagination */}
-                        <div className="pagination">
-                            <button className="pagination__btn">
-                                <span className="material-symbols-outlined">chevron_left</span>
-                            </button>
-                            <button className="pagination__btn active">1</button>
-                            <button className="pagination__btn">2</button>
-                            <button className="pagination__btn">3</button>
-                            <span className="pagination__dots">...</span>
-                            <button className="pagination__btn">12</button>
-                            <button className="pagination__btn">
-                                <span className="material-symbols-outlined">chevron_right</span>
-                            </button>
-                        </div>
+                                            {/* Image */}
+                                            <div className="product-card__image">
+                                                <img
+                                                    src={product.primaryImage || '/placeholder-product.png'}
+                                                    alt={product.name}
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = '/placeholder-product.png';
+                                                    }}
+                                                />
+                                                <button className="quick-view-btn">Quick View</button>
+                                            </div>
+
+                                            {/* Content */}
+                                            <div className="product-card__content">
+                                                <div className="product-card__brand">{product.brand?.name || 'Unknown Brand'}</div>
+                                                <h3 className="product-card__name">{product.name}</h3>
+
+                                                {/* Categories & SKU */}
+                                                <div className="product-card__specs">
+                                                    {product.categories?.slice(0, 2).map((cat) => (
+                                                        <span key={cat.categoryId} className="spec-tag">{cat.name}</span>
+                                                    ))}
+                                                    <span className="sku">SKU: {product.sku}</span>
+                                                </div>
+
+                                                {/* Price & Action */}
+                                                <div className="product-card__footer">
+                                                    <div className="price-info">
+                                                        <span className="price">{formatPrice(product.price)}</span>
+                                                        <span className="stock-qty">
+                                                            {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        className="add-to-cart-btn"
+                                                        disabled={!product.inStock}
+                                                    >
+                                                        <span className="material-symbols-outlined">add_shopping_cart</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Pagination */}
+                                {pagination && pagination.totalPages > 1 && (
+                                    <div className="pagination">
+                                        <button
+                                            className="pagination__btn"
+                                            onClick={() => handlePageChange(pageNumber - 1)}
+                                            disabled={pageNumber === 1}
+                                        >
+                                            <span className="material-symbols-outlined">chevron_left</span>
+                                        </button>
+
+                                        {paginationPages.map((page, index) =>
+                                            page === 'dots' ? (
+                                                <span key={`dots-${index}`} className="pagination__dots">...</span>
+                                            ) : (
+                                                <button
+                                                    key={page}
+                                                    className={`pagination__btn ${pageNumber === page ? 'active' : ''}`}
+                                                    onClick={() => handlePageChange(page)}
+                                                >
+                                                    {page}
+                                                </button>
+                                            )
+                                        )}
+
+                                        <button
+                                            className="pagination__btn"
+                                            onClick={() => handlePageChange(pageNumber + 1)}
+                                            disabled={pageNumber === pagination.totalPages}
+                                        >
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             </main>

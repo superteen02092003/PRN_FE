@@ -22,7 +22,7 @@ export default defineConfig({
         open: true,
         proxy: {
             '/api': {
-                target: 'http://localhost:5255',
+                target: 'http://127.0.0.1:5255',
                 changeOrigin: true,
                 secure: false,
                 configure: (proxy, _options) => {

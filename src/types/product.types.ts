@@ -2,6 +2,24 @@
 
 export type ProductType = 'MODULE' | 'KIT' | 'COMPONENT';
 
+// ===== API Response Wrapper =====
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T | null;
+}
+
+// ===== Paginated Response =====
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 // ===== DTOs cơ bản =====
 
 export interface BrandDto {
@@ -24,7 +42,7 @@ export interface ProductResponseDto {
   stockQuantity: number;
   productType: ProductType;
   brand: BrandDto;
-  primaryImage: string;
+  primaryImage: string | null;
   categories: CategoryDto[];
   inStock: boolean;
 }
@@ -38,7 +56,7 @@ export interface CategoryResponseDto {
 export interface BrandResponseDto {
   brandId: number;
   name: string;
-  logoUrl: string;
+  logoUrl?: string;
   productCount: number;
 }
 
@@ -53,4 +71,13 @@ export interface ProductFilterParams {
   minPrice?: number;
   maxPrice?: number;
   productType?: ProductType;
+}
+
+// ===== Pagination Info =====
+
+export interface PaginationInfo {
+  pageNumber: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
 }
