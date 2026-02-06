@@ -1,12 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '@components/common/Header';
 import Footer from '@components/common/Footer';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+// Lazy load Spline for better performance - only loads when needed
+const Spline = lazy(() => import('@splinetool/react-spline'));
 
 const HomePage = () => {
     const location = useLocation();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const sectionsRef = useRef<HTMLDivElement>(null);
+    const [splineLoaded, setSplineLoaded] = useState(false);
+    const [heroContentHidden, setHeroContentHidden] = useState(false);
+    const heroRef = useRef<HTMLElement>(null);
+
+    // Detect mobile for video fallback
+    const isMobile = useMediaQuery('(max-width: 768px)');
 
     // Check for success message from login/register
     useEffect(() => {
@@ -21,6 +31,34 @@ const HomePage = () => {
             return () => clearTimeout(timer);
         }
     }, [location.state]);
+
+    // Auto-hide hero content after 3 seconds, show on hover
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setHeroContentHidden(true);
+        }, 3000);
+
+        const heroElement = heroRef.current;
+
+        const handleMouseEnter = () => setHeroContentHidden(false);
+        const handleMouseLeave = () => {
+            // Re-hide after a short delay when mouse leaves
+            setTimeout(() => setHeroContentHidden(true), 2000);
+        };
+
+        if (heroElement) {
+            heroElement.addEventListener('mouseenter', handleMouseEnter);
+            heroElement.addEventListener('mouseleave', handleMouseLeave);
+        }
+
+        return () => {
+            clearTimeout(timer);
+            if (heroElement) {
+                heroElement.removeEventListener('mouseenter', handleMouseEnter);
+                heroElement.removeEventListener('mouseleave', handleMouseLeave);
+            }
+        };
+    }, []);
 
     // Scroll reveal animation using Intersection Observer
     useEffect(() => {
@@ -95,16 +133,39 @@ const HomePage = () => {
             <Header />
             <main className="home-page__main">
                 <div className="home-page__sections" ref={sectionsRef}>
-                    {/* Hero Search Section */}
-                    <section className="hero-search">
-                        <div
-                            className="hero-search__background"
-                            style={{
-                                backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuChGPyK6HLZZn99akyoQexfblTEYbq4TGd6_crW-HEPM4CexDAYeSmPuhsurHOdbXnAHXmN_hSQ1WKmXtaOW6JyMGnGRkO5ztNcFU5UIU1IE8aB674lHC6YOUnLQ8sBD_iTx105MvFt1jW4mcOLlKm7ZnMrdGHLurrr-YVSs8scVhSMTRGevj3ix29gbokhMLYbLPgPKaPNHDEF2VTNlbWlXDkFXb0JCa131yfOWk3M3ZNfLoH3ItByxjdJdybgRMczvLmCbMX1IXM")'
-                            }}
-                        />
-                        <div className="hero-search__overlay" />
-                        <div className="hero-search__content">
+                    {/* Hero Search Section with 3D Spline */}
+                    <section className="hero-search" ref={heroRef}>
+                        {/* 3D Spline Background */}
+                        <div className="hero-search__3d-container">
+                            {!isMobile ? (
+                                <Suspense fallback={
+                                    <div className="hero-search__3d-loading">
+                                        <div className="hero-search__3d-spinner"></div>
+                                    </div>
+                                }>
+                                    <Spline
+                                        scene="https://prod.spline.design/cX2vHOXxH1nnhGEf/scene.splinecode"
+                                        onLoad={() => setSplineLoaded(true)}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                        }}
+                                    />
+                                </Suspense>
+                            ) : (
+                                <div
+                                    className="hero-search__background"
+                                    style={{
+                                        backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuChGPyK6HLZZn99akyoQexfblTEYbq4TGd6_crW-HEPM4CexDAYeSmPuhsurHOdbXnAHXmN_hSQ1WKmXtaOW6JyMGnGRkO5ztNcFU5UIU1IE8aB674lHC6YOUnLQ8sBD_iTx105MvFt1jW4mcOLlKm7ZnMrdGHLurrr-YVSs8scVhSMTRGevj3ix29gbokhMLYbLPgPKaPNHDEF2VTNlbWlXDkFXb0JCa131yfOWk3M3ZNfLoH3ItByxjdJdybgRMczvLmCbMX1IXM")'
+                                    }}
+                                />
+                            )}
+                        </div>
+                        <div className={`hero-search__overlay ${heroContentHidden ? 'hero-search__overlay--hidden' : ''}`} />
+                        <div className={`hero-search__content ${heroContentHidden ? 'hero-search__content--hidden' : ''}`}>
                             <div>
                                 <h1 className="hero-search__title">
                                     Find the right gear for your next build
