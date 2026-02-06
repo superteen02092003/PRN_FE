@@ -12,6 +12,7 @@ const Header = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [cartItemCount, setCartItemCount] = useState(0);
 
     useEffect(() => {
         // Check for logged in user
@@ -42,14 +43,69 @@ const Header = () => {
         };
     }, []);
 
+    // Fetch cart count when user is logged in
+    useEffect(() => {
+        const fetchCartCount = async () => {
+            if (!user) {
+                setCartItemCount(0);
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setCartItemCount(0);
+                    return;
+                }
+
+                const response = await fetch(
+                    `${import.meta.env.VITE_API_URL || '/api'}/Cart`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        setCartItemCount(data.data.summary?.totalItems || 0);
+                    }
+                }
+            } catch {
+                // Silently fail - cart count is not critical
+            }
+        };
+
+        fetchCartCount();
+
+        // Listen for cart updates
+        const handleCartUpdate = () => fetchCartCount();
+        window.addEventListener('cartUpdate', handleCartUpdate);
+
+        return () => {
+            window.removeEventListener('cartUpdate', handleCartUpdate);
+        };
+    }, [user]);
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        setCartItemCount(0);
         setShowDropdown(false);
         // Dispatch authChange event to notify AuthContext
         window.dispatchEvent(new Event('authChange'));
         navigate('/');
+    };
+
+    const handleCartClick = () => {
+        if (user) {
+            navigate('/cart');
+        } else {
+            navigate('/login', { state: { from: '/cart' } });
+        }
     };
 
     return (
@@ -230,9 +286,11 @@ const Header = () => {
                                 </Link>
                             </>
                         )}
-                        <button className="header__cart">
+                        <button className="header__cart" onClick={handleCartClick}>
                             <span className="material-symbols-outlined">shopping_cart</span>
-                            <span className="header__cart-badge">2</span>
+                            {cartItemCount > 0 && (
+                                <span className="header__cart-badge">{cartItemCount > 99 ? '99+' : cartItemCount}</span>
+                            )}
                         </button>
                         <button className="header__menu-toggle">
                             <span className="material-symbols-outlined">menu</span>
@@ -245,3 +303,4 @@ const Header = () => {
 };
 
 export default Header;
+

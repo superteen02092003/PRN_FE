@@ -1,8 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Header from '../../components/common/Header/Header';
 import Footer from '../../components/common/Footer/Footer';
 import { useProducts, useCategories, useBrands } from '../../hooks/useProducts';
+import { useAddToCart } from '../../hooks/useCart';
+import { useAuth } from '../../contexts/AuthContext';
 import type { ProductFilterParams } from '../../types/product.types';
 import './ProductsPage.css';
 
@@ -31,6 +34,10 @@ const formatPrice = (price: number): string => {
 
 const ProductsPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    const { addToCart, error: addToCartError } = useAddToCart();
+    const [addingProductId, setAddingProductId] = useState<number | null>(null);
 
     // UI State
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -74,6 +81,34 @@ const ProductsPage = () => {
     const { products, pagination, loading: productsLoading, error: productsError } = useProducts(filterParams);
     const { categories, loading: categoriesLoading } = useCategories();
     const { brands, loading: brandsLoading } = useBrands();
+
+    // Handle add to cart
+    const handleAddToCart = useCallback(async (e: React.MouseEvent, productId: number, productName: string) => {
+        e.preventDefault(); // Prevent navigation to product detail
+        e.stopPropagation();
+
+        if (!isAuthenticated) {
+            toast.info('Please login to add items to cart');
+            navigate('/login', { state: { from: '/products' } });
+            return;
+        }
+
+        setAddingProductId(productId);
+        const success = await addToCart(productId, 1);
+        setAddingProductId(null);
+
+        if (success) {
+            toast.success(`${productName} added to cart!`);
+        }
+        // Note: Error will be in addToCartError after this
+    }, [isAuthenticated, navigate, addToCart]);
+
+    // Show error toast when add to cart fails
+    useEffect(() => {
+        if (addToCartError) {
+            toast.error(addToCartError);
+        }
+    }, [addToCartError]);
 
     // Update URL when filters change
     useEffect(() => {
@@ -451,11 +486,17 @@ const ProductsPage = () => {
                                                             {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
                                                         </span>
                                                     </div>
-                                                    <div
+                                                    <button
                                                         className={`cart-btn ${!product.inStock ? 'disabled' : ''}`}
+                                                        onClick={(e) => handleAddToCart(e, product.productId, product.name)}
+                                                        disabled={!product.inStock || addingProductId === product.productId}
                                                     >
-                                                        <span className="material-symbols-outlined">add_shopping_cart</span>
-                                                    </div>
+                                                        {addingProductId === product.productId ? (
+                                                            <div className="loading-spinner-small" />
+                                                        ) : (
+                                                            <span className="material-symbols-outlined">add_shopping_cart</span>
+                                                        )}
+                                                    </button>
                                                 </div>
                                             </div>
                                         </Link>

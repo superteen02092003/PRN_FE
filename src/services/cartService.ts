@@ -7,8 +7,55 @@ import type {
     CouponValidationResult,
     CouponApiResponse,
     ValidateCouponDto,
+    CartItemDto,
 } from '../types/cart.types';
 import type { ApiResponse } from '../types/product.types';
+
+// Transform API response to match frontend types
+// Backend might use different field names or nested objects
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const transformCartItem = (item: any): CartItemDto => {
+    console.log('[cartService] Raw cart item:', item);
+
+    // Handle nested Product object if exists
+    const product = item.product || item.Product || {};
+
+    return {
+        cartItemId: item.cartItemId ?? item.CartItemId ?? item.id ?? item.Id ?? 0,
+        productId: item.productId ?? item.ProductId ?? product.productId ?? product.ProductId ?? product.id ?? 0,
+        name: item.name ?? item.Name ?? item.productName ?? item.ProductName ?? product.name ?? product.Name ?? product.productName ?? 'Unknown Product',
+        sku: item.sku ?? item.Sku ?? item.SKU ?? item.productSku ?? product.sku ?? product.Sku ?? product.SKU ?? 'N/A',
+        price: item.price ?? item.Price ?? item.unitPrice ?? item.UnitPrice ?? product.price ?? product.Price ?? 0,
+        quantity: item.quantity ?? item.Quantity ?? 0,
+        primaryImage: item.primaryImage ?? item.PrimaryImage ?? item.imageUrl ?? item.ImageUrl ?? item.image ?? product.primaryImage ?? product.PrimaryImage ?? product.imageUrl ?? null,
+        itemTotal: item.itemTotal ?? item.ItemTotal ?? item.total ?? item.Total ?? item.subTotal ?? item.SubTotal ?? 0,
+        inStock: item.inStock ?? item.InStock ?? item.isInStock ?? item.IsInStock ?? product.inStock ?? product.InStock ?? true,
+        stockQuantity: item.stockQuantity ?? item.StockQuantity ?? item.stock ?? item.Stock ?? product.stockQuantity ?? product.StockQuantity ?? 99,
+    };
+};
+
+// Transform entire cart response
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const transformCart = (data: any): CartDto => {
+    console.log('[cartService] Raw API response:', data);
+
+    // Handle nested items array
+    const items = data.items ?? data.Items ?? data.cartItems ?? data.CartItems ?? [];
+
+    return {
+        cartId: data.cartId ?? data.CartId ?? data.id ?? data.Id ?? 0,
+        userId: data.userId ?? data.UserId ?? 0,
+        items: items.map(transformCartItem),
+        summary: {
+            totalItems: data.summary?.totalItems ?? data.Summary?.TotalItems ?? data.totalItems ?? data.TotalItems ?? items.length,
+            subtotal: data.summary?.subtotal ?? data.Summary?.Subtotal ?? data.subtotal ?? data.Subtotal ?? 0,
+            shippingFee: data.summary?.shippingFee ?? data.Summary?.ShippingFee ?? data.shippingFee ?? data.ShippingFee ?? 0,
+            discount: data.summary?.discount ?? data.Summary?.Discount ?? data.discount ?? data.Discount ?? 0,
+            total: data.summary?.total ?? data.Summary?.Total ?? data.total ?? data.Total ?? 0,
+        },
+        appliedCoupon: data.appliedCoupon ?? data.AppliedCoupon ?? null,
+    };
+};
 
 /**
  * Lấy giỏ hàng của user hiện tại
@@ -20,7 +67,7 @@ export const getCart = async (): Promise<CartDto> => {
         throw new Error(response.data.message || 'Failed to fetch cart');
     }
 
-    return response.data.data;
+    return transformCart(response.data.data);
 };
 
 /**
@@ -33,7 +80,7 @@ export const addToCart = async (data: AddToCartDto): Promise<CartDto> => {
         throw new Error(response.data.message || 'Failed to add item to cart');
     }
 
-    return response.data.data;
+    return transformCart(response.data.data);
 };
 
 /**
@@ -42,27 +89,39 @@ export const addToCart = async (data: AddToCartDto): Promise<CartDto> => {
 export const updateCartItem = async (
     cartItemId: number,
     data: UpdateCartItemDto
-): Promise<CartDto> => {
+): Promise<CartDto | null> => {
     const response = await api.put<CartApiResponse>(`/Cart/items/${cartItemId}`, data);
+    console.log('[cartService] updateCartItem response:', response.data);
 
-    if (!response.data.success || !response.data.data) {
+    if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to update cart item');
     }
 
-    return response.data.data;
+    // If API returns cart data, transform and return it
+    // Otherwise return null to signal caller to refetch
+    if (response.data.data) {
+        return transformCart(response.data.data);
+    }
+    return null;
 };
 
 /**
  * Xóa 1 sản phẩm khỏi giỏ hàng
  */
-export const removeCartItem = async (cartItemId: number): Promise<CartDto> => {
+export const removeCartItem = async (cartItemId: number): Promise<CartDto | null> => {
     const response = await api.delete<CartApiResponse>(`/Cart/items/${cartItemId}`);
+    console.log('[cartService] removeCartItem response:', response.data);
 
-    if (!response.data.success || !response.data.data) {
+    if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to remove cart item');
     }
 
-    return response.data.data;
+    // If API returns cart data, transform and return it
+    // Otherwise return null to signal caller to refetch
+    if (response.data.data) {
+        return transformCart(response.data.data);
+    }
+    return null;
 };
 
 /**
