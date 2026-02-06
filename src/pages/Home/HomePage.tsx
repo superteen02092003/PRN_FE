@@ -1,22 +1,171 @@
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '@components/common/Header';
 import Footer from '@components/common/Footer';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+
+// Lazy load Spline for better performance - only loads when needed
+const Spline = lazy(() => import('@splinetool/react-spline'));
 
 const HomePage = () => {
+    const location = useLocation();
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const sectionsRef = useRef<HTMLDivElement>(null);
+    const [splineLoaded, setSplineLoaded] = useState(false);
+    const [heroContentHidden, setHeroContentHidden] = useState(false);
+    const heroRef = useRef<HTMLElement>(null);
+
+    // Detect mobile for video fallback
+    const isMobile = useMediaQuery('(max-width: 768px)');
+
+    // Check for success message from login/register
+    useEffect(() => {
+        if (location.state?.message) {
+            setSuccessMessage(location.state.message);
+            // Clear the state to prevent showing message on refresh
+            window.history.replaceState({}, document.title);
+            // Auto dismiss after 3 seconds
+            const timer = setTimeout(() => {
+                setSuccessMessage(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [location.state]);
+
+    // Auto-hide hero content after 3 seconds, show on hover
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setHeroContentHidden(true);
+        }, 3000);
+
+        const heroElement = heroRef.current;
+
+        const handleMouseEnter = () => setHeroContentHidden(false);
+        const handleMouseLeave = () => {
+            // Re-hide after a short delay when mouse leaves
+            setTimeout(() => setHeroContentHidden(true), 2000);
+        };
+
+        if (heroElement) {
+            heroElement.addEventListener('mouseenter', handleMouseEnter);
+            heroElement.addEventListener('mouseleave', handleMouseLeave);
+        }
+
+        return () => {
+            clearTimeout(timer);
+            if (heroElement) {
+                heroElement.removeEventListener('mouseenter', handleMouseEnter);
+                heroElement.removeEventListener('mouseleave', handleMouseLeave);
+            }
+        };
+    }, []);
+
+    // Scroll reveal animation using Intersection Observer
+    useEffect(() => {
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -50px 0px',
+            threshold: 0.1
+        };
+
+        const observerCallback: IntersectionObserverCallback = (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        // Observe all cards that need reveal animation
+        const sectionsContainer = sectionsRef.current;
+        if (sectionsContainer) {
+            const revealElements = sectionsContainer.querySelectorAll(
+                '.category-card, .product-card, .arrival-card, .reveal'
+            );
+            revealElements.forEach((el) => observer.observe(el));
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <div className="home-page">
+            {/* Success Toast Notification */}
+            {successMessage && (
+                <div style={{
+                    position: 'fixed',
+                    top: '80px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                    padding: '16px 24px',
+                    backgroundColor: '#16A34A',
+                    color: 'white',
+                    borderRadius: '8px',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    animation: 'slideDown 0.3s ease-out',
+                }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
+                    {successMessage}
+                </div>
+            )}
+
+            <style>{`
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-50%) translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(-50%) translateY(0);
+                    }
+                }
+            `}</style>
+
             <Header />
             <main className="home-page__main">
-                <div className="home-page__sections">
-                    {/* Hero Search Section */}
-                    <section className="hero-search">
-                        <div
-                            className="hero-search__background"
-                            style={{
-                                backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuChGPyK6HLZZn99akyoQexfblTEYbq4TGd6_crW-HEPM4CexDAYeSmPuhsurHOdbXnAHXmN_hSQ1WKmXtaOW6JyMGnGRkO5ztNcFU5UIU1IE8aB674lHC6YOUnLQ8sBD_iTx105MvFt1jW4mcOLlKm7ZnMrdGHLurrr-YVSs8scVhSMTRGevj3ix29gbokhMLYbLPgPKaPNHDEF2VTNlbWlXDkFXb0JCa131yfOWk3M3ZNfLoH3ItByxjdJdybgRMczvLmCbMX1IXM")'
-                            }}
-                        />
-                        <div className="hero-search__overlay" />
-                        <div className="hero-search__content">
+                <div className="home-page__sections" ref={sectionsRef}>
+                    {/* Hero Search Section with 3D Spline */}
+                    <section className="hero-search" ref={heroRef}>
+                        {/* 3D Spline Background */}
+                        <div className="hero-search__3d-container">
+                            {!isMobile ? (
+                                <Suspense fallback={
+                                    <div className="hero-search__3d-loading">
+                                        <div className="hero-search__3d-spinner"></div>
+                                    </div>
+                                }>
+                                    <Spline
+                                        scene="https://prod.spline.design/cX2vHOXxH1nnhGEf/scene.splinecode"
+                                        onLoad={() => setSplineLoaded(true)}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                        }}
+                                    />
+                                </Suspense>
+                            ) : (
+                                <div
+                                    className="hero-search__background"
+                                    style={{
+                                        backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuChGPyK6HLZZn99akyoQexfblTEYbq4TGd6_crW-HEPM4CexDAYeSmPuhsurHOdbXnAHXmN_hSQ1WKmXtaOW6JyMGnGRkO5ztNcFU5UIU1IE8aB674lHC6YOUnLQ8sBD_iTx105MvFt1jW4mcOLlKm7ZnMrdGHLurrr-YVSs8scVhSMTRGevj3ix29gbokhMLYbLPgPKaPNHDEF2VTNlbWlXDkFXb0JCa131yfOWk3M3ZNfLoH3ItByxjdJdybgRMczvLmCbMX1IXM")'
+                                    }}
+                                />
+                            )}
+                        </div>
+                        <div className={`hero-search__overlay ${heroContentHidden ? 'hero-search__overlay--hidden' : ''}`} />
+                        <div className={`hero-search__content ${heroContentHidden ? 'hero-search__content--hidden' : ''}`}>
                             <div>
                                 <h1 className="hero-search__title">
                                     Find the right gear for your next build
