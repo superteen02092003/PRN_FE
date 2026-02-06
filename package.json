@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
+    "@splinetool/react-spline": "^4.1.0",
     "axios": "^1.13.4",
     "clsx": "^2.1.0",
     "framer-motion": "^12.29.2",
