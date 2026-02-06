@@ -6,6 +6,7 @@ import HomePage from './pages/Home/index';
 import { RegisterPage, LoginPage } from './pages/Auth';
 import ProductsPage from './pages/Products';
 import ProductDetailPage from './pages/Products/ProductDetail';
+import { CartPage } from './pages/Cart';
 import PageTransition from './components/common/PageTransition';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -48,6 +49,15 @@ function App() {
                             </PageTransition>
                         } />
 
+                        {/* Protected Cart Route */}
+                        <Route path="/cart" element={
+                            <ProtectedRoute>
+                                <PageTransition>
+                                    <CartPage />
+                                </PageTransition>
+                            </ProtectedRoute>
+                        } />
+
                         {/* Protected Profile Route - All authenticated users */}
                         <Route path="/profile" element={
                             <ProtectedRoute>
@@ -75,4 +85,6 @@ function App() {
 }
 
 export default App
+
+
 
