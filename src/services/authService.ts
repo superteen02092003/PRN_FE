@@ -58,7 +58,30 @@ const authService = {
     },
 
     getProfile: async (): Promise<ApiResponse<UserProfile>> => {
-        const response = await api.get<ApiResponse<UserProfile>>('/Auth/profile');
+        const storedUser = authService.getStoredUser();
+        if (!storedUser?.userId) {
+            return { success: false, message: 'No user ID found' };
+        }
+        // Backend returns UserDto directly from GET /api/users/{id}
+        const response = await api.get<any>(`/users/${storedUser.userId}`);
+        const data = response.data;
+        return {
+            success: true,
+            message: 'OK',
+            data: {
+                userId: data.userId,
+                username: data.username,
+                email: data.email,
+                role: data.roleName || data.role,
+                phone: data.phone,
+                address: data.address,
+                createdAt: data.createdAt
+            }
+        };
+    },
+
+    updateProfile: async (userId: number, data: { email: string; phone?: string; address?: string }): Promise<string> => {
+        const response = await api.put<string>(`/users/${userId}`, data);
         return response.data;
     },
 
