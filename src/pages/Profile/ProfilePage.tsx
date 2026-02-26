@@ -1,11 +1,22 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useState, useEffect } from 'react';
+import authService from '../../services/authService';
+import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
     const { user, logout, refreshUser } = useAuth();
     const navigate = useNavigate();
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
+    // Edit form state
+    const [formData, setFormData] = useState({
+        email: '',
+        phone: '',
+        address: ''
+    });
 
     useEffect(() => {
         // Fetch latest profile data
@@ -16,6 +27,58 @@ const ProfilePage = () => {
         };
         fetchProfile();
     }, []);
+
+    // Sync form with user data when entering edit mode
+    const handleEditClick = () => {
+        setFormData({
+            email: user?.email || '',
+            phone: user?.phone || '',
+            address: user?.address || ''
+        });
+        setIsEditing(true);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+    };
+
+    const handleSave = async () => {
+        if (!user?.userId) return;
+
+        // Basic validation
+        if (!formData.email.trim()) {
+            toast.error('Email is required');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            toast.error('Please enter a valid email format');
+            return;
+        }
+
+        if (formData.phone && !/^(03|05|07|08|09)\d{8}$/.test(formData.phone)) {
+            toast.error('Phone must be a valid 10-digit Vietnamese number (03, 05, 07, 08, 09)');
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            await authService.updateProfile(user.userId, {
+                email: formData.email,
+                phone: formData.phone || undefined,
+                address: formData.address || undefined
+            });
+            toast.success('Profile updated successfully!');
+            await refreshUser();
+            setIsEditing(false);
+        } catch (err: any) {
+            const message = err?.response?.data || err?.message || 'Failed to update profile';
+            toast.error(typeof message === 'string' ? message : 'Failed to update profile');
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleLogout = () => {
         logout();
@@ -179,7 +242,7 @@ const ProfilePage = () => {
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
                         marginBottom: '16px'
-                    }}>Account Information</h3>
+                    }}>{isEditing ? 'Edit Information' : 'Account Information'}</h3>
 
                     <div style={{
                         display: 'flex',
@@ -202,13 +265,37 @@ const ProfilePage = () => {
                                 backgroundColor: '#dbeafe',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                flexShrink: 0
                             }}>
                                 <span className="material-symbols-outlined" style={{ color: '#2463eb', fontSize: '22px' }}>mail</span>
                             </div>
-                            <div>
-                                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>Email Address</div>
-                                <div style={{ fontSize: '15px', fontWeight: 600, color: '#374151' }}>{user?.email || 'N/A'}</div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>Email Address</div>
+                                {isEditing ? (
+                                    <input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px 12px',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '8px',
+                                            fontSize: '15px',
+                                            fontWeight: 500,
+                                            color: '#374151',
+                                            outline: 'none',
+                                            transition: 'border-color 0.2s',
+                                            fontFamily: 'inherit',
+                                            boxSizing: 'border-box'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#2463eb'}
+                                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                                    />
+                                ) : (
+                                    <div style={{ fontSize: '15px', fontWeight: 600, color: '#374151' }}>{user?.email || 'N/A'}</div>
+                                )}
                             </div>
                         </div>
 
@@ -228,20 +315,45 @@ const ProfilePage = () => {
                                 backgroundColor: '#f0fdf4',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                flexShrink: 0
                             }}>
                                 <span className="material-symbols-outlined" style={{ color: '#22c55e', fontSize: '22px' }}>phone</span>
                             </div>
-                            <div>
-                                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>Phone Number</div>
-                                <div style={{ fontSize: '15px', fontWeight: 600, color: '#374151' }}>{user?.phone || 'Not provided'}</div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>Phone Number</div>
+                                {isEditing ? (
+                                    <input
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        placeholder="0912345678"
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px 12px',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '8px',
+                                            fontSize: '15px',
+                                            fontWeight: 500,
+                                            color: '#374151',
+                                            outline: 'none',
+                                            transition: 'border-color 0.2s',
+                                            fontFamily: 'inherit',
+                                            boxSizing: 'border-box'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#2463eb'}
+                                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                                    />
+                                ) : (
+                                    <div style={{ fontSize: '15px', fontWeight: 600, color: '#374151' }}>{user?.phone || 'Not provided'}</div>
+                                )}
                             </div>
                         </div>
 
                         {/* Address */}
                         <div style={{
                             display: 'flex',
-                            alignItems: 'center',
+                            alignItems: isEditing ? 'flex-start' : 'center',
                             gap: '16px',
                             padding: '16px',
                             backgroundColor: '#f9fafb',
@@ -254,17 +366,44 @@ const ProfilePage = () => {
                                 backgroundColor: '#fef3c7',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                                marginTop: isEditing ? '4px' : 0
                             }}>
                                 <span className="material-symbols-outlined" style={{ color: '#f59e0b', fontSize: '22px' }}>location_on</span>
                             </div>
-                            <div>
-                                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>Address</div>
-                                <div style={{ fontSize: '15px', fontWeight: 600, color: '#374151' }}>{user?.address || 'Not provided'}</div>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>Address</div>
+                                {isEditing ? (
+                                    <textarea
+                                        value={formData.address}
+                                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                        placeholder="Enter your address"
+                                        rows={2}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px 12px',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '8px',
+                                            fontSize: '15px',
+                                            fontWeight: 500,
+                                            color: '#374151',
+                                            outline: 'none',
+                                            transition: 'border-color 0.2s',
+                                            fontFamily: 'inherit',
+                                            resize: 'vertical',
+                                            boxSizing: 'border-box'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#2463eb'}
+                                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                                    />
+                                ) : (
+                                    <div style={{ fontSize: '15px', fontWeight: 600, color: '#374151' }}>{user?.address || 'Not provided'}</div>
+                                )}
                             </div>
                         </div>
 
-                        {/* Member Since */}
+                        {/* Member Since — always read-only */}
                         <div style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -280,7 +419,8 @@ const ProfilePage = () => {
                                 backgroundColor: '#fce7f3',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                flexShrink: 0
                             }}>
                                 <span className="material-symbols-outlined" style={{ color: '#ec4899', fontSize: '22px' }}>calendar_month</span>
                             </div>
@@ -306,57 +446,115 @@ const ProfilePage = () => {
                     gap: '12px',
                     justifyContent: 'flex-end'
                 }}>
-                    <button
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 24px',
-                            backgroundColor: '#f3f4f6',
-                            border: 'none',
-                            borderRadius: '8px',
-                            color: '#374151',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.backgroundColor = '#e5e7eb';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.backgroundColor = '#f3f4f6';
-                        }}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
-                        Edit Profile
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 24px',
-                            backgroundColor: '#fee2e2',
-                            border: 'none',
-                            borderRadius: '8px',
-                            color: '#dc2626',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => {
-                            e.currentTarget.style.backgroundColor = '#fecaca';
-                        }}
-                        onMouseOut={(e) => {
-                            e.currentTarget.style.backgroundColor = '#fee2e2';
-                        }}
-                    >
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
-                        Log Out
-                    </button>
+                    {isEditing ? (
+                        <>
+                            <button
+                                onClick={handleCancelEdit}
+                                disabled={isSaving}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '12px 24px',
+                                    backgroundColor: '#f3f4f6',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: '#374151',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: isSaving ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    opacity: isSaving ? 0.5 : 1
+                                }}
+                                onMouseOver={(e) => { if (!isSaving) e.currentTarget.style.backgroundColor = '#e5e7eb'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#f3f4f6'; }}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '12px 24px',
+                                    backgroundColor: '#2463eb',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: 'white',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: isSaving ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    opacity: isSaving ? 0.7 : 1
+                                }}
+                                onMouseOver={(e) => { if (!isSaving) e.currentTarget.style.backgroundColor = '#1d4ed8'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#2463eb'; }}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                                    {isSaving ? 'hourglass_empty' : 'check'}
+                                </span>
+                                {isSaving ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                onClick={handleEditClick}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '12px 24px',
+                                    backgroundColor: '#f3f4f6',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: '#374151',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#e5e7eb';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#f3f4f6';
+                                }}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                                Edit Profile
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '12px 24px',
+                                    backgroundColor: '#fee2e2',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: '#dc2626',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#fecaca';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#fee2e2';
+                                }}
+                            >
+                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+                                Log Out
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
