@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ProductImageDto } from '@/types/product.types';
+import { resolveImageUrl } from '@/utils/imageUrl';
 import './ImageGallery.css';
 
 interface ImageGalleryProps {
@@ -67,7 +68,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
                     onClick={toggleZoom}
                 >
                     <img
-                        src={selectedImage?.imageUrl}
+                        src={resolveImageUrl(selectedImage?.imageUrl) || ''}
                         alt={`${productName} - Image ${selectedIndex + 1}`}
                         className="main-image"
                     />
@@ -100,7 +101,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
                             aria-label={`View image ${index + 1}`}
                         >
                             <img
-                                src={image.imageUrl}
+                                src={resolveImageUrl(image.imageUrl) || ''}
                                 alt={`${productName} thumbnail ${index + 1}`}
                             />
                         </button>
@@ -115,7 +116,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
                         &times;
                     </button>
                     <img
-                        src={selectedImage?.imageUrl}
+                        src={resolveImageUrl(selectedImage?.imageUrl) || ''}
                         alt={`${productName} - Zoomed`}
                         className="zoomed-image"
                     />

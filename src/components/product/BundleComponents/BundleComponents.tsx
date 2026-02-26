@@ -1,4 +1,5 @@
 import type { ProductBundleDto } from '@/types/product.types';
+import { resolveImageUrl } from '@/utils/imageUrl';
 import './BundleComponents.css';
 
 interface BundleComponentsProps {
@@ -49,7 +50,7 @@ const BundleComponents: React.FC<BundleComponentsProps> = ({
                         <div className="component-image">
                             {component.primaryImage ? (
                                 <img
-                                    src={component.primaryImage}
+                                    src={resolveImageUrl(component.primaryImage) || ''}
                                     alt={component.name}
                                 />
                             ) : (

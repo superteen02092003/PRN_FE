@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CartItemDto } from '@/types/cart.types';
+import { resolveImageUrl } from '@/utils/imageUrl';
 import './CartItem.css';
 
 interface CartItemProps {
@@ -46,7 +47,7 @@ const CartItem: React.FC<CartItemProps> = ({
             {/* Product Image */}
             <div className="cart-item__image">
                 {item.primaryImage ? (
-                    <img src={item.primaryImage} alt={item.name} />
+                    <img src={resolveImageUrl(item.primaryImage) || ''} alt={item.name} />
                 ) : (
                     <div className="cart-item__no-image">
                         <span className="material-symbols-outlined">image</span>
