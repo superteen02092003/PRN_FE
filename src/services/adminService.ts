@@ -228,12 +228,19 @@ export const getUsers = async (): Promise<AdminUserDto[]> => {
 
 // ===== Brands =====
 
+interface PagedResponse<T> {
+    items: T[];
+    pagination: {
+        currentPage: number;
+        pageSize: number;
+        totalItems: number;
+        totalPages: number;
+    };
+}
+
 export const getAdminBrands = async (): Promise<AdminBrandResponse[]> => {
-    const response = await api.get<AdminApiResponse<AdminBrandResponse[]>>('/brands');
-    if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to fetch brands');
-    }
-    return response.data.data;
+    const response = await api.get<PagedResponse<AdminBrandResponse>>('/brands?pageSize=200');
+    return response.data.items || [];
 };
 
 export const createBrand = async (data: CreateBrandRequest): Promise<AdminBrandResponse> => {
@@ -283,11 +290,8 @@ export const deleteBrand = async (id: number): Promise<void> => {
 // ===== Categories =====
 
 export const getAdminCategories = async (): Promise<AdminCategoryResponse[]> => {
-    const response = await api.get<AdminApiResponse<AdminCategoryResponse[]>>('/categories');
-    if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to fetch categories');
-    }
-    return response.data.data;
+    const response = await api.get<PagedResponse<AdminCategoryResponse>>('/categories?pageSize=200');
+    return response.data.items || [];
 };
 
 export const createCategory = async (data: CreateCategoryRequest): Promise<AdminCategoryResponse> => {
