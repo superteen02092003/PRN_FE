@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { resolveImageUrl } from '@/utils/imageUrl';
 import { toast } from 'react-toastify';
 import Header from '../../components/common/Header/Header';
 import Footer from '../../components/common/Footer/Footer';
@@ -449,7 +450,8 @@ const ProductsPage = () => {
                                             <div className="product-card__image">
                                                 {product.primaryImage ? (
                                                     <img
-                                                        src={product.primaryImage}
+                                                        className="product-card__image"
+                                                        src={resolveImageUrl(product.primaryImage) || ''}
                                                         alt={product.name}
                                                         onError={(e) => {
                                                             (e.target as HTMLImageElement).style.display = 'none';
