@@ -4,3 +4,6 @@ export { default as AdminProductFormPage } from './Products/AdminProductFormPage
 export { default as AdminOrdersPage } from './Orders/AdminOrdersPage';
 export { default as AdminOrderDetailPage } from './Orders/AdminOrderDetailPage';
 export { default as AdminUsersPage } from './Users/AdminUsersPage';
+export { default as AdminBrandsPage } from './Brands/AdminBrandsPage';
+export { default as AdminCategoriesPage } from './Categories/AdminCategoriesPage';
+export { default as AdminReviewsPage } from './Reviews/AdminReviewsPage';

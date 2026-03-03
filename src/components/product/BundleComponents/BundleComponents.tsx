@@ -29,7 +29,7 @@ const BundleComponents: React.FC<BundleComponentsProps> = ({
         );
     }
 
-    const { kitName, totalComponents, components } = bundle;
+    const { kitName: _kitName, totalComponents, components } = bundle;
 
     return (
         <div className="bundle-components">

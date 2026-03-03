@@ -12,6 +12,12 @@ import type {
     AdminUserDto,
     AdminApiResponse,
     AdminPaginatedResponse,
+    AdminBrandResponse,
+    CreateBrandRequest,
+    UpdateBrandRequest,
+    AdminCategoryResponse,
+    CreateCategoryRequest,
+    UpdateCategoryRequest,
 } from '../types/admin.types';
 
 // ===== Dashboard =====
@@ -218,4 +224,128 @@ export const updatePaymentStatus = async (
 export const getUsers = async (): Promise<AdminUserDto[]> => {
     const response = await api.get<AdminUserDto[]>('/users');
     return response.data;
+};
+
+// ===== Brands =====
+
+export const getAdminBrands = async (): Promise<AdminBrandResponse[]> => {
+    const response = await api.get<AdminApiResponse<AdminBrandResponse[]>>('/brands');
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to fetch brands');
+    }
+    return response.data.data;
+};
+
+export const createBrand = async (data: CreateBrandRequest): Promise<AdminBrandResponse> => {
+    try {
+        const response = await api.post<AdminApiResponse<AdminBrandResponse>>('/brands', data);
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to create brand');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+export const updateBrand = async (id: number, data: UpdateBrandRequest): Promise<AdminBrandResponse> => {
+    try {
+        const response = await api.put<AdminApiResponse<AdminBrandResponse>>(`/brands/${id}`, data);
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to update brand');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+export const deleteBrand = async (id: number): Promise<void> => {
+    try {
+        const response = await api.delete<AdminApiResponse<unknown>>(`/brands/${id}`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to delete brand');
+        }
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+// ===== Categories =====
+
+export const getAdminCategories = async (): Promise<AdminCategoryResponse[]> => {
+    const response = await api.get<AdminApiResponse<AdminCategoryResponse[]>>('/categories');
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to fetch categories');
+    }
+    return response.data.data;
+};
+
+export const createCategory = async (data: CreateCategoryRequest): Promise<AdminCategoryResponse> => {
+    try {
+        const response = await api.post<AdminApiResponse<AdminCategoryResponse>>('/categories', data);
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to create category');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+export const updateCategory = async (id: number, data: UpdateCategoryRequest): Promise<AdminCategoryResponse> => {
+    try {
+        const response = await api.put<AdminApiResponse<AdminCategoryResponse>>(`/categories/${id}`, data);
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to update category');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+export const deleteCategory = async (id: number): Promise<void> => {
+    try {
+        const response = await api.delete<AdminApiResponse<unknown>>(`/categories/${id}`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to delete category');
+        }
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+// ===== Reviews =====
+
+export const deleteReview = async (reviewId: number): Promise<void> => {
+    try {
+        const response = await api.delete<AdminApiResponse<unknown>>(`/admin/reviews/${reviewId}`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to delete review');
+        }
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
 };

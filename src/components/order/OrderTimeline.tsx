@@ -33,7 +33,7 @@ const steps: TimelineStep[] = [
 
 const statusOrder: OrderStatus[] = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED'];
 
-const OrderTimeline = ({ status, confirmedAt, shippedAt, deliveredAt, cancelledAt }: OrderTimelineProps) => {
+const OrderTimeline = ({ status, confirmedAt: _confirmedAt, shippedAt: _shippedAt, deliveredAt: _deliveredAt, cancelledAt }: OrderTimelineProps) => {
     const isCancelled = status === 'CANCELLED';
     const currentIndex = isCancelled ? -1 : statusOrder.indexOf(status);
 
@@ -66,7 +66,7 @@ const OrderTimeline = ({ status, confirmedAt, shippedAt, deliveredAt, cancelledA
 
                 {/* Steps */}
                 <div className="od-timeline-steps">
-                    {steps.map((step, index) => {
+                    {steps.map((step, _index) => {
                         const stepIdx = statusOrder.indexOf(step.key);
                         const isActive = stepIdx <= currentIndex && stepIdx >= 0;
                         const isCurrent = stepIdx === currentIndex;

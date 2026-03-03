@@ -12,6 +12,9 @@ const menuItems = [
     { icon: 'inventory_2', label: 'Products', path: '/admin/products' },
     { icon: 'receipt_long', label: 'Orders', path: '/admin/orders' },
     { icon: 'group', label: 'Users', path: '/admin/users' },
+    { icon: 'label', label: 'Brands', path: '/admin/brands' },
+    { icon: 'category', label: 'Categories', path: '/admin/categories' },
+    { icon: 'reviews', label: 'Reviews', path: '/admin/reviews' },
 ];
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {

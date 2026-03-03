@@ -124,7 +124,6 @@ export const getBrands = async (): Promise<BrandResponseDto[]> => {
 
 // ===== Product Detail APIs =====
 
-type ReviewsApiResponse = ApiResponse<ReviewsResponse>;
 type BundleApiResponse = ApiResponse<ProductBundleDto>;
 type ReviewApiResponse = ApiResponse<ReviewDto>;
 

@@ -13,7 +13,7 @@ import { OrderHistoryPage, OrderDetailPage } from './pages/Orders';
 import PageTransition from './components/common/PageTransition';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import { AdminDashboard, AdminProductsPage, AdminProductFormPage, AdminOrdersPage, AdminOrderDetailPage, AdminUsersPage } from './pages/Admin';
+import { AdminDashboard, AdminProductsPage, AdminProductFormPage, AdminOrdersPage, AdminOrderDetailPage, AdminUsersPage, AdminBrandsPage, AdminCategoriesPage, AdminReviewsPage } from './pages/Admin';
 import ProfilePage from './pages/Profile';
 
 function App() {
@@ -153,6 +153,21 @@ function App() {
                         <Route path="/admin/users" element={
                             <ProtectedRoute allowedRoles={['Admin']}>
                                 <AdminUsersPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/brands" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminBrandsPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/categories" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminCategoriesPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/reviews" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminReviewsPage />
                             </ProtectedRoute>
                         } />
                     </Routes>

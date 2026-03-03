@@ -11,7 +11,7 @@ const HomePage = () => {
     const location = useLocation();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const sectionsRef = useRef<HTMLDivElement>(null);
-    const [splineLoaded, setSplineLoaded] = useState(false);
+    const [_splineLoaded, setSplineLoaded] = useState(false);
     const [heroContentHidden, setHeroContentHidden] = useState(false);
     const heroRef = useRef<HTMLElement>(null);
 

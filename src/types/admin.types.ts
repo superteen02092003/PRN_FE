@@ -200,3 +200,38 @@ export interface AdminApiResponse<T> {
     message: string;
     data: T | null;
 }
+
+// ===== Admin Brand Types =====
+
+export interface AdminBrandResponse {
+    brandId: number;
+    name: string;
+    logoUrl: string | null;
+    productCount: number;
+}
+
+export interface CreateBrandRequest {
+    name: string;
+    logoUrl?: string;
+}
+
+export interface UpdateBrandRequest {
+    name: string;
+    logoUrl?: string;
+}
+
+// ===== Admin Category Types =====
+
+export interface AdminCategoryResponse {
+    categoryId: number;
+    name: string;
+    productCount: number;
+}
+
+export interface CreateCategoryRequest {
+    name: string;
+}
+
+export interface UpdateCategoryRequest {
+    name: string;
+}

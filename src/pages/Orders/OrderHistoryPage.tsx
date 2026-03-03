@@ -18,7 +18,7 @@ const statusFilters: { value: string; label: string }[] = [
 
 const OrderHistoryPage = () => {
     const [searchInput, setSearchInput] = useState('');
-    const { orders, totalPages, totalCount, currentPage, isLoading, error, filter, setFilter } = useOrders();
+    const { orders, totalPages, totalCount: _totalCount, currentPage, isLoading, error, filter, setFilter } = useOrders();
 
     const handleSearch = () => {
         setFilter({ searchTerm: searchInput || undefined, pageNumber: 1 });
