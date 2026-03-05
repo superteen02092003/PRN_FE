@@ -13,7 +13,7 @@ import { OrderHistoryPage, OrderDetailPage } from './pages/Orders';
 import PageTransition from './components/common/PageTransition';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import { AdminDashboard } from './pages/Admin';
+import { AdminDashboard, AdminProductsPage, AdminProductFormPage, AdminOrdersPage, AdminOrderDetailPage, AdminUsersPage, AdminBrandsPage, AdminCategoriesPage, AdminReviewsPage } from './pages/Admin';
 import ProfilePage from './pages/Profile';
 
 function App() {
@@ -122,9 +122,52 @@ function App() {
                         {/* Protected Admin Routes */}
                         <Route path="/admin/dashboard" element={
                             <ProtectedRoute allowedRoles={['Admin']}>
-                                <PageTransition>
-                                    <AdminDashboard />
-                                </PageTransition>
+                                <AdminDashboard />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/products" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminProductsPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/products/new" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminProductFormPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/products/:id/edit" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminProductFormPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/orders" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminOrdersPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/orders/:id" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminOrderDetailPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/users" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminUsersPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/brands" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminBrandsPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/categories" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminCategoriesPage />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/admin/reviews" element={
+                            <ProtectedRoute allowedRoles={['Admin']}>
+                                <AdminReviewsPage />
                             </ProtectedRoute>
                         } />
                     </Routes>

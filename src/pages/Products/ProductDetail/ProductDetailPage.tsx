@@ -144,7 +144,7 @@ const ProductDetailPage = () => {
     // Determine available tabs
     const tabs: { key: TabType; label: string }[] = [
         { key: 'description', label: 'Description' },
-        { key: 'reviews', label: `Reviews (${product.totalReviews ?? 0})` },
+        { key: 'reviews', label: `Reviews (${reviews?.summary?.totalReviews ?? product.totalReviews ?? 0})` },
     ];
     if (product.productType === 'KIT') {
         tabs.splice(1, 0, { key: 'bundle', label: 'Kit Contents' });

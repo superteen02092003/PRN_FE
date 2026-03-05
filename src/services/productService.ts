@@ -124,7 +124,6 @@ export const getBrands = async (): Promise<BrandResponseDto[]> => {
 
 // ===== Product Detail APIs =====
 
-type ReviewsApiResponse = ApiResponse<ReviewsResponse>;
 type BundleApiResponse = ApiResponse<ProductBundleDto>;
 type ReviewApiResponse = ApiResponse<ReviewDto>;
 
@@ -176,7 +175,8 @@ export const getProductReviews = async (
     queryParams.PageSize = params.pageSize || 10;
     if (params.sortBy) queryParams.SortBy = params.sortBy;
 
-    const response = await api.get<ReviewsApiResponse>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await api.get<ApiResponse<any>>(
         `/Product/${productId}/reviews`,
         { params: queryParams }
     );
@@ -185,7 +185,46 @@ export const getProductReviews = async (
         throw new Error(response.data.message || 'Failed to fetch reviews');
     }
 
-    return response.data.data;
+    // Transform flat BE response into nested FE ReviewsResponse structure
+    const raw = response.data.data;
+
+    // Map ratingDistribution from { "5": 1, "4": 0, ... } to [{ rating, count, percentage }]
+    const totalReviews = raw.totalReviews ?? 0;
+    const ratingDistribution = Object.entries(raw.ratingDistribution ?? {}).map(
+        ([rating, count]) => ({
+            rating: parseInt(rating),
+            count: count as number,
+            percentage: totalReviews > 0 ? Math.round(((count as number) / totalReviews) * 100) : 0,
+        })
+    ).sort((a, b) => b.rating - a.rating);
+
+    // Map reviews array — BE uses "reviewer" field, FE expects "userName"
+    const reviewItems = (raw.reviews ?? []).map((r: Record<string, unknown>) => ({
+        reviewId: r.reviewId,
+        userId: r.userId ?? 0,
+        userName: r.reviewer ?? r.userName ?? 'Anonymous',
+        rating: r.rating,
+        comment: r.comment,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt ?? null,
+    }));
+
+    const result: ReviewsResponse = {
+        summary: {
+            averageRating: raw.averageRating ?? 0,
+            totalReviews: totalReviews,
+            ratingDistribution,
+        },
+        reviews: {
+            items: reviewItems,
+            pageNumber: raw.page ?? 1,
+            pageSize: raw.pageSize ?? 10,
+            totalCount: totalReviews,
+            totalPages: raw.totalPages ?? 0,
+        },
+    };
+
+    return result;
 };
 
 /**
@@ -208,14 +247,24 @@ export const createProductReview = async (
     productId: number,
     review: CreateReviewDto
 ): Promise<ReviewDto> => {
-    const response = await api.post<ReviewApiResponse>(
-        `/Product/${productId}/reviews`,
-        review
-    );
+    try {
+        const response = await api.post<ReviewApiResponse>(
+            `/Product/${productId}/reviews`,
+            review
+        );
 
-    if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to create review');
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to create review');
+        }
+
+        return response.data.data;
+    } catch (err) {
+        // Extract BE error message from Axios error response (400/403)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosError = err as any;
+        if (axiosError?.response?.data?.message) {
+            throw new Error(axiosError.response.data.message);
+        }
+        throw err;
     }
-
-    return response.data.data;
 };

@@ -180,8 +180,10 @@ export const useCreateReview = (productId: number | null): UseCreateReviewResult
             setSuccess(true);
             return data;
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create review');
-            return null;
+            const message = err instanceof Error ? err.message : 'Failed to create review';
+            setError(message);
+            // Re-throw so ReviewForm can catch and display the error
+            throw new Error(message);
         } finally {
             setLoading(false);
         }
