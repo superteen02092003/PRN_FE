@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import NotificationDropdown from '../NotificationDropdown/NotificationDropdown';
 
 interface User {
     userId: number;
@@ -123,7 +124,7 @@ const Header = () => {
                     {/* Desktop Nav Links */}
                     <nav className="header__nav">
                         <Link to="/products" className="header__nav-link">Products</Link>
-                        <a className="header__nav-link" href="#">Projects</a>
+                        <Link to="/store" className="header__nav-link">Store</Link>
                         <a className="header__nav-link" href="#">Forums</a>
                         <a className="header__nav-link header__nav-link--quick-order" href="#">
                             <span className="material-symbols-outlined">bolt</span>
@@ -249,6 +250,25 @@ const Header = () => {
                                                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>shopping_bag</span>
                                                 My Orders
                                             </Link>
+                                            <Link
+                                                to="/warranties"
+                                                onClick={() => setShowDropdown(false)}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: '8px',
+                                                    padding: '10px 12px',
+                                                    borderRadius: '6px',
+                                                    color: '#374151',
+                                                    textDecoration: 'none',
+                                                    fontSize: '14px',
+                                                }}
+                                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                            >
+                                                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>shield</span>
+                                                My Warranties
+                                            </Link>
                                             <button
                                                 onClick={handleLogout}
                                                 style={{
@@ -285,6 +305,12 @@ const Header = () => {
                                     Sign Up
                                 </Link>
                             </>
+                        )}
+                        {user && <NotificationDropdown />}
+                        {user && (
+                            <Link to="/chat" className="header__cart" title="Chat Support">
+                                <span className="material-symbols-outlined">chat</span>
+                            </Link>
                         )}
                         <button className="header__cart" onClick={handleCartClick}>
                             <span className="material-symbols-outlined">shopping_cart</span>

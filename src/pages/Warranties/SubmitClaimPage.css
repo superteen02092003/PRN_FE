@@ -1,0 +1,253 @@
+.submit-claim-page {
+    padding: 40px 0 80px;
+    min-height: 60vh;
+    background: #f8fafc;
+}
+
+.submit-claim-page .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #2463eb;
+}
+
+.back-link .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.submit-claim-page h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 24px;
+}
+
+/* Loading / Error */
+.claim-loading,
+.claim-error-box {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.claim-loading .loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #2463eb;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px;
+}
+
+.claim-error-box .material-symbols-outlined {
+    font-size: 48px;
+    color: #ef4444;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.claim-error-box button {
+    margin-top: 16px;
+    background: #2463eb;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Form Container */
+.claim-form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Warranty Summary */
+.claim-warranty-summary {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+}
+
+.claim-warranty-summary h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    margin: 0 0 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.summary-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+}
+
+.summary-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.summary-value.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+}
+
+/* Claim Form */
+.claim-form {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.form-group .required {
+    color: #ef4444;
+}
+
+.form-group textarea,
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #0f172a;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.form-group textarea:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: #2463eb;
+    box-shadow: 0 0 0 3px rgba(36, 99, 235, 0.1);
+}
+
+.char-counter {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+.text-warn {
+    color: #f59e0b;
+}
+
+.validation-error {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-submit-claim {
+    background: #2463eb;
+    color: white;
+    border: none;
+    padding: 11px 28px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-submit-claim:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.btn-submit-claim:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+@media (max-width: 600px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+}
