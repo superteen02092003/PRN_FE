@@ -1,0 +1,166 @@
+.store-page {
+    padding: 40px 0 80px;
+    min-height: 60vh;
+    background: #f8fafc;
+}
+
+.store-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.store-header {
+    margin-bottom: 24px;
+}
+
+.store-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 6px;
+}
+
+.store-header p {
+    color: #64748b;
+    font-size: 15px;
+    margin: 0;
+}
+
+.store-loading,
+.store-error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Layout */
+.store-content {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Map */
+.store-map-wrapper {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.store-map {
+    height: 500px;
+    width: 100%;
+}
+
+/* Info Panel */
+.store-info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.branches-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 8px 0 0;
+}
+
+/* Store Card */
+.store-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 18px;
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.store-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border-color: #93c5fd;
+}
+
+.store-card.main-store {
+    border-left: 4px solid #2463eb;
+}
+
+.store-card-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2463eb;
+    background: #eff6ff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.store-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 12px;
+}
+
+.store-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 10px;
+}
+
+.store-card-detail {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.store-card-detail .material-symbols-outlined {
+    font-size: 18px;
+    color: #94a3b8;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* Opening Hours */
+.store-hours {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.store-hours-row {
+    display: flex;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.store-hours-day {
+    text-transform: capitalize;
+    font-weight: 600;
+    min-width: 80px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .store-content {
+        grid-template-columns: 1fr;
+    }
+
+    .store-map {
+        height: 350px;
+    }
+}
