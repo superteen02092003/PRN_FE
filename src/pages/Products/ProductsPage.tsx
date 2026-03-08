@@ -398,11 +398,26 @@ const ProductsPage = () => {
 
                     {/* Product Grid */}
                     <div className="products-section">
-                        {/* Loading State */}
+                        {/* Loading State — Skeleton Cards */}
                         {productsLoading && (
-                            <div className="products-loading">
-                                <div className="loading-spinner"></div>
-                                <p>Loading products...</p>
+                            <div className="products-grid">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <div key={i} className="product-card product-card--skeleton">
+                                        <div className="skeleton-box" style={{ width: '100%', height: '200px', borderRadius: '8px 8px 0 0' }} />
+                                        <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            <div className="skeleton-box" style={{ width: '40%', height: '0.7rem' }} />
+                                            <div className="skeleton-box" style={{ width: '85%', height: '1rem' }} />
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                                                <div className="skeleton-box" style={{ width: '60px', height: '1.2rem', borderRadius: '4px' }} />
+                                                <div className="skeleton-box" style={{ width: '60px', height: '1.2rem', borderRadius: '4px' }} />
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+                                                <div className="skeleton-box" style={{ width: '35%', height: '1.1rem' }} />
+                                                <div className="skeleton-box" style={{ width: '36px', height: '36px', borderRadius: '8px' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         )}
 
@@ -454,14 +469,22 @@ const ProductsPage = () => {
                                                         src={resolveImageUrl(product.primaryImage) || ''}
                                                         alt={product.name}
                                                         onError={(e) => {
-                                                            (e.target as HTMLImageElement).style.display = 'none';
-                                                            (e.target as HTMLImageElement).parentElement?.classList.add('no-image');
+                                                            const img = e.target as HTMLImageElement;
+                                                            img.style.display = 'none';
+                                                            const parent = img.parentElement;
+                                                            if (parent && !parent.querySelector('.image-placeholder')) {
+                                                                parent.classList.add('no-image');
+                                                                const placeholder = document.createElement('div');
+                                                                placeholder.className = 'image-placeholder';
+                                                                placeholder.innerHTML = '<span class="material-symbols-outlined">image_not_supported</span><span>Image Unavailable</span>';
+                                                                parent.insertBefore(placeholder, parent.firstChild);
+                                                            }
                                                         }}
                                                     />
                                                 ) : (
                                                     <div className="image-placeholder">
-                                                        <span className="material-symbols-outlined">image</span>
-                                                        <span>No Image</span>
+                                                        <span className="material-symbols-outlined">image_not_supported</span>
+                                                        <span>No Image Available</span>
                                                     </div>
                                                 )}
                                                 <span className="quick-view-btn">View Details</span>

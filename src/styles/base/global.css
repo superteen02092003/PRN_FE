@@ -43,3 +43,42 @@ img {
     margin: 0 auto;
     padding: 0 24px;
 }
+
+/* Page Transition — smooth fade-in */
+main,
+.product-detail-page,
+.order-page-wrapper,
+.warranties-page,
+.cart-page {
+    animation: page-fade-in 0.35s ease-out;
+}
+
+@keyframes page-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== GLOBAL SKELETON SHIMMER ===== */
+.skeleton-box {
+    background: linear-gradient(90deg, #e9ecef 25%, #f8f9fa 50%, #e9ecef 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: 6px;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

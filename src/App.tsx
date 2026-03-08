@@ -21,6 +21,9 @@ import SubmitClaimPage from './pages/Warranties/SubmitClaimPage';
 import ChatPage from './pages/Chat/ChatPage';
 import StorePage from './pages/Store/StorePage';
 import { NotificationProvider } from './contexts/NotificationContext';
+import ScrollToTop from './components/common/ScrollToTop/ScrollToTop';
+import ChatbotWidget from './components/common/ChatbotWidget/ChatbotWidget';
+import NotFoundPage from './pages/NotFound/NotFoundPage';
 
 function App() {
     const location = useLocation();
@@ -217,8 +220,16 @@ function App() {
                                     <AdminChatPage />
                                 </ProtectedRoute>
                             } />
+                            {/* 404 Catch-all */}
+                            <Route path="*" element={
+                                <PageTransition>
+                                    <NotFoundPage />
+                                </PageTransition>
+                            } />
                         </Routes>
                     </AnimatePresence>
+                    <ScrollToTop />
+                    <ChatbotWidget />
                 </div>
             </NotificationProvider>
         </AuthProvider>

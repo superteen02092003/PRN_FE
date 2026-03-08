@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
-import { createProduct, updateProduct, uploadProductImages, deleteProductImage, createKit, addProductToBundle, removeProductFromBundle } from '@/services/adminService';
+import { createProduct, updateProduct, uploadProductImages, deleteProductImage, createKit, addProductToBundle, removeProductFromBundle, getWarrantyPolicies } from '@/services/adminService';
+import type { WarrantyPolicyOption } from '@/services/adminService';
 import { getProductDetail, getCategories, getBrands, getProducts } from '@/services/productService';
 import type { CategoryResponseDto, BrandResponseDto, ProductImageDto, BundleItemDto } from '@/types/product.types';
 import { resolveImageUrl } from '@/utils/imageUrl';
@@ -16,6 +17,7 @@ const AdminProductFormPage = () => {
 
     const [categories, setCategories] = useState<CategoryResponseDto[]>([]);
     const [brands, setBrands] = useState<BrandResponseDto[]>([]);
+    const [warrantyPolicies, setWarrantyPolicies] = useState<WarrantyPolicyOption[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -57,9 +59,10 @@ const AdminProductFormPage = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [cats, brs] = await Promise.all([getCategories(), getBrands()]);
+                const [cats, brs, policies] = await Promise.all([getCategories(), getBrands(), getWarrantyPolicies()]);
                 setCategories(cats);
                 setBrands(brs);
+                setWarrantyPolicies(policies);
 
                 if (isEdit) {
                     setLoading(true);
@@ -404,6 +407,29 @@ const AdminProductFormPage = () => {
                                 value={form.stockQuantity}
                                 onChange={(e) => setForm(p => ({ ...p, stockQuantity: Number(e.target.value) }))}
                             />
+                        </div>
+                    </div>
+
+                    {/* Warranty Policy */}
+                    <div className="admin-form-row">
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Warranty Policy</label>
+                            <select
+                                className="admin-select"
+                                value={form.warrantyPolicyId ?? ''}
+                                onChange={(e) => setForm(p => ({ ...p, warrantyPolicyId: e.target.value ? Number(e.target.value) : null }))}
+                                style={{ width: '100%' }}
+                            >
+                                <option value="">No warranty</option>
+                                {warrantyPolicies.map(wp => (
+                                    <option key={wp.policyId} value={wp.policyId}>
+                                        {wp.policyName} ({wp.durationMonths} months)
+                                    </option>
+                                ))}
+                            </select>
+                            <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                                Products with a warranty policy will auto-create warranties when orders are delivered.
+                            </p>
                         </div>
                     </div>
 

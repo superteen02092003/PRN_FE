@@ -23,7 +23,6 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
         categories = [],
         averageRating = 0,
         totalReviews = 0,
-        description,
     } = product;
 
     // Tính inStock từ stockQuantity nếu API không trả về field inStock
@@ -103,13 +102,6 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
                 </div>
             )}
 
-            {/* Description */}
-            {description && (
-                <div className="description-section">
-                    <h3 className="description-title">Description</h3>
-                    <p className="description-text">{description}</p>
-                </div>
-            )}
         </div>
     );
 };

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header/Header';
 import Footer from '@/components/common/Footer/Footer';
-import { connectToChat, disconnectChat, getChatHistory, sendMessage } from '@/services/chatService';
+import { connectToChat, disconnectChat, getChatHistory, sendMessage, markMyMessagesAsRead } from '@/services/chatService';
 import type { ChatMessageDto } from '@/services/chatService';
 import './ChatPage.css';
 
@@ -41,6 +41,8 @@ const ChatPage = () => {
                 setLoading(true);
                 const data = await getChatHistory(1, 100);
                 setMessages((data.items || []).reverse());
+                // Mark admin messages as read when chat is opened
+                try { await markMyMessagesAsRead(); } catch { /* ignore */ }
             } catch (err) {
                 console.error('Failed to load chat history:', err);
             } finally {
@@ -126,11 +128,20 @@ const ChatPage = () => {
 
                     <div className="chat-messages" ref={messagesContainerRef}>
                         {loading ? (
-                            <div className="chat-loading">Loading messages...</div>
+                            <div className="chat-skeleton">
+                                {[1, 2, 3, 4].map(i => (
+                                    <div key={i} className={`chat-msg ${i % 2 === 0 ? 'sent' : 'received'}`}>
+                                        <div className="skeleton-box" style={{ width: i % 2 === 0 ? '55%' : '65%', height: '2.5rem', borderRadius: '14px' }} />
+                                    </div>
+                                ))}
+                            </div>
                         ) : messages.length === 0 ? (
                             <div className="chat-empty">
-                                <span className="material-symbols-outlined">chat_bubble</span>
-                                <p>No messages yet. Start a conversation!</p>
+                                <div className="chat-empty-icon">
+                                    <span className="material-symbols-outlined">forum</span>
+                                </div>
+                                <h3>Start a Conversation</h3>
+                                <p>Send a message and our support team will reply shortly.</p>
                             </div>
                         ) : (
                             groupedMessages.map((group, gi) => (

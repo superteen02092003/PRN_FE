@@ -54,9 +54,35 @@ const MyWarrantiesPage = () => {
                     </div>
 
                     {loading && (
-                        <div className="warranties-loading">
-                            <div className="loading-spinner" />
-                            <p>Loading your warranties...</p>
+                        <div className="warranties-grid">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <div key={i} className="warranty-card warranty-card--skeleton">
+                                    <div className="warranty-card-header">
+                                        <div className="warranty-product-info">
+                                            <div className="skeleton-box" style={{ width: '56px', height: '56px', borderRadius: '8px', flexShrink: 0 }} />
+                                            <div className="warranty-product-details">
+                                                <div className="skeleton-box" style={{ width: '70%', height: '0.9rem', marginBottom: '0.4rem' }} />
+                                                <div className="skeleton-box" style={{ width: '50%', height: '0.7rem' }} />
+                                            </div>
+                                        </div>
+                                        <div className="skeleton-box" style={{ width: '70px', height: '1.5rem', borderRadius: '9999px' }} />
+                                    </div>
+                                    <div className="warranty-card-body">
+                                        <div className="warranty-info-row">
+                                            <div className="skeleton-box" style={{ width: '90px', height: '0.7rem' }} />
+                                            <div className="skeleton-box" style={{ width: '120px', height: '0.7rem' }} />
+                                        </div>
+                                        <div className="warranty-info-row">
+                                            <div className="skeleton-box" style={{ width: '80px', height: '0.7rem' }} />
+                                            <div className="skeleton-box" style={{ width: '80px', height: '0.7rem' }} />
+                                        </div>
+                                        <div className="warranty-info-row">
+                                            <div className="skeleton-box" style={{ width: '100px', height: '0.7rem' }} />
+                                            <div className="skeleton-box" style={{ width: '70px', height: '0.7rem' }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
 

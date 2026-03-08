@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
-import { connectToChat, disconnectChat, getConversations, getChatHistoryWithUser, sendMessage } from '@/services/chatService';
+import { connectToChat, disconnectChat, getConversations, getChatHistoryWithUser, sendMessage, markAsRead } from '@/services/chatService';
 import type { ChatMessageDto, ConversationDto } from '@/services/chatService';
 import './AdminChatPage.css';
 
@@ -68,6 +68,21 @@ const AdminChatPage = () => {
         load();
     }, [selectedUserId]);
 
+    // Handle selecting a conversation - clear unread
+    const handleSelectConversation = async (userId: number) => {
+        setSelectedUserId(userId);
+        // Clear unread count in UI immediately
+        setConversations(prev =>
+            prev.map(c => c.userId === userId ? { ...c, unreadCount: 0 } : c)
+        );
+        // Call API to mark as read
+        try {
+            await markAsRead(userId);
+        } catch (err) {
+            console.error('Failed to mark as read:', err);
+        }
+    };
+
     useEffect(() => {
         const container = messagesContainerRef.current;
         if (container) {
@@ -126,7 +141,7 @@ const AdminChatPage = () => {
                                 <div
                                     key={convo.userId}
                                     className={`admin-chat-convo-item ${selectedUserId === convo.userId ? 'active' : ''}`}
-                                    onClick={() => setSelectedUserId(convo.userId)}
+                                    onClick={() => handleSelectConversation(convo.userId)}
                                 >
                                     <div className="convo-avatar">
                                         {convo.userName.charAt(0).toUpperCase()}

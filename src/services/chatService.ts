@@ -145,6 +145,22 @@ export const getChatHistoryWithUser = async (
     return response.data.data;
 };
 
+// [Admin] Mark messages from a user as read
+export const markAsRead = async (userId: number): Promise<void> => {
+    await api.post(`/chat/mark-read/${userId}`);
+};
+
+// [Customer] Mark admin messages as read
+export const markMyMessagesAsRead = async (): Promise<void> => {
+    await api.post('/chat/mark-read');
+};
+
+// Get unread message count
+export const getUnreadCount = async (): Promise<number> => {
+    const response = await api.get<{ success: boolean; data: { unreadCount: number } }>('/chat/unread-count');
+    return response.data.data.unreadCount;
+};
+
 const chatService = {
     connectToChat,
     disconnectChat,
@@ -153,6 +169,9 @@ const chatService = {
     getConversations,
     getChatHistoryWithUser,
     getConnection,
+    markAsRead,
+    markMyMessagesAsRead,
+    getUnreadCount,
 };
 
 export default chatService;

@@ -434,3 +434,20 @@ export const deleteReview = async (reviewId: number): Promise<void> => {
         throw err;
     }
 };
+
+// ===== Warranty Policies =====
+
+export interface WarrantyPolicyOption {
+    policyId: number;
+    policyName: string;
+    durationMonths: number;
+    description: string | null;
+}
+
+export const getWarrantyPolicies = async (): Promise<WarrantyPolicyOption[]> => {
+    const response = await api.get<AdminApiResponse<WarrantyPolicyOption[]>>('/warranty/policies');
+    if (!response.data.success || !response.data.data) {
+        return [];
+    }
+    return response.data.data;
+};
