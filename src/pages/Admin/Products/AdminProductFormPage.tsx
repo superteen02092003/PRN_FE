@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
-import { createProduct, updateProduct, uploadProductImages, deleteProductImage } from '@/services/adminService';
-import { getProductDetail, getCategories, getBrands } from '@/services/productService';
-import type { CategoryResponseDto, BrandResponseDto, ProductImageDto } from '@/types/product.types';
+import { createProduct, updateProduct, uploadProductImages, deleteProductImage, createKit, addProductToBundle, removeProductFromBundle, getWarrantyPolicies } from '@/services/adminService';
+import type { WarrantyPolicyOption } from '@/services/adminService';
+import { getProductDetail, getCategories, getBrands, getProducts } from '@/services/productService';
+import type { CategoryResponseDto, BrandResponseDto, ProductImageDto, BundleItemDto } from '@/types/product.types';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import { toast } from 'react-toastify';
 
@@ -16,6 +17,7 @@ const AdminProductFormPage = () => {
 
     const [categories, setCategories] = useState<CategoryResponseDto[]>([]);
     const [brands, setBrands] = useState<BrandResponseDto[]>([]);
+    const [warrantyPolicies, setWarrantyPolicies] = useState<WarrantyPolicyOption[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -26,6 +28,20 @@ const AdminProductFormPage = () => {
     const [newFiles, setNewFiles] = useState<File[]>([]);
     const [newPreviews, setNewPreviews] = useState<string[]>([]);
     const [uploadingImages, setUploadingImages] = useState(false);
+
+    // KIT bundle state
+    interface KitComponent {
+        productId: number;
+        name: string;
+        sku: string;
+        price: number;
+        quantity: number;
+    }
+    const [kitComponents, setKitComponents] = useState<KitComponent[]>([]);
+    const [originalComponents, setOriginalComponents] = useState<KitComponent[]>([]);
+    const [componentSearch, setComponentSearch] = useState('');
+    const [componentResults, setComponentResults] = useState<{ productId: number; name: string; sku: string; price: number; productType: string }[]>([]);
+    const [searchingComponents, setSearchingComponents] = useState(false);
 
     const [form, setForm] = useState({
         name: '',
@@ -43,9 +59,10 @@ const AdminProductFormPage = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [cats, brs] = await Promise.all([getCategories(), getBrands()]);
+                const [cats, brs, policies] = await Promise.all([getCategories(), getBrands(), getWarrantyPolicies()]);
                 setCategories(cats);
                 setBrands(brs);
+                setWarrantyPolicies(policies);
 
                 if (isEdit) {
                     setLoading(true);
@@ -63,6 +80,18 @@ const AdminProductFormPage = () => {
                         categoryIds: product.categories?.map(c => c.categoryId) || [],
                     });
                     setExistingImages(product.images || []);
+                    // Load existing KIT components
+                    if (product.productType === 'KIT' && product.bundleComponents) {
+                        const comps: KitComponent[] = product.bundleComponents.map((b: BundleItemDto) => ({
+                            productId: b.productId,
+                            name: b.name,
+                            sku: b.sku || '',
+                            price: b.price || 0,
+                            quantity: b.quantity,
+                        }));
+                        setKitComponents(comps);
+                        setOriginalComponents(comps);
+                    }
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load data');
@@ -72,6 +101,33 @@ const AdminProductFormPage = () => {
         };
         loadData();
     }, [id, isEdit]);
+
+    // Component search for KIT
+    useEffect(() => {
+        if (componentSearch.length < 2) {
+            setComponentResults([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            try {
+                setSearchingComponents(true);
+                const data = await getProducts({ search: componentSearch, pageSize: 10 });
+                // Filter out KIT products and already-added products
+                const added = new Set(kitComponents.map(c => c.productId));
+                const filtered = (data.items || []).filter(
+                    (p: { productId: number; productType?: string }) => p.productType !== 'KIT' && !added.has(p.productId)
+                );
+                setComponentResults(filtered.map((p: { productId: number; name: string; sku: string; price: number; productType: string }) => ({
+                    productId: p.productId, name: p.name, sku: p.sku, price: p.price, productType: p.productType,
+                })));
+            } catch {
+                setComponentResults([]);
+            } finally {
+                setSearchingComponents(false);
+            }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [componentSearch, kitComponents]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -148,20 +204,71 @@ const AdminProductFormPage = () => {
             return;
         }
 
+        // KIT validation
+        if (form.productType === 'KIT' && !isEdit && kitComponents.length === 0) {
+            setError('KIT must have at least 1 component');
+            return;
+        }
+
         try {
             setSaving(true);
-            const data = {
-                ...form,
-                warrantyPolicyId: form.warrantyPolicyId || undefined,
-            };
-
             let productId: number;
 
             if (isEdit) {
+                const data = {
+                    ...form,
+                    warrantyPolicyId: form.warrantyPolicyId || undefined,
+                };
                 await updateProduct(Number(id), data);
                 productId = Number(id);
+
+                // Handle KIT component changes (add/remove)
+                if (form.productType === 'KIT') {
+                    const origIds = new Set(originalComponents.map(c => c.productId));
+                    const newIds = new Set(kitComponents.map(c => c.productId));
+
+                    // Remove components that were in original but not in current
+                    for (const oc of originalComponents) {
+                        if (!newIds.has(oc.productId)) {
+                            try {
+                                await removeProductFromBundle(productId, oc.productId);
+                            } catch (err) {
+                                toast.error(`Failed to remove ${oc.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                            }
+                        }
+                    }
+                    // Add new components
+                    for (const nc of kitComponents) {
+                        if (!origIds.has(nc.productId)) {
+                            try {
+                                await addProductToBundle(productId, nc.productId, nc.quantity);
+                            } catch (err) {
+                                toast.error(`Failed to add ${nc.name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                            }
+                        }
+                    }
+                }
                 toast.success('Product updated successfully');
+            } else if (form.productType === 'KIT') {
+                // Create KIT with components atomically
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const created = await createKit({
+                    name: form.name,
+                    sku: form.sku,
+                    description: form.description || undefined,
+                    price: form.price,
+                    brandId: form.brandId,
+                    warrantyPolicyId: form.warrantyPolicyId || undefined,
+                    categoryIds: form.categoryIds,
+                    components: kitComponents.map(c => ({ productId: c.productId, quantity: c.quantity })),
+                }) as any;
+                productId = created?.productId ?? created?.data?.productId ?? 0;
+                toast.success('Kit created successfully');
             } else {
+                const data = {
+                    ...form,
+                    warrantyPolicyId: form.warrantyPolicyId || undefined,
+                };
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const created = await createProduct(data) as any;
                 productId = created?.productId ?? created?.data?.productId ?? 0;
@@ -303,6 +410,29 @@ const AdminProductFormPage = () => {
                         </div>
                     </div>
 
+                    {/* Warranty Policy */}
+                    <div className="admin-form-row">
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Warranty Policy</label>
+                            <select
+                                className="admin-select"
+                                value={form.warrantyPolicyId ?? ''}
+                                onChange={(e) => setForm(p => ({ ...p, warrantyPolicyId: e.target.value ? Number(e.target.value) : null }))}
+                                style={{ width: '100%' }}
+                            >
+                                <option value="">No warranty</option>
+                                {warrantyPolicies.map(wp => (
+                                    <option key={wp.policyId} value={wp.policyId}>
+                                        {wp.policyName} ({wp.durationMonths} months)
+                                    </option>
+                                ))}
+                            </select>
+                            <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                                Products with a warranty policy will auto-create warranties when orders are delivered.
+                            </p>
+                        </div>
+                    </div>
+
                     {/* Categories */}
                     <div className="admin-form-group">
                         <label className="admin-form-label">Categories</label>
@@ -331,6 +461,122 @@ const AdminProductFormPage = () => {
                             ))}
                         </div>
                     </div>
+
+                    {/* KIT Components Section (only when productType is KIT) */}
+                    {form.productType === 'KIT' && (
+                        <div className="admin-form-group" style={{ marginTop: '8px' }}>
+                            <label className="admin-form-label" style={{ fontSize: '15px', fontWeight: 700, marginBottom: '12px', display: 'block' }}>
+                                Kit Components {!isEdit && <span style={{ color: '#ef4444' }}>*</span>}
+                            </label>
+
+                            {/* Current components list */}
+                            {kitComponents.length > 0 && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    {kitComponents.map((comp, idx) => (
+                                        <div key={comp.productId} style={{
+                                            display: 'flex', alignItems: 'center', gap: '10px',
+                                            padding: '10px 14px', background: '#f8fafc',
+                                            borderRadius: '8px', marginBottom: '6px',
+                                            border: '1px solid #e2e8f0',
+                                        }}>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ fontWeight: 600, fontSize: '13px', color: '#0f172a' }}>
+                                                    {comp.name}
+                                                </div>
+                                                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                                    SKU: {comp.sku} · ₫{comp.price.toLocaleString()}
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <label style={{ fontSize: '12px', color: '#64748b' }}>Qty:</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={comp.quantity}
+                                                    onChange={(e) => {
+                                                        const qty = Math.max(1, Number(e.target.value));
+                                                        setKitComponents(prev => prev.map((c, i) => i === idx ? { ...c, quantity: qty } : c));
+                                                    }}
+                                                    style={{
+                                                        width: '60px', padding: '4px 8px',
+                                                        border: '1px solid #d1d5db', borderRadius: '6px',
+                                                        fontSize: '13px', textAlign: 'center',
+                                                    }}
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setKitComponents(prev => prev.filter((_, i) => i !== idx))}
+                                                style={{
+                                                    background: 'none', border: 'none',
+                                                    color: '#ef4444', cursor: 'pointer',
+                                                    padding: '4px', display: 'flex',
+                                                }}
+                                                title="Remove component"
+                                            >
+                                                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Search to add component */}
+                            <div style={{ position: 'relative' }}>
+                                <input
+                                    className="admin-form-input"
+                                    placeholder="Search products to add (type at least 2 chars)..."
+                                    value={componentSearch}
+                                    onChange={(e) => setComponentSearch(e.target.value)}
+                                />
+                                {searchingComponents && (
+                                    <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '12px', color: '#94a3b8' }}>
+                                        Searching...
+                                    </div>
+                                )}
+                                {componentResults.length > 0 && (
+                                    <div style={{
+                                        position: 'absolute', top: '100%', left: 0, right: 0,
+                                        background: 'white', border: '1px solid #e2e8f0',
+                                        borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+                                        zIndex: 50, maxHeight: '200px', overflowY: 'auto',
+                                    }}>
+                                        {componentResults.map(r => (
+                                            <div
+                                                key={r.productId}
+                                                onClick={() => {
+                                                    setKitComponents(prev => [...prev, {
+                                                        productId: r.productId, name: r.name,
+                                                        sku: r.sku, price: r.price, quantity: 1,
+                                                    }]);
+                                                    setComponentSearch('');
+                                                    setComponentResults([]);
+                                                }}
+                                                style={{
+                                                    padding: '10px 14px', cursor: 'pointer',
+                                                    borderBottom: '1px solid #f1f5f9',
+                                                    transition: 'background 0.1s',
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.background = '#f0f7ff'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'white'}
+                                            >
+                                                <div style={{ fontWeight: 600, fontSize: '13px', color: '#0f172a' }}>{r.name}</div>
+                                                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                                    {r.productType} · SKU: {r.sku} · ₫{r.price.toLocaleString()}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {kitComponents.length === 0 && (
+                                <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px' }}>
+                                    No components added yet. Search for products above to add them to this kit.
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     {/* Product Images */}
                     <div className="admin-form-group">

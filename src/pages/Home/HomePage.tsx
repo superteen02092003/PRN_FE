@@ -1,466 +1,627 @@
 import { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Header from '@components/common/Header';
 import Footer from '@components/common/Footer';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useAddToCart } from '@/hooks/useCart';
+import { useAuth } from '@/contexts/AuthContext';
+import { getProducts, getCategories, getBrands } from '@/services/productService';
+import { CATEGORY_IMAGES } from '@/data/mockData';
+import type { ProductResponseDto, CategoryResponseDto, BrandResponseDto } from '@/types/product.types';
 
-// Lazy load Spline for better performance - only loads when needed
 const Spline = lazy(() => import('@splinetool/react-spline'));
 
 const HomePage = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const { addToCart } = useAddToCart();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const sectionsRef = useRef<HTMLDivElement>(null);
     const [_splineLoaded, setSplineLoaded] = useState(false);
-    const [heroContentHidden, setHeroContentHidden] = useState(false);
-    const heroRef = useRef<HTMLElement>(null);
-
-    // Detect mobile for video fallback
     const isMobile = useMediaQuery('(max-width: 768px)');
 
-    // Check for success message from login/register
+    // API data states
+    const [categories, setCategories] = useState<CategoryResponseDto[]>([]);
+    const [brands, setBrands] = useState<BrandResponseDto[]>([]);
+    const [featuredProducts, setFeaturedProducts] = useState<ProductResponseDto[]>([]);
+    const [newArrivals, setNewArrivals] = useState<ProductResponseDto[]>([]);
+    const [bestSellers, setBestSellers] = useState<ProductResponseDto[]>([]);
+    const [loading, setLoading] = useState(true);
+
+
+
+    // Stats counter
+    const [statsVisible, setStatsVisible] = useState(false);
+    const statsRef = useRef<HTMLElement>(null);
+
+    // Testimonials
+    const [activeTestimonial, setActiveTestimonial] = useState(0);
+
+    // New Arrivals slider
+    const arrivalsRef = useRef<HTMLDivElement>(null);
+
+
+    // Scroll progress
+    const [scrollProgress, setScrollProgress] = useState(0);
+
+
+
+    // ===== FETCH REAL DATA FROM API =====
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [categoriesData, brandsData, productsData1, productsData2] = await Promise.allSettled([
+                    getCategories(),
+                    getBrands(),
+                    getProducts({ pageSize: 4, pageNumber: 1 }),
+                    getProducts({ pageSize: 8, pageNumber: 1 }),
+                ]);
+
+                if (categoriesData.status === 'fulfilled') {
+                    setCategories(categoriesData.value);
+                }
+                if (brandsData.status === 'fulfilled') {
+                    setBrands(brandsData.value);
+                }
+                if (productsData1.status === 'fulfilled') {
+                    setFeaturedProducts(productsData1.value.items);
+                }
+                if (productsData2.status === 'fulfilled') {
+                    const allProducts = productsData2.value.items;
+                    setBestSellers(allProducts.slice(0, 4));
+                    setNewArrivals(allProducts.slice(4, 8));
+                }
+            } catch (err) {
+                console.error('Failed to fetch landing page data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // Success message from login/register
     useEffect(() => {
         if (location.state?.message) {
             setSuccessMessage(location.state.message);
-            // Clear the state to prevent showing message on refresh
             window.history.replaceState({}, document.title);
-            // Auto dismiss after 3 seconds
-            const timer = setTimeout(() => {
-                setSuccessMessage(null);
-            }, 3000);
+            const timer = setTimeout(() => setSuccessMessage(null), 3000);
             return () => clearTimeout(timer);
         }
     }, [location.state]);
 
-    // Auto-hide hero content after 3 seconds, show on hover
+
+
+    // Stats counter observer
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setHeroContentHidden(true);
-        }, 3000);
-
-        const heroElement = heroRef.current;
-
-        const handleMouseEnter = () => setHeroContentHidden(false);
-        const handleMouseLeave = () => {
-            // Re-hide after a short delay when mouse leaves
-            setTimeout(() => setHeroContentHidden(true), 2000);
-        };
-
-        if (heroElement) {
-            heroElement.addEventListener('mouseenter', handleMouseEnter);
-            heroElement.addEventListener('mouseleave', handleMouseLeave);
-        }
-
-        return () => {
-            clearTimeout(timer);
-            if (heroElement) {
-                heroElement.removeEventListener('mouseenter', handleMouseEnter);
-                heroElement.removeEventListener('mouseleave', handleMouseLeave);
-            }
-        };
-    }, []);
-
-    // Scroll reveal animation using Intersection Observer
-    useEffect(() => {
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px 0px -50px 0px',
-            threshold: 0.1
-        };
-
-        const observerCallback: IntersectionObserverCallback = (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('revealed');
-                }
-            });
-        };
-
-        const observer = new IntersectionObserver(observerCallback, observerOptions);
-
-        // Observe all cards that need reveal animation
-        const sectionsContainer = sectionsRef.current;
-        if (sectionsContainer) {
-            const revealElements = sectionsContainer.querySelectorAll(
-                '.category-card, .product-card, .arrival-card, .reveal'
-            );
-            revealElements.forEach((el) => observer.observe(el));
-        }
-
+        const observer = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) setStatsVisible(true); },
+            { threshold: 0.3 }
+        );
+        if (statsRef.current) observer.observe(statsRef.current);
         return () => observer.disconnect();
     }, []);
 
+    // Testimonial auto-rotate
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveTestimonial(prev => (prev + 1) % testimonials.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Scroll: progress bar
+    useEffect(() => {
+        const handleScroll = () => {
+            const total = document.documentElement.scrollHeight - window.innerHeight;
+            setScrollProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Scroll reveal
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('revealed'); }),
+            { rootMargin: '0px 0px -50px 0px', threshold: 0.1 }
+        );
+        const container = sectionsRef.current;
+        if (container) {
+            container.querySelectorAll('.reveal-item').forEach(el => observer.observe(el));
+        }
+        return () => observer.disconnect();
+    }, [loading]); // re-observe when loading finishes
+
+    const scrollArrivals = (dir: number) => {
+        if (arrivalsRef.current) {
+            arrivalsRef.current.scrollBy({ left: dir * 350, behavior: 'smooth' });
+        }
+    };
+
+
+
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    };
+
+
+
+    // Category icons mapping
+    const categoryIcons: Record<string, string> = {
+        'Sensors': 'sensors',
+        'Dev Boards': 'developer_board',
+        'Power Modules': 'bolt',
+        'Prototyping': 'build',
+        'Robotics': 'smart_toy',
+        'Connectors': 'cable',
+        'Modules': 'memory',
+        'Kits': 'inventory_2',
+        'Components': 'settings_input_component',
+    };
+
+    const getCategoryIcon = (name: string) => {
+        // Try exact match first, then partial match
+        for (const [key, icon] of Object.entries(categoryIcons)) {
+            if (name.toLowerCase().includes(key.toLowerCase())) return icon;
+        }
+        return 'category';
+    };
+
     return (
         <div className="home-page">
-            {/* Success Toast Notification */}
+            {/* Scroll Progress Bar */}
+            <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
+
+            {/* Success Toast */}
             {successMessage && (
-                <div style={{
-                    position: 'fixed',
-                    top: '80px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 1000,
-                    padding: '16px 24px',
-                    backgroundColor: '#16A34A',
-                    color: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    animation: 'slideDown 0.3s ease-out',
-                }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
+                <div className="success-toast">
+                    <span className="material-symbols-outlined">check_circle</span>
                     {successMessage}
                 </div>
             )}
 
-            <style>{`
-                @keyframes slideDown {
-                    from {
-                        opacity: 0;
-                        transform: translateX(-50%) translateY(-20px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(-50%) translateY(0);
-                    }
-                }
-            `}</style>
-
             <Header />
-            <main className="home-page__main">
-                <div className="home-page__sections" ref={sectionsRef}>
-                    {/* Hero Search Section with 3D Spline */}
-                    <section className="hero-search" ref={heroRef}>
-                        {/* 3D Spline Background */}
-                        <div className="hero-search__3d-container">
-                            {!isMobile ? (
-                                <Suspense fallback={
-                                    <div className="hero-search__3d-loading">
-                                        <div className="hero-search__3d-spinner"></div>
-                                    </div>
-                                }>
-                                    <Spline
-                                        scene="https://prod.spline.design/cX2vHOXxH1nnhGEf/scene.splinecode"
-                                        onLoad={() => setSplineLoaded(true)}
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                        }}
-                                    />
-                                </Suspense>
-                            ) : (
-                                <div
-                                    className="hero-search__background"
-                                    style={{
-                                        backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuChGPyK6HLZZn99akyoQexfblTEYbq4TGd6_crW-HEPM4CexDAYeSmPuhsurHOdbXnAHXmN_hSQ1WKmXtaOW6JyMGnGRkO5ztNcFU5UIU1IE8aB674lHC6YOUnLQ8sBD_iTx105MvFt1jW4mcOLlKm7ZnMrdGHLurrr-YVSs8scVhSMTRGevj3ix29gbokhMLYbLPgPKaPNHDEF2VTNlbWlXDkFXb0JCa131yfOWk3M3ZNfLoH3ItByxjdJdybgRMczvLmCbMX1IXM")'
-                                    }}
+            <main className="home-page__main" ref={sectionsRef}>
+                {/* ===== 1. HERO ===== */}
+                <section className="hero-search">
+                    <div className="hero-search__3d-container">
+                        {!isMobile ? (
+                            <Suspense fallback={<div className="hero-search__3d-loading"><div className="hero-search__3d-spinner" /></div>}>
+                                <Spline
+                                    scene="https://prod.spline.design/cX2vHOXxH1nnhGEf/scene.splinecode"
+                                    onLoad={() => setSplineLoaded(true)}
+                                    style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
                                 />
-                            )}
+                            </Suspense>
+                        ) : (
+                            <div className="hero-search__background" style={{
+                                backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuChGPyK6HLZZn99akyoQexfblTEYbq4TGd6_crW-HEPM4CexDAYeSmPuhsurHOdbXnAHXmN_hSQ1WKmXtaOW6JyMGnGRkO5ztNcFU5UIU1IE8aB674lHC6YOUnLQ8sBD_iTx105MvFt1jW4mcOLlKm7ZnMrdGHLurrr-YVSs8scVhSMTRGevj3ix29gbokhMLYbLPgPKaPNHDEF2VTNlbWlXDkFXb0JCa131yfOWk3M3ZNfLoH3ItByxjdJdybgRMczvLmCbMX1IXM")'
+                            }} />
+                        )}
+                    </div>
+                    <div className="hero-search__overlay" />
+                    <div className="hero-search__content">
+                        <div>
+                            <h1 className="hero-search__title">Find the right gear for your next build</h1>
+                            <p className="hero-search__subtitle">Industrial-grade components for makers, engineers, and prototypers.</p>
                         </div>
-                        <div className={`hero-search__overlay ${heroContentHidden ? 'hero-search__overlay--hidden' : ''}`} />
-                        <div className={`hero-search__content ${heroContentHidden ? 'hero-search__content--hidden' : ''}`}>
-                            <div>
-                                <h1 className="hero-search__title">
-                                    Find the right gear for your next build
-                                </h1>
-                                <p className="hero-search__subtitle">
-                                    Industrial-grade components for makers, engineers, and prototypers.
-                                </p>
-                            </div>
+                        <div className="hero-quick-shop">
+                            <Link to="/products?type=MODULE" className="hero-quick-shop__card">
+                                <span className="material-symbols-outlined">memory</span>
+                                <span className="hero-quick-shop__label">Modules</span>
+                            </Link>
+                            <Link to="/products?type=KIT" className="hero-quick-shop__card">
+                                <span className="material-symbols-outlined">inventory_2</span>
+                                <span className="hero-quick-shop__label">Kits</span>
+                            </Link>
+                            <Link to="/products?type=COMPONENT" className="hero-quick-shop__card">
+                                <span className="material-symbols-outlined">settings_input_component</span>
+                                <span className="hero-quick-shop__label">Components</span>
+                            </Link>
+                        </div>
+                        <div className="hero-cta-row">
+                            <Link to="/products" className="hero-cta hero-cta--primary">
+                                <span className="material-symbols-outlined">storefront</span>
+                                Shop All Products
+                            </Link>
+                            <Link to="/store" className="hero-cta hero-cta--secondary">
+                                <span className="material-symbols-outlined">location_on</span>
+                                Find Our Store
+                            </Link>
+                        </div>
+                        <div className="hero-search__popular">
+                            <span>Trending:</span>
+                            <Link className="hero-search__popular-link" to="/products?search=ESP32">ESP32</Link>
+                            <Link className="hero-search__popular-link" to="/products?search=Raspberry">Raspberry Pi</Link>
+                            <Link className="hero-search__popular-link" to="/products?search=Motor">Stepper Motors</Link>
+                        </div>
+                    </div>
+                </section>
 
-                            <div className="hero-search__bar">
-                                <div className="hero-search__icon">
-                                    <span className="material-symbols-outlined">search</span>
+                {/* ===== 2. WHY STEM GEAR ===== */}
+                <section className="why-section" id="about">
+                    <div className="why-section__grid">
+                        {whyStemGear.map((item, i) => (
+                            <div key={i} className="why-card reveal-item">
+                                <div className="why-card__icon">
+                                    <span className="material-symbols-outlined">{item.icon}</span>
                                 </div>
-                                <input
-                                    className="hero-search__input"
-                                    placeholder="Search by SKU, Name, or Component Type..."
-                                    type="text"
-                                />
-                                <div className="hero-search__select-wrapper">
-                                    <select className="hero-search__select">
-                                        <option>All Categories</option>
-                                        <option>Sensors</option>
-                                        <option>Boards</option>
-                                        <option>Power</option>
-                                    </select>
-                                </div>
-                                <button className="hero-search__button">
-                                    Search
-                                </button>
+                                <h3 className="why-card__title">{item.title}</h3>
+                                <p className="why-card__desc">{item.description}</p>
                             </div>
+                        ))}
+                    </div>
+                </section>
 
-                            <div className="hero-search__popular">
-                                <span>Popular:</span>
-                                <a className="hero-search__popular-link" href="#">ESP32</a>
-                                <a className="hero-search__popular-link" href="#">Raspberry Pi 5</a>
-                                <a className="hero-search__popular-link" href="#">Stepper Motors</a>
+                {/* ===== 3. HOW IT WORKS ===== */}
+                <section className="how-section">
+                    <h2 className="how-section__title">How It Works</h2>
+                    <div className="how-section__steps">
+                        {howItWorks.map((step, i) => (
+                            <div key={i} className="how-step reveal-item">
+                                <div className="how-step__number">{i + 1}</div>
+                                <span className="material-symbols-outlined how-step__icon">{step.icon}</span>
+                                <h3 className="how-step__title">{step.title}</h3>
+                                <p className="how-step__desc">{step.description}</p>
+                                {i < howItWorks.length - 1 && <div className="how-step__connector" />}
                             </div>
-                        </div>
-                    </section>
+                        ))}
+                    </div>
+                </section>
 
-                    {/* Category Grid */}
-                    <section>
-                        <div className="section-header">
-                            <h2 className="section-header__title">
-                                <span className="material-symbols-outlined">category</span>
-                                Browse by Category
-                            </h2>
-                            <a className="section-header__link" href="#">View All Categories</a>
-                        </div>
-                        <div className="category-grid">
-                            {categories.map((category, index) => (
-                                <a key={index} className="category-card" href="#">
+                {/* ===== 4. CATEGORIES (FROM API) ===== */}
+                <section>
+                    <div className="section-header">
+                        <h2 className="section-header__title">
+                            <span className="material-symbols-outlined">category</span>
+                            Browse by Category
+                        </h2>
+                        <Link to="/products" className="section-header__link">View All Categories</Link>
+                    </div>
+                    <div className="category-grid">
+                        {categories.length > 0 ? categories.map((cat) => {
+                            const catImage = CATEGORY_IMAGES[cat.name.toLowerCase()];
+                            return (
+                                <Link key={cat.categoryId} className="category-card reveal-item" to={`/products?categoryId=${cat.categoryId}`}>
                                     <div className="category-card__image-wrapper">
-                                        <img
-                                            className="category-card__image"
-                                            alt={category.alt}
-                                            src={category.image}
-                                        />
+                                        {catImage ? (
+                                            <img className="category-card__real-image" src={catImage} alt={cat.name} />
+                                        ) : (
+                                            <span className="material-symbols-outlined category-card__icon-large">
+                                                {getCategoryIcon(cat.name)}
+                                            </span>
+                                        )}
+                                        <div className="category-card__overlay" />
                                     </div>
-                                    <span className="category-card__name">{category.name}</span>
-                                </a>
-                            ))}
-                        </div>
-                    </section>
+                                    <span className="category-card__name">{cat.name}</span>
+                                    <span className="category-card__count">{cat.productCount} products</span>
+                                </Link>
+                            );
+                        }) : (
+                            Array.from({ length: 6 }).map((_, i) => (
+                                <div key={i} className="category-card category-card--skeleton">
+                                    <div className="skeleton-box" style={{ width: '100%', aspectRatio: '1', borderRadius: '0.5rem' }} />
+                                    <div className="skeleton-box" style={{ width: '60%', height: '1rem', borderRadius: '0.25rem' }} />
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </section>
 
-                    {/* Flash Deals */}
-                    <section className="flash-deals">
-                        <div className="flash-deals__header">
-                            <div className="flash-deals__title-wrapper">
-                                <div className="flash-deals__icon">
-                                    <span className="material-symbols-outlined">flash_on</span>
-                                </div>
-                                <div>
-                                    <h2 className="flash-deals__title">Flash Deals</h2>
-                                    <p className="flash-deals__subtitle">Limited quantity offers ending soon</p>
-                                </div>
+                {/* ===== 5. BRAND LOGOS (FROM API) ===== */}
+                <section className="brands-strip">
+                    <p className="brands-strip__label">Trusted components from world-leading manufacturers</p>
+                    <div className="brands-strip__marquee">
+                        <div className="brands-strip__track">
+                            {(() => {
+                                const brandList = brands.length > 0 ? brands : fallbackBrands;
+                                return [...brandList, ...brandList, ...brandList, ...brandList].map((brand, i) => (
+                                    <div key={i} className="brands-strip__item">
+                                        <span className="material-symbols-outlined">verified</span>
+                                        <span>{brand.name}</span>
+                                    </div>
+                                ));
+                            })()}
+                        </div>
+                    </div>
+                </section>
+
+                {/* ===== 6. FEATURED PRODUCTS (FROM API) ===== */}
+                <section className="flash-deals" id="deals">
+                    <div className="flash-deals__header">
+                        <div className="flash-deals__title-wrapper">
+                            <div className="flash-deals__icon">
+                                <span className="material-symbols-outlined">star</span>
                             </div>
-                            <div className="flash-deals__timer">
-                                <span className="flash-deals__timer-label">Ends in:</span>
-                                <span className="flash-deals__timer-value">04:22:10</span>
+                            <div>
+                                <h2 className="flash-deals__title">Featured Products</h2>
+                                <p className="flash-deals__subtitle">Handpicked components for your next project</p>
                             </div>
                         </div>
-                        <div className="flash-deals__grid">
-                            {flashDeals.map((product, index) => (
-                                <div key={index} className="product-card">
+                        <Link to="/products" className="section-header__link">View All</Link>
+                    </div>
+                    <div className="flash-deals__grid">
+                        {featuredProducts.length > 0 ? featuredProducts.map((product) => {
+                            const stockPercent = product.stockQuantity > 0 ? Math.min((product.stockQuantity / 100) * 100, 100) : 0;
+                            return (
+                                <Link key={product.productId} className="product-card reveal-item" to={`/products/${product.productId}`} style={{ textDecoration: 'none' }}>
                                     <div className="product-card__image-wrapper">
-                                        <span className="product-card__badge">{product.discount}</span>
-                                        <img
-                                            className="product-card__image"
-                                            alt={product.alt}
-                                            src={product.image}
-                                        />
+                                        <span className="product-card__badge">{product.productType}</span>
+                                        {product.primaryImage ? (
+                                            <img className="product-card__image" alt={product.name} src={product.primaryImage} />
+                                        ) : (
+                                            <div className="product-card__image product-card__image--placeholder">
+                                                <span className="material-symbols-outlined">image</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="product-card__content">
                                         <h3 className="product-card__title">{product.name}</h3>
-                                        <p className="product-card__sku">{product.sku}</p>
+                                        <p className="product-card__sku">SKU: {product.sku}</p>
                                         <div className="product-card__pricing">
                                             <div className="product-card__price-wrapper">
-                                                <span className="product-card__old-price">{product.oldPrice}</span>
-                                                <div className="product-card__price">{product.price}</div>
+                                                <div className="product-card__price">{formatPrice(product.price)}</div>
                                             </div>
-                                            <button className="product-card__add-btn">
-                                                <span className="material-symbols-outlined">add</span>
+                                            <button className="product-card__add-btn" title="Add to Cart" onClick={async (e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                if (!user) { navigate('/login', { state: { message: 'Please log in to add items to cart' } }); return; }
+                                                const ok = await addToCart(product.productId, 1);
+                                                if (ok) toast.success(`${product.name} added to cart!`);
+                                                else toast.error('Failed to add to cart');
+                                            }}>
+                                                <span className="material-symbols-outlined">add_shopping_cart</span>
                                             </button>
                                         </div>
                                     </div>
                                     <div className="product-card__stock">
-                                        <div
-                                            className="product-card__stock-bar"
-                                            style={{ width: `${product.stockPercent}%` }}
-                                        />
+                                        <div className="product-card__stock-bar" style={{ width: `${stockPercent}%` }} />
                                     </div>
-                                    <p className="product-card__stock-text">{product.stockLeft} left in stock</p>
+                                    <p className="product-card__stock-text">{product.stockQuantity} left in stock</p>
+                                </Link>
+                            );
+                        }) : (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="product-card product-card--skeleton">
+                                    <div className="skeleton-box" style={{ width: '100%', height: '10rem', borderRadius: '0.375rem' }} />
+                                    <div className="skeleton-box" style={{ width: '80%', height: '1rem', marginTop: '0.5rem' }} />
+                                    <div className="skeleton-box" style={{ width: '40%', height: '0.75rem', marginTop: '0.25rem' }} />
+                                    <div className="skeleton-box" style={{ width: '50%', height: '1.25rem', marginTop: '0.5rem' }} />
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </section>
+
+                {/* ===== 7. BEST SELLERS (FROM API) ===== */}
+                <section>
+                    <div className="section-header">
+                        <h2 className="section-header__title">
+                            <span className="material-symbols-outlined">trending_up</span>
+                            Best Sellers
+                        </h2>
+                        <Link to="/products" className="section-header__link">View All</Link>
+                    </div>
+                    <div className="bestsellers-grid">
+                        {bestSellers.length > 0 ? bestSellers.map((p) => (
+                            <Link key={p.productId} className="bestseller-card reveal-item" to={`/products/${p.productId}`} style={{ textDecoration: 'none' }}>
+                                <div className="bestseller-card__img">
+                                    {p.primaryImage ? (
+                                        <img src={p.primaryImage} alt={p.name} />
+                                    ) : (
+                                        <div className="bestseller-card__placeholder">
+                                            <span className="material-symbols-outlined">image</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="bestseller-card__info">
+                                    <h3>{p.name}</h3>
+                                    <div className="bestseller-card__rating">
+                                        {'★'.repeat(4)}{'☆'.repeat(1)}
+                                        <span>({p.brand.name})</span>
+                                    </div>
+                                    <div className="bestseller-card__bottom">
+                                        <span className="bestseller-card__price">{formatPrice(p.price)}</span>
+                                        <span className={`bestseller-card__stock-badge ${p.inStock ? '' : 'out-of-stock'}`}>
+                                            {p.inStock ? 'In Stock' : 'Out of Stock'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </Link>
+                        )) : (
+                            Array.from({ length: 4 }).map((_, i) => (
+                                <div key={i} className="bestseller-card bestseller-card--skeleton">
+                                    <div className="skeleton-box" style={{ width: '100%', aspectRatio: '1' }} />
+                                    <div style={{ padding: '1rem' }}>
+                                        <div className="skeleton-box" style={{ width: '80%', height: '1rem' }} />
+                                        <div className="skeleton-box" style={{ width: '40%', height: '0.75rem', marginTop: '0.5rem' }} />
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </section>
+
+                {/* ===== 8. NEW ARRIVALS (FROM API) ===== */}
+                <section>
+                    <div className="section-header">
+                        <h2 className="section-header__title">New Arrivals</h2>
+                        <div className="section-header__controls">
+                            <button className="section-header__control-btn" onClick={() => scrollArrivals(-1)}>
+                                <span className="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button className="section-header__control-btn" onClick={() => scrollArrivals(1)}>
+                                <span className="material-symbols-outlined">chevron_right</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="new-arrivals-scroll" ref={arrivalsRef}>
+                        {newArrivals.length > 0 ? newArrivals.map((product) => (
+                            <article key={product.productId} className="arrival-card">
+                                <div className="arrival-card__image">
+                                    {product.primaryImage ? (
+                                        <img src={product.primaryImage} alt={product.name} />
+                                    ) : (
+                                        <div className="arrival-card__placeholder">
+                                            <span className="material-symbols-outlined">image</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="arrival-card__content">
+                                    <div>
+                                        <div className="arrival-card__header">
+                                            <h3 className="arrival-card__title">{product.name}</h3>
+                                            <span className="arrival-card__badge">{product.productType}</span>
+                                        </div>
+                                        <p className="arrival-card__description">
+                                            {product.brand.name} • {product.categories.map(c => c.name).join(', ')}
+                                        </p>
+                                    </div>
+                                    <div className="arrival-card__footer">
+                                        <span className="arrival-card__price">{formatPrice(product.price)}</span>
+                                        <Link to={`/products/${product.productId}`} className="arrival-card__link">View Product</Link>
+                                    </div>
+                                </div>
+                            </article>
+                        )) : (
+                            Array.from({ length: 3 }).map((_, i) => (
+                                <div key={i} className="arrival-card arrival-card--skeleton" style={{ minWidth: 320 }}>
+                                    <div className="skeleton-box" style={{ width: '6rem', height: '6rem', borderRadius: '0.375rem' }} />
+                                    <div style={{ flex: 1 }}>
+                                        <div className="skeleton-box" style={{ width: '80%', height: '1rem' }} />
+                                        <div className="skeleton-box" style={{ width: '60%', height: '0.75rem', marginTop: '0.25rem' }} />
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </section>
+
+                {/* ===== 9. MARKET STATS ===== */}
+                <section className="stats-section" ref={statsRef}>
+                    <div className="stats-section__bg" />
+                    <div className="stats-section__content">
+                        <h2 className="stats-section__title">Trusted by Makers Worldwide</h2>
+                        <p className="stats-section__subtitle">Join thousands of engineers, students, and hobbyists who trust STEM Gear</p>
+                        <div className="stats-grid">
+                            {marketStats.map((stat, i) => (
+                                <div key={i} className="stat-item">
+                                    <span className="material-symbols-outlined stat-item__icon">{stat.icon}</span>
+                                    <div className="stat-item__number">
+                                        <CountUp target={stat.value} suffix={stat.suffix} animate={statsVisible} />
+                                    </div>
+                                    <span className="stat-item__label">{stat.label}</span>
                                 </div>
                             ))}
                         </div>
-                    </section>
+                    </div>
+                </section>
 
-                    {/* New Arrivals */}
-                    <section>
-                        <div className="section-header">
-                            <h2 className="section-header__title">New Arrivals</h2>
-                            <div className="section-header__controls">
-                                <button className="section-header__control-btn">
-                                    <span className="material-symbols-outlined">chevron_left</span>
-                                </button>
-                                <button className="section-header__control-btn">
-                                    <span className="material-symbols-outlined">chevron_right</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div className="new-arrivals-grid">
-                            {newArrivals.map((product, index) => (
-                                <article key={index} className="arrival-card">
-                                    <div className="arrival-card__image">
-                                        <img src={product.image} alt={product.alt} />
+                {/* ===== 10. TESTIMONIALS ===== */}
+                <section className="testimonials-section">
+                    <h2 className="testimonials-section__title">What Our Makers Say</h2>
+                    <div className="testimonials-carousel">
+                        {testimonials.map((t, i) => (
+                            <div key={i} className={`testimonial-card ${i === activeTestimonial ? 'active' : ''}`}>
+                                <div className="testimonial-card__stars">{'★'.repeat(t.rating)}</div>
+                                <p className="testimonial-card__quote">"{t.quote}"</p>
+                                <div className="testimonial-card__author">
+                                    <div className="testimonial-card__avatar">{t.name.charAt(0)}</div>
+                                    <div>
+                                        <strong>{t.name}</strong>
+                                        <span>{t.role}</span>
                                     </div>
-                                    <div className="arrival-card__content">
-                                        <div>
-                                            <div className="arrival-card__header">
-                                                <h3 className="arrival-card__title">{product.name}</h3>
-                                                <span className="arrival-card__badge">{product.badge}</span>
-                                            </div>
-                                            <p className="arrival-card__description">{product.description}</p>
-                                        </div>
-                                        <div className="arrival-card__footer">
-                                            <span className="arrival-card__price">{product.price}</span>
-                                            <button className="arrival-card__link">View Datasheet</button>
-                                        </div>
-                                    </div>
-                                </article>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* Newsletter */}
-                    <section className="newsletter">
-                        <div
-                            className="newsletter__background"
-                            style={{
-                                backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuATUj_7PJ8BtLkthfG_jLxDprnfTDFF_t_qafLcRhSqbnlVO-GHF0E09vXb3Ceboo1smnacTUnWl0-Mi6T5KzJfqx4KQetyb0g9mR61Q9Vc7D3qlKoQjhRLq-isgEvJ60N30uNBdEP6yop10thz1XkrA6C-WpNTNv0cJRozrnhvvC17yZngjGv55FKt5Zm62wqhPtKhvfCueZlIaDvZYcb_L6jbOMDFHKcPt-zNZJ7a1kC_jAv5vEJdYOKegi8qan7gSGLCG7LCjFw")'
-                            }}
-                        />
-                        <div className="newsletter__content">
-                            <div className="newsletter__text">
-                                <h2 className="newsletter__title">Stay in the loop</h2>
-                                <p className="newsletter__subtitle">
-                                    Get weekly updates on new arrivals, engineering tutorials, and exclusive component datasheets.
-                                </p>
+                                </div>
                             </div>
-                            <div className="newsletter__form">
-                                <input
-                                    className="newsletter__input"
-                                    placeholder="Enter your email"
-                                    type="email"
-                                />
-                                <button className="newsletter__button">
-                                    Subscribe
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-                </div>
+                        ))}
+                    </div>
+                    <div className="testimonials-dots">
+                        {testimonials.map((_, i) => (
+                            <button key={i} className={`dot ${i === activeTestimonial ? 'active' : ''}`} onClick={() => setActiveTestimonial(i)} />
+                        ))}
+                    </div>
+                </section>
             </main>
             <Footer />
+
+            <style>{`
+                @keyframes slideDown {
+                    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+                }
+                .success-toast {
+                    position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 1000;
+                    padding: 16px 24px; background: #16A34A; color: white; border-radius: 8px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; align-items: center;
+                    gap: 10px; font-size: 14px; font-weight: 500; animation: slideDown 0.3s ease-out;
+                }
+            `}</style>
         </div>
     );
 };
 
-// Sample data
-const categories = [
-    {
-        name: 'Sensors',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA6EM81M0H5g0Z9_ggTVm2AtikZIhWbvF60qLhjI1MtzJyza7ZoYpMOP8DppfmVAqSgEAIxVaB_Y_m3luAZ3atd9SO3wjgaqOFlPBdc9_iLZtOS8NvOyjSuweP-IeP2IliKB0lUDKCItyoFOjZPQEn5ZkRt-gzagBVMlMX8kQ3izVwRzzmuw1KvHoCJDFq3nt9rlSVY-j9g_LC44RWiQZl9yzn4-s1Ex77fLqpn7oQ1uinjh5x7eiRvUQrbqCcvI8pFfc_dPUxMfpk',
-        alt: 'Electronic sensor component'
-    },
-    {
-        name: 'Dev Boards',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCrepVnx3ENWfVScfVRYfFar_uEH4RTkcJryL5daiQ12HlckueoNliyvb0nB_S2eYr82o_JIEsvhXvWHgugEsT3Mf1rJO_cd3pZbwEv_EtpbzUkjkk7EFrDrZlNviuAfo_XlKz3ydhEjoqZrRSZlfwhdxtTRWPc4-mkH5Mo-MD88WE3TZB4sZIGsNEgmSfOK3COhcE7LszC0e-P-WAbW9QYTLU8JLhqAsftZ_E8d0jQfSVK6UU9HnbyyTPIIOrJxkGMr8UhV2op6KE',
-        alt: 'Development board'
-    },
-    {
-        name: 'Power Modules',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYEJNESXMSgMVtQ94nmsYBKP0o3dVwLYKmp3Xsz9hjlL8NjyzhhE-ybWPc9roGPKCxYO1bPlcOQ7uHNMllVGY_BymGF0sWZQSVYfrRRkWJrpnT-7huiCiwTfsIVRFvP8BLaB2upyvuurIwR3eK6ULAcyyhi_sRseefWiySpe2YJZ2UTs0xr5Wmcco0DzU0NAseJPOuo1QdqqPFZLuPIFoTVugtvEzw4nFuodUu01Nh7SaIiFrA_50tyEGHWaqnLQT6bQzos4xQuO8',
-        alt: 'Power module component'
-    },
-    {
-        name: 'Prototyping',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3REXYs3tVdJ4Y7M3FVMyhlfnF0j3Dh0KSxVCQJvFC5vxZwMqaGS7KfT4qc_n339uKQX-mcDR7BQ-1nd3f3R8h5-NCU4vS-SqBspGTo3_BtESFesxakQFe27_Av3J0AOVkB04QJ6eaEDiDXAHes-oxV7gi7fcq9S-4YdhLI2t0K2kpy6tWkL-FT9SMxv0P9YssUh7n2iB0VXkam2444bRBCk-XMW15-BOW1KNnQHepQLDJd42AYH7mYXqHKdB-m8LwW1JetQe7eaQ',
-        alt: 'Prototyping equipment'
-    },
-    {
-        name: 'Robotics',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDXWIgbmrCcjAxnxR0Rg5F5s9QzEYYmhaDEGBIXXNOFnv5adltkoL1mqrKqAJrMSFFn_uGBcDVTn0gw8jfnBAgfdLsAtTctu3fQIwqEjdGWSZW3uY8_VtnJPxOIACAKjFrXq4mFYCAmboWLkxTpAc3CVMI_DbqBrX_3WcB30mjJ8163jFuego1K_VDX27tkut2wb5YBTRN3Z-ZMFad00VLsrFB496lEpwHEa_9V-96AxAsV35dNpmvXUwwTXPMZVZbX_NsJIl25FpE',
-        alt: 'Robotics motor component'
-    },
-    {
-        name: 'Connectors',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBn_lKSUDpgzxxHV4ekfHioqsNUuc3TCzp8vyMvx8VS3szv3OOlIK7xgCO5JDX6RV5UEfive6pRLDHujt0tXEguUJ6ZsQZa7vn2JqJlivYCr8hnWY_4U9QhEm7L1UizOw6EkH5TbFdCIt685D41XiAFJ29U3N1KDnuVLNCRYckcvE64T_HPraMkEKfsqQ630lnXdpkSXs-LYWdYWAoPPXPc-CTw2Fdm0hufh57kGqHUQnz0ls7luapVxM8vVyg2rE8I9ARqawkl2iA',
-        alt: 'Connector ports'
-    }
+// ===== CountUp Component =====
+const CountUp = ({ target, suffix, animate }: { target: number; suffix: string; animate: boolean }) => {
+    const [value, setValue] = useState(0);
+    useEffect(() => {
+        if (!animate) return;
+        let start = 0;
+        const duration = 2000;
+        const step = target / (duration / 16);
+        const timer = setInterval(() => {
+            start += step;
+            if (start >= target) { start = target; clearInterval(timer); }
+            setValue(Math.floor(start));
+        }, 16);
+        return () => clearInterval(timer);
+    }, [animate, target]);
+    return <>{value.toLocaleString()}{suffix}</>;
+};
+
+// ===== STATIC DATA (sections that don't need API) =====
+const whyStemGear = [
+    { icon: 'verified', title: 'Industrial-Grade Quality', description: 'Components from top manufacturers, rigorously tested for reliability and performance.' },
+    { icon: 'local_shipping', title: 'Fast Shipping', description: 'Same-day dispatch for orders placed before 2PM. Free shipping on orders over $50.' },
+    { icon: 'shield', title: 'Warranty Included', description: 'All products backed by manufacturer warranty. Easy returns within 30 days.' },
+    { icon: 'support_agent', title: '24/7 Expert Support', description: 'Technical support from real engineers. Chat, email, or phone — we\'re here to help.' },
 ];
 
-const flashDeals = [
-    {
-        name: 'Raspberry Pi 5 Starter Kit - 8GB RAM',
-        sku: 'SKU: RPI-5-8GB-KIT',
-        discount: '-20%',
-        oldPrice: '$120.00',
-        price: '$96.00',
-        stockPercent: 75,
-        stockLeft: 12,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDwes7NFji-vtygmyQov5GNKE_wgyINklHcP7mKBddNX3uMfRzUTnbzDuaMlGKy7bzratm_qjMmVjGJ5EQkXPU0wm-fVrqN3VgGaqxOjjm4qsyJq_mW_Chwe9vDm_0eTlwBJ7nt_yrxhssQY2ZOO9wcnVCFTf6q6eX-uy4O1wOOTuzIFitMPVSRvTdV8H7Qd35Qx1mkpCz6wARMVrsQoZAz87y4NsYkLERRmGLy_wGFGTapMlwd9LavhjtIY4iddLsKzF2TeMgvBzM',
-        alt: 'Raspberry Pi computer board'
-    },
-    {
-        name: 'Arduino Uno R3 Compatible Board',
-        sku: 'SKU: ARD-UNO-R3-CLONE',
-        discount: '-15%',
-        oldPrice: '$24.00',
-        price: '$20.40',
-        stockPercent: 45,
-        stockLeft: 45,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBvlm5lzxMz39h6rVEajKu3yASgDDFWl6GjisEfuvRglbxz0_R8kptGKYJ34foUhg9wUTAyuvqdnTZzRiMWXVexgb2Ek_1i-lP0JyUY7XOKHIJclLjE9vz5ffy4qXr0kn0nnT5-X_kTs0IlvSONl1SA-mcy7GlsgBIATvykjBZ-uza5Z--walgZpUVidOtZCXLgB567rWuMcjbA69XM6QP5EIXUfDp2MCP_LtBIdYfcoSLKcEzLkrT4h9D5NcI8GKE7Exg6uM33_ys',
-        alt: 'Arduino compatible microcontroller board'
-    },
-    {
-        name: 'Jumper Wire Kit - 120pcs',
-        sku: 'SKU: WIRE-JUMP-120',
-        discount: '-30%',
-        oldPrice: '$8.50',
-        price: '$5.95',
-        stockPercent: 90,
-        stockLeft: 5,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAOATWWVCkO6jS91xAdnFpBcoANcGLkmO9v0SvBnKABppUhlNB_FENIPW27aBm_CBt7pSMfE8oT4N_EppPqqqTgIJL_meXbuil1M4-otHifSKGpZ05WFqXgzHejQgy5XlDkYi5a2aAizTWrIrobXtUp1n91ncJsXy4xCVBfS-ymFExiMG9CmrxN69-q86FaLU_3qqDlxVFptTsneIG3CxKYhgxEUA6TEz2SMF24hSHf1Sqrrk-5QSryLPTkqEcJOo8FahbDZRR2Qro',
-        alt: 'Bundle of multicolored jumper wires'
-    },
-    {
-        name: 'Pro Soldering Station 60W',
-        sku: 'SKU: TOOL-SOLD-60W',
-        discount: '-10%',
-        oldPrice: '$45.00',
-        price: '$40.50',
-        stockPercent: 20,
-        stockLeft: 80,
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBOFEgLUThffqWl3RHpSgEcqQYE_s79VCOjv-lPpabHeMQsPenNPOMxAo3ZvumMSVgDf4TLBVaTnlTdz4tncCJr8L1DaACQmmQRL97hxXQ2dGsspyflY2zIfOO1ZDwpG9xYPL25JCl5wPJLWAiRDuP0wAtmmmqnrJgSyeiCkDCF2okF-SKqDk2VoKS4xRsfU9vhiTHx4WItYyutxLT_xK50nnjkjlUixeUq038hfRZmzUjItsFQHhJepWFXzb070cEggsFnk2jVGZ8',
-        alt: 'Soldering iron station'
-    }
+const howItWorks = [
+    { icon: 'search', title: 'Browse', description: 'Explore 500+ components across 50+ categories' },
+    { icon: 'shopping_cart', title: 'Order', description: 'Secure checkout with multiple payment options' },
+    { icon: 'rocket_launch', title: 'Build', description: 'Fast shipping — start building within days' },
 ];
 
-const newArrivals = [
-    {
-        name: 'ESP32-S3-WROOM-1',
-        badge: 'WiFi+BT',
-        description: 'Powerful generic Wi-Fi + Bluetooth LE MCU module that targets a wide variety of applications.',
-        price: '$3.95',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD8i7LK6KGuF29B8oi8YLTzYWKU9Lg9QsRNhSgcQjxueZbKdP4JEeU8TJ7fgq0YIgTS9VxMXAzAAqSyvYimQMMFIHF5csSzotSC_Ztr_tFZDlmUSc03yBkgM4uYL6x95yQqtTNe_p-sMdk-50BjUN1jlo2V3A7pOU3qzfKaqLmTgN6gWBZzkO2zcVSDhOC8tYyeitnDRlVXX4Esqf2ILP0DpcjRUWGMyfakgS3g94h9z4-vJIMrZyw4IdHY8vAmFuQj0E-70bFLxBA',
-        alt: 'Small ESP32 wireless module'
-    },
-    {
-        name: 'TF-Luna LiDAR Module',
-        badge: 'ToF',
-        description: 'Single-point ranging LiDAR, based on ToF principle. 8m range, high stability.',
-        price: '$22.50',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBhWkLDvxiLsHjmfMO7BxUE5sbxxwR6TjbOumqmrnC1k1xQNVX-2lwzsjcLuy8hiF5x9V5R33tjKbie5PV6IafLwgj20gTjfYfjzN5WcAA7S-G2ae6NCMI1aNj2Xz7y3O74B9NZ4PtKpIY1Atddap4OWLOGjvhNo2AU94nUD6xNaLf5k59FQX8SouFc9EeC8_SYSgWMH9InJHxioFiD59IW7LtRl1FqHdkmLySobPdk5mqFlhcIZFEwkda3UXypwWMnPzllh5Mgl_M',
-        alt: 'LiDAR sensor module'
-    },
-    {
-        name: '2.9" E-Ink Display',
-        badge: 'SPI',
-        description: 'Three-color (Red, Black, White) e-paper display module for low power projects.',
-        price: '$18.90',
-        image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCS1BtyqsmtZ3FwmG4SBFOAVf1br-dQoTiYC5FswA_tSbKunscu81xZ6TTKtvG38XPrh_tg9JI9b4njtmkwcydctAfuCyCtbbWsV5YnmmmdXyTchIa9Vc375gWz8-cHgmNjXK-TvvPMd8ZeqKNuvKF7ge0xCKsYTnATahwzM3d43YSyinlmbQMrgABcjBc13frLStCJ5gJXY4FPQz5ZVa2FNnWeJt79gzNtEJqZ2KgIOGrXXTUiVryYyjwB7IDlRQMTKq3jVAQg4ro',
-        alt: 'E-Ink display panel'
-    }
+const fallbackBrands = [
+    { name: 'Arduino', brandId: 0, productCount: 0 },
+    { name: 'Raspberry Pi', brandId: 0, productCount: 0 },
+    { name: 'Espressif', brandId: 0, productCount: 0 },
+    { name: 'STMicro', brandId: 0, productCount: 0 },
+    { name: 'Texas Instruments', brandId: 0, productCount: 0 },
+    { name: 'Adafruit', brandId: 0, productCount: 0 },
+    { name: 'Arduino', brandId: 0, productCount: 0 },
+    { name: 'Raspberry Pi', brandId: 0, productCount: 0 },
+    { name: 'Espressif', brandId: 0, productCount: 0 },
+    { name: 'STMicro', brandId: 0, productCount: 0 },
+    { name: 'Texas Instruments', brandId: 0, productCount: 0 },
+    { name: 'Adafruit', brandId: 0, productCount: 0 },
+];
+
+const marketStats = [
+    { icon: 'inventory_2', value: 500, suffix: '+', label: 'Products Available' },
+    { icon: 'storefront', value: 50, suffix: '+', label: 'Trusted Brands' },
+    { icon: 'groups', value: 10000, suffix: '+', label: 'Happy Makers' },
+    { icon: 'star', value: 4.8, suffix: '★', label: 'Average Rating' },
+];
+
+const testimonials = [
+    { name: 'Alex Nguyen', role: 'IoT Engineer', rating: 5, quote: 'STEM Gear has become my go-to supplier. The quality is consistent and shipping is blazing fast. Highly recommended!' },
+    { name: 'Sarah Chen', role: 'Maker & Educator', rating: 5, quote: 'As a STEM educator, I need reliable components for my students. STEM Gear never disappoints — great prices and excellent support.' },
+    { name: 'David Park', role: 'Robotics Student', rating: 5, quote: 'The component selection is amazing. I built my entire senior project robot using parts from STEM Gear. 10/10!' },
 ];
 
 export default HomePage;

@@ -140,6 +140,87 @@ export const deleteProductImage = async (productId: number, imageId: number): Pr
     }
 };
 
+// ===== KIT Bundle Management =====
+
+interface CreateKitRequest {
+    name: string;
+    sku: string;
+    description?: string;
+    price: number;
+    brandId: number;
+    warrantyPolicyId?: number;
+    categoryIds: number[];
+    components: { productId: number; quantity: number }[];
+}
+
+/**
+ * Create KIT product with components in single atomic transaction
+ * POST /api/product/kit
+ */
+export const createKit = async (data: CreateKitRequest): Promise<unknown> => {
+    try {
+        const response = await api.post<AdminApiResponse<unknown>>('/product/kit', data);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to create kit');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+/**
+ * Add a product to an existing KIT bundle
+ * POST /api/product/{kitId}/bundle
+ */
+export const addProductToBundle = async (
+    kitId: number,
+    childProductId: number,
+    quantity: number
+): Promise<unknown> => {
+    try {
+        const response = await api.post<AdminApiResponse<unknown>>(
+            `/product/${kitId}/bundle`,
+            { childProductId, quantity }
+        );
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to add product to kit');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+/**
+ * Remove a product from KIT bundle
+ * DELETE /api/product/{kitId}/bundle/{childProductId}
+ */
+export const removeProductFromBundle = async (
+    kitId: number,
+    childProductId: number
+): Promise<void> => {
+    try {
+        const response = await api.delete<AdminApiResponse<unknown>>(
+            `/product/${kitId}/bundle/${childProductId}`
+        );
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to remove product from kit');
+        }
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
 // ===== Orders =====
 
 export const getAdminOrders = async (
@@ -352,4 +433,21 @@ export const deleteReview = async (reviewId: number): Promise<void> => {
         if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
         throw err;
     }
+};
+
+// ===== Warranty Policies =====
+
+export interface WarrantyPolicyOption {
+    policyId: number;
+    policyName: string;
+    durationMonths: number;
+    description: string | null;
+}
+
+export const getWarrantyPolicies = async (): Promise<WarrantyPolicyOption[]> => {
+    const response = await api.get<AdminApiResponse<WarrantyPolicyOption[]>>('/warranty/policies');
+    if (!response.data.success || !response.data.data) {
+        return [];
+    }
+    return response.data.data;
 };

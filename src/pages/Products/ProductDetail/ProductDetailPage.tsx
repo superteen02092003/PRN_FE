@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '@/components/common/Header/Header';
 import Footer from '@/components/common/Footer/Footer';
 import {
@@ -109,10 +109,24 @@ const ProductDetailPage = () => {
                 <Header />
                 <main className="product-detail-page">
                     <div className="container">
-                        <div className="loading-container">
-                            <div className="loading-spinner" />
-                            <p>Loading product...</p>
+                        <div className="breadcrumb">
+                            <div className="skeleton-box" style={{ width: '200px', height: '1rem' }} />
                         </div>
+                        <section className="product-section">
+                            <div className="product-grid">
+                                <div className="product-images">
+                                    <div className="skeleton-box" style={{ width: '100%', height: '400px', borderRadius: '12px' }} />
+                                </div>
+                                <div className="product-details">
+                                    <div className="skeleton-box" style={{ width: '60px', height: '24px', borderRadius: '4px' }} />
+                                    <div className="skeleton-box" style={{ width: '85%', height: '2rem', marginTop: '0.5rem' }} />
+                                    <div className="skeleton-box" style={{ width: '40%', height: '1rem', marginTop: '0.5rem' }} />
+                                    <div className="skeleton-box" style={{ width: '30%', height: '2rem', marginTop: '1rem' }} />
+                                    <div className="skeleton-box" style={{ width: '50%', height: '1rem', marginTop: '0.5rem' }} />
+                                    <div className="skeleton-box" style={{ width: '100%', height: '48px', borderRadius: '8px', marginTop: '1.5rem' }} />
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </main>
                 <Footer />
@@ -157,10 +171,10 @@ const ProductDetailPage = () => {
                 <div className="container">
                     {/* Breadcrumb */}
                     <nav className="breadcrumb">
-                        <a href="/">Home</a>
-                        <span>/</span>
-                        <a href="/products">Products</a>
-                        <span>/</span>
+                        <Link to="/">Home</Link>
+                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</span>
+                        <Link to="/products">Products</Link>
+                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>chevron_right</span>
                         <span className="current">{product.name}</span>
                     </nav>
 
@@ -201,6 +215,22 @@ const ProductDetailPage = () => {
                                     onLoginClick={handleLoginClick}
                                     loading={addToCartLoading}
                                 />
+
+                                {/* Trust Badges */}
+                                <div className="trust-badges">
+                                    <div className="trust-badge">
+                                        <span className="material-symbols-outlined">local_shipping</span>
+                                        <span>Free shipping over $50</span>
+                                    </div>
+                                    <div className="trust-badge">
+                                        <span className="material-symbols-outlined">undo</span>
+                                        <span>30-day returns</span>
+                                    </div>
+                                    <div className="trust-badge">
+                                        <span className="material-symbols-outlined">lock</span>
+                                        <span>Secure payment</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </section>

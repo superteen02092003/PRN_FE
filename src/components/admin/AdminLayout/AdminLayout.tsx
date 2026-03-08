@@ -15,6 +15,8 @@ const menuItems = [
     { icon: 'label', label: 'Brands', path: '/admin/brands' },
     { icon: 'category', label: 'Categories', path: '/admin/categories' },
     { icon: 'reviews', label: 'Reviews', path: '/admin/reviews' },
+    { icon: 'shield', label: 'Warranty Claims', path: '/admin/warranty-claims' },
+    { icon: 'chat', label: 'Chat', path: '/admin/chat' },
 ];
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
