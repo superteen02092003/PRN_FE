@@ -71,9 +71,31 @@ const OrderHistoryPage = () => {
                 {/* Order List */}
                 <div className="order-cards-list">
                     {isLoading ? (
-                        <div className="order-loading">
-                            <div className="order-loading-spinner" />
-                            <p style={{ color: '#64748b' }}>Loading orders...</p>
+                        <div className="order-cards-list">
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <div key={i} className="order-card order-card--skeleton">
+                                    <div className="order-card__body">
+                                        <div className="order-card__header">
+                                            <div>
+                                                <div className="skeleton-box" style={{ width: '120px', height: '1rem', marginBottom: '0.5rem' }} />
+                                                <div className="skeleton-box" style={{ width: '90px', height: '0.7rem' }} />
+                                            </div>
+                                            <div className="skeleton-box" style={{ width: '80px', height: '1.5rem', borderRadius: '9999px' }} />
+                                        </div>
+                                        <div className="order-card__content">
+                                            <div className="skeleton-box" style={{ width: '96px', height: '96px', borderRadius: '0.5rem', flexShrink: 0 }} />
+                                            <div className="order-card__info">
+                                                <div className="skeleton-box" style={{ width: '70%', height: '0.9rem', marginBottom: '0.5rem' }} />
+                                                <div className="skeleton-box" style={{ width: '40%', height: '0.7rem' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="order-card__footer">
+                                        <div className="skeleton-box" style={{ width: '100px', height: '1.1rem' }} />
+                                        <div className="skeleton-box" style={{ width: '80px', height: '2rem', borderRadius: '0.5rem' }} />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ) : error ? (
                         <div className="order-empty-state">
@@ -81,11 +103,15 @@ const OrderHistoryPage = () => {
                         </div>
                     ) : orders.length === 0 ? (
                         <div className="order-empty-state">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                            </svg>
-                            <p>You don't have any orders yet</p>
-                            <Link to="/products">Start Shopping →</Link>
+                            <div className="order-empty-icon">
+                                <span className="material-symbols-outlined">receipt_long</span>
+                            </div>
+                            <h3 className="order-empty-title">No orders yet</h3>
+                            <p className="order-empty-text">Start shopping to see your order history here.</p>
+                            <Link to="/products" className="order-empty-cta">
+                                <span className="material-symbols-outlined">storefront</span>
+                                Start Shopping
+                            </Link>
                         </div>
                     ) : (
                         orders.map((order) => (

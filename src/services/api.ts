@@ -25,9 +25,12 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Handle unauthorized
-            localStorage.removeItem('token');
-            window.location.href = '/login';
+            // Don't redirect on login/register failures - let the page handle the error
+            const url = error.config?.url || '';
+            if (!url.includes('/login') && !url.includes('/register')) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

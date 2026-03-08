@@ -66,6 +66,7 @@ export interface ProductFilterParams {
   pageNumber?: number;
   pageSize?: number;
   searchTerm?: string;
+  search?: string;
   brandId?: number;
   categoryId?: number;
   minPrice?: number;
@@ -115,6 +116,7 @@ export interface ProductDetailDto {
   inStock: boolean;
   createdAt: string;
   updatedAt: string;
+  bundleComponents?: BundleItemDto[];
 }
 
 // ===== Review Types =====

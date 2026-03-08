@@ -4,6 +4,7 @@ import { useOrderDetail } from '../../hooks/useOrders';
 import OrderTimeline from '../../components/order/OrderTimeline';
 import CancelOrderModal from '../../components/order/CancelOrderModal';
 import { redirectToSepayCheckout } from '../../services/paymentService';
+import { resolveImageUrl } from '@/utils/imageUrl';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import type { OrderStatus } from '../../types/order.types';
@@ -54,9 +55,45 @@ const OrderDetailPage = () => {
             <>
                 <Header />
                 <div className="order-page-wrapper">
-                    <div className="order-loading">
-                        <div className="order-loading-spinner" />
-                        <p style={{ color: '#64748b' }}>Loading order details...</p>
+                    {/* Skeleton breadcrumb */}
+                    <nav className="od-breadcrumb">
+                        <div className="skeleton-box" style={{ width: '60px', height: '0.8rem' }} />
+                        <span className="material-symbols-outlined">chevron_right</span>
+                        <div className="skeleton-box" style={{ width: '50px', height: '0.8rem' }} />
+                        <span className="material-symbols-outlined">chevron_right</span>
+                        <div className="skeleton-box" style={{ width: '80px', height: '0.8rem' }} />
+                    </nav>
+                    {/* Skeleton header */}
+                    <div className="od-header">
+                        <div>
+                            <div className="skeleton-box" style={{ width: '200px', height: '1.5rem', marginBottom: '0.5rem' }} />
+                            <div className="skeleton-box" style={{ width: '160px', height: '0.8rem' }} />
+                        </div>
+                        <div className="skeleton-box" style={{ width: '90px', height: '1.8rem', borderRadius: '9999px' }} />
+                    </div>
+                    {/* Skeleton content */}
+                    <div className="od-content-grid">
+                        <div className="od-left-column">
+                            <div className="od-card" style={{ padding: '1.5rem' }}>
+                                <div className="skeleton-box" style={{ width: '120px', height: '1rem', marginBottom: '1.5rem' }} />
+                                {[1, 2].map(i => (
+                                    <div key={i} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div className="skeleton-box" style={{ width: '64px', height: '64px', borderRadius: '8px', flexShrink: 0 }} />
+                                        <div style={{ flex: 1 }}>
+                                            <div className="skeleton-box" style={{ width: '70%', height: '0.9rem', marginBottom: '0.4rem' }} />
+                                            <div className="skeleton-box" style={{ width: '40%', height: '0.7rem' }} />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="od-right-column">
+                            <div className="od-card" style={{ padding: '1.5rem' }}>
+                                <div className="skeleton-box" style={{ width: '100%', height: '1rem', marginBottom: '1rem' }} />
+                                <div className="skeleton-box" style={{ width: '80%', height: '0.8rem', marginBottom: '0.5rem' }} />
+                                <div className="skeleton-box" style={{ width: '60%', height: '0.8rem' }} />
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <Footer />
@@ -146,10 +183,25 @@ const OrderDetailPage = () => {
                                     <div key={item.orderItemId} className="od-item">
                                         <div className="od-item-image">
                                             {item.productImageUrl ? (
-                                                <img src={item.productImageUrl} alt={item.productName || 'Product'} />
+                                                <img
+                                                    src={resolveImageUrl(item.productImageUrl) || ''}
+                                                    alt={item.productName || 'Product'}
+                                                    onError={(e) => {
+                                                        const img = e.target as HTMLImageElement;
+                                                        img.style.display = 'none';
+                                                        const parent = img.parentElement;
+                                                        if (parent && !parent.querySelector('.od-item-image-placeholder')) {
+                                                            const icon = document.createElement('span');
+                                                            icon.className = 'material-symbols-outlined od-item-image-placeholder';
+                                                            icon.style.fontSize = '28px';
+                                                            icon.textContent = 'image_not_supported';
+                                                            parent.appendChild(icon);
+                                                        }
+                                                    }}
+                                                />
                                             ) : (
                                                 <span className="material-symbols-outlined od-item-image-placeholder" style={{ fontSize: 28 }}>
-                                                    inventory_2
+                                                    image_not_supported
                                                 </span>
                                             )}
                                         </div>
@@ -261,7 +313,7 @@ const OrderDetailPage = () => {
                                         <span className="od-summary-free">FREE</span>
                                     )}
                                 </div>
-                                {order.discountAmount && order.discountAmount > 0 && (
+                                {order.discountAmount != null && order.discountAmount > 0 && (
                                     <div className="od-summary-row">
                                         <span>Discount {order.coupon ? `(${order.coupon.code})` : ''}</span>
                                         <span className="od-summary-discount">-{formatPrice(order.discountAmount)}</span>

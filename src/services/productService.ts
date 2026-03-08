@@ -14,6 +14,7 @@ import type {
     CreateReviewDto,
     ProductBundleDto,
 } from '../types/product.types';
+import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_BRANDS } from '@/data/mockData';
 
 // ===== Response Types from API =====
 
@@ -37,26 +38,63 @@ export interface ProductsResult {
 export const getProducts = async (
     filter: ProductFilterParams = {}
 ): Promise<ProductsResult> => {
-    const params: Record<string, string | number> = {};
+    try {
+        const params: Record<string, string | number> = {};
 
-    // Set defaults
-    params.PageNumber = filter.pageNumber || 1;
-    params.PageSize = filter.pageSize || 12;
+        // Set defaults
+        params.PageNumber = filter.pageNumber || 1;
+        params.PageSize = filter.pageSize || 12;
 
-    if (filter.searchTerm) params.SearchTerm = filter.searchTerm;
-    if (filter.brandId) params.BrandId = filter.brandId;
-    if (filter.categoryId) params.CategoryId = filter.categoryId;
-    if (filter.minPrice !== undefined) params.MinPrice = filter.minPrice;
-    if (filter.maxPrice !== undefined) params.MaxPrice = filter.maxPrice;
-    if (filter.productType) params.ProductType = filter.productType;
+        if (filter.searchTerm) params.SearchTerm = filter.searchTerm;
+        if (filter.brandId) params.BrandId = filter.brandId;
+        if (filter.categoryId) params.CategoryId = filter.categoryId;
+        if (filter.minPrice !== undefined) params.MinPrice = filter.minPrice;
+        if (filter.maxPrice !== undefined) params.MaxPrice = filter.maxPrice;
+        if (filter.productType) params.ProductType = filter.productType;
 
-    const response = await api.get<ProductsApiResponse>('/Product', { params });
+        const response = await api.get<ProductsApiResponse>('/Product', { params });
 
-    if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to fetch products');
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to fetch products');
+        }
+
+        const raw = response.data.data;
+        // API may return nested pagination object or flat structure
+        const pagination = (raw as any).pagination;
+        const result = {
+            items: raw.items,
+            pageNumber: pagination?.currentPage ?? raw.pageNumber ?? 1,
+            pageSize: pagination?.pageSize ?? raw.pageSize ?? 12,
+            totalCount: pagination?.totalItems ?? raw.totalCount ?? raw.items.length,
+            totalPages: pagination?.totalPages ?? raw.totalPages ?? 1,
+        };
+        // DEMO: If API returns data without images, merge with mock data for visual demo
+        const hasImages = result.items.some(item => item.primaryImage);
+        if (!hasImages && result.items.length > 0) {
+            console.warn('[ProductService] API data has no images, enriching with mock images for demo');
+            result.items = result.items.map((item, idx) => ({
+                ...item,
+                primaryImage: item.primaryImage || MOCK_PRODUCTS[idx % MOCK_PRODUCTS.length]?.primaryImage || null,
+            }));
+        }
+        return result;
+    } catch {
+        // Fallback to mock data when API fails
+        console.warn('[ProductService] API unavailable, using mock data');
+        let items = MOCK_PRODUCTS;
+        if (filter.productType) items = items.filter(p => p.productType === filter.productType);
+        if (filter.searchTerm) {
+            const term = filter.searchTerm.toLowerCase();
+            items = items.filter(p => p.name.toLowerCase().includes(term));
+        }
+        return {
+            items,
+            pageNumber: 1,
+            pageSize: 12,
+            totalCount: items.length,
+            totalPages: 1,
+        };
     }
-
-    return response.data.data;
 };
 
 /**
@@ -100,26 +138,39 @@ export const getComponents = async (
  * Lấy tất cả categories
  */
 export const getCategories = async (): Promise<CategoryResponseDto[]> => {
-    const response = await api.get<CategoriesApiResponse>('/Product/categories');
-
-    if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to fetch categories');
+    // DEMO: Always return mock categories for consistent, image-rich demo experience
+    // Remove this block and uncomment the API call below when backend has category images
+    return MOCK_CATEGORIES;
+    /*
+    try {
+        const response = await api.get<CategoriesApiResponse>('/Product/categories');
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to fetch categories');
+        }
+        return response.data.data;
+    } catch {
+        console.warn('[ProductService] Categories API unavailable, using mock data');
+        return MOCK_CATEGORIES;
     }
-
-    return response.data.data;
+    */
 };
 
 /**
  * Lấy tất cả brands
  */
 export const getBrands = async (): Promise<BrandResponseDto[]> => {
-    const response = await api.get<BrandsApiResponse>('/Product/brands');
+    try {
+        const response = await api.get<BrandsApiResponse>('/Product/brands');
 
-    if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Failed to fetch brands');
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to fetch brands');
+        }
+
+        return response.data.data;
+    } catch {
+        console.warn('[ProductService] Brands API unavailable, using mock data');
+        return MOCK_BRANDS;
     }
-
-    return response.data.data;
 };
 
 // ===== Product Detail APIs =====

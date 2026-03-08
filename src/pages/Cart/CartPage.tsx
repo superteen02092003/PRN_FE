@@ -91,9 +91,35 @@ const CartPage = () => {
                 <Header />
                 <main className="cart-page">
                     <div className="container">
-                        <div className="cart-loading">
-                            <div className="loading-spinner" />
-                            <p>Loading your cart...</p>
+                        <div className="cart-header">
+                            <div className="skeleton-box" style={{ width: '180px', height: '1.8rem', marginBottom: '0.5rem' }} />
+                            <div className="skeleton-box" style={{ width: '140px', height: '0.9rem' }} />
+                        </div>
+                        <div className="cart-layout">
+                            <div className="cart-items-section">
+                                {Array.from({ length: 2 }).map((_, i) => (
+                                    <div key={i} style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'white', borderRadius: '12px', marginBottom: '1rem', border: '1px solid #e5e7eb' }}>
+                                        <div className="skeleton-box" style={{ width: '100px', height: '100px', borderRadius: '8px', flexShrink: 0 }} />
+                                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                            <div className="skeleton-box" style={{ width: '60%', height: '1rem' }} />
+                                            <div className="skeleton-box" style={{ width: '40%', height: '0.8rem' }} />
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
+                                                <div className="skeleton-box" style={{ width: '90px', height: '1.2rem' }} />
+                                                <div className="skeleton-box" style={{ width: '100px', height: '2rem', borderRadius: '8px' }} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="cart-summary-section">
+                                <div style={{ background: 'white', borderRadius: '12px', padding: '1.5rem', border: '1px solid #e5e7eb' }}>
+                                    <div className="skeleton-box" style={{ width: '120px', height: '1rem', marginBottom: '1rem' }} />
+                                    <div className="skeleton-box" style={{ width: '100%', height: '0.8rem', marginBottom: '0.75rem' }} />
+                                    <div className="skeleton-box" style={{ width: '100%', height: '0.8rem', marginBottom: '0.75rem' }} />
+                                    <div className="skeleton-box" style={{ width: '100%', height: '1.2rem', marginBottom: '1rem' }} />
+                                    <div className="skeleton-box" style={{ width: '100%', height: '2.5rem', borderRadius: '10px' }} />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </main>
