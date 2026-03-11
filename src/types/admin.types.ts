@@ -225,13 +225,16 @@ export interface UpdateBrandRequest {
 export interface AdminCategoryResponse {
     categoryId: number;
     name: string;
+    imageUrl: string | null;
     productCount: number;
 }
 
 export interface CreateCategoryRequest {
     name: string;
+    imageUrl?: string;
 }
 
 export interface UpdateCategoryRequest {
     name: string;
+    imageUrl?: string;
 }

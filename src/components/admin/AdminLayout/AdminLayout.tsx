@@ -56,8 +56,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                 </nav>
 
                 <Link to="/profile" className="admin-sidebar-user">
-                    <div className="admin-sidebar-user-avatar">
-                        {user?.username?.charAt(0).toUpperCase() || 'A'}
+                    <div className="admin-sidebar-user-avatar" style={{ overflow: 'hidden' }}>
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                        ) : (user?.username?.charAt(0).toUpperCase() || 'A')}
                     </div>
                     <div className="admin-sidebar-user-info">
                         <div className="admin-sidebar-user-name">{user?.username || 'Admin'}</div>

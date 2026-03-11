@@ -7,7 +7,6 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAddToCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
 import { getProducts, getCategories, getBrands } from '@/services/productService';
-import { CATEGORY_IMAGES } from '@/data/mockData';
 import type { ProductResponseDto, CategoryResponseDto, BrandResponseDto } from '@/types/product.types';
 
 const Spline = lazy(() => import('@splinetool/react-spline'));
@@ -28,6 +27,8 @@ const HomePage = () => {
     const [featuredProducts, setFeaturedProducts] = useState<ProductResponseDto[]>([]);
     const [newArrivals, setNewArrivals] = useState<ProductResponseDto[]>([]);
     const [bestSellers, setBestSellers] = useState<ProductResponseDto[]>([]);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const [totalBrands, setTotalBrands] = useState(0);
     const [loading, setLoading] = useState(true);
 
 
@@ -65,9 +66,11 @@ const HomePage = () => {
                 }
                 if (brandsData.status === 'fulfilled') {
                     setBrands(brandsData.value);
+                    setTotalBrands(brandsData.value.length);
                 }
                 if (productsData1.status === 'fulfilled') {
                     setFeaturedProducts(productsData1.value.items);
+                    setTotalProducts(productsData1.value.totalCount);
                 }
                 if (productsData2.status === 'fulfilled') {
                     const allProducts = productsData2.value.items;
@@ -280,35 +283,49 @@ const HomePage = () => {
                             <span className="material-symbols-outlined">category</span>
                             Browse by Category
                         </h2>
-                        <Link to="/products" className="section-header__link">View All Categories</Link>
+                        <div className="section-header__controls">
+                            <button className="section-header__control-btn" onClick={() => {
+                                const el = document.querySelector('.category-carousel__track') as HTMLElement;
+                                if (el) el.scrollBy({ left: -280, behavior: 'smooth' });
+                            }}>
+                                <span className="material-symbols-outlined">chevron_left</span>
+                            </button>
+                            <button className="section-header__control-btn" onClick={() => {
+                                const el = document.querySelector('.category-carousel__track') as HTMLElement;
+                                if (el) el.scrollBy({ left: 280, behavior: 'smooth' });
+                            }}>
+                                <span className="material-symbols-outlined">chevron_right</span>
+                            </button>
+                            <Link to="/products" className="section-header__link" style={{ marginLeft: '0.5rem' }}>View All</Link>
+                        </div>
                     </div>
-                    <div className="category-grid">
-                        {categories.length > 0 ? categories.map((cat) => {
-                            const catImage = CATEGORY_IMAGES[cat.name.toLowerCase()];
-                            return (
-                                <Link key={cat.categoryId} className="category-card reveal-item" to={`/products?categoryId=${cat.categoryId}`}>
-                                    <div className="category-card__image-wrapper">
-                                        {catImage ? (
-                                            <img className="category-card__real-image" src={catImage} alt={cat.name} />
-                                        ) : (
-                                            <span className="material-symbols-outlined category-card__icon-large">
-                                                {getCategoryIcon(cat.name)}
-                                            </span>
-                                        )}
-                                        <div className="category-card__overlay" />
+                    <div className="category-carousel">
+                        <div className="category-carousel__track">
+                            {categories.length > 0 ? categories
+                                .sort((a, b) => b.productCount - a.productCount)
+                                .map((cat) => (
+                                    <Link key={cat.categoryId} className="category-carousel__card" to={`/products?categoryId=${cat.categoryId}`}>
+                                        <div className="category-carousel__image">
+                                            {cat.imageUrl ? (
+                                                <img src={cat.imageUrl} alt={cat.name} />
+                                            ) : (
+                                                <span className="material-symbols-outlined category-carousel__icon">
+                                                    {getCategoryIcon(cat.name)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="category-carousel__name">{cat.name}</span>
+                                        <span className="category-carousel__count">{cat.productCount} products</span>
+                                    </Link>
+                                )) : (
+                                Array.from({ length: 6 }).map((_, i) => (
+                                    <div key={i} className="category-carousel__card category-carousel__card--skeleton">
+                                        <div className="skeleton-box" style={{ width: '100%', aspectRatio: '1.2', borderRadius: '0.5rem' }} />
+                                        <div className="skeleton-box" style={{ width: '60%', height: '0.875rem', borderRadius: '0.25rem' }} />
                                     </div>
-                                    <span className="category-card__name">{cat.name}</span>
-                                    <span className="category-card__count">{cat.productCount} products</span>
-                                </Link>
-                            );
-                        }) : (
-                            Array.from({ length: 6 }).map((_, i) => (
-                                <div key={i} className="category-card category-card--skeleton">
-                                    <div className="skeleton-box" style={{ width: '100%', aspectRatio: '1', borderRadius: '0.5rem' }} />
-                                    <div className="skeleton-box" style={{ width: '60%', height: '1rem', borderRadius: '0.25rem' }} />
-                                </div>
-                            ))
-                        )}
+                                ))
+                            )}
+                        </div>
                     </div>
                 </section>
 
@@ -318,8 +335,8 @@ const HomePage = () => {
                     <div className="brands-strip__marquee">
                         <div className="brands-strip__track">
                             {(() => {
-                                const brandList = brands.length > 0 ? brands : fallbackBrands;
-                                return [...brandList, ...brandList, ...brandList, ...brandList].map((brand, i) => (
+                                if (brands.length === 0) return null;
+                                return [...brands, ...brands, ...brands, ...brands].map((brand, i) => (
                                     <div key={i} className="brands-strip__item">
                                         <span className="material-symbols-outlined">verified</span>
                                         <span>{brand.name}</span>
@@ -508,7 +525,12 @@ const HomePage = () => {
                         <h2 className="stats-section__title">Trusted by Makers Worldwide</h2>
                         <p className="stats-section__subtitle">Join thousands of engineers, students, and hobbyists who trust STEM Gear</p>
                         <div className="stats-grid">
-                            {marketStats.map((stat, i) => (
+                            {[
+                                { icon: 'inventory_2', value: totalProducts || 50, suffix: '+', label: 'Products Available' },
+                                { icon: 'storefront', value: totalBrands || 10, suffix: '+', label: 'Trusted Brands' },
+                                { icon: 'category', value: categories.length || 10, suffix: '+', label: 'Categories' },
+                                { icon: 'star', value: 4.8, suffix: '★', label: 'Average Rating' },
+                            ].map((stat, i) => (
                                 <div key={i} className="stat-item">
                                     <span className="material-symbols-outlined stat-item__icon">{stat.icon}</span>
                                     <div className="stat-item__number">
@@ -596,27 +618,7 @@ const howItWorks = [
     { icon: 'rocket_launch', title: 'Build', description: 'Fast shipping — start building within days' },
 ];
 
-const fallbackBrands = [
-    { name: 'Arduino', brandId: 0, productCount: 0 },
-    { name: 'Raspberry Pi', brandId: 0, productCount: 0 },
-    { name: 'Espressif', brandId: 0, productCount: 0 },
-    { name: 'STMicro', brandId: 0, productCount: 0 },
-    { name: 'Texas Instruments', brandId: 0, productCount: 0 },
-    { name: 'Adafruit', brandId: 0, productCount: 0 },
-    { name: 'Arduino', brandId: 0, productCount: 0 },
-    { name: 'Raspberry Pi', brandId: 0, productCount: 0 },
-    { name: 'Espressif', brandId: 0, productCount: 0 },
-    { name: 'STMicro', brandId: 0, productCount: 0 },
-    { name: 'Texas Instruments', brandId: 0, productCount: 0 },
-    { name: 'Adafruit', brandId: 0, productCount: 0 },
-];
 
-const marketStats = [
-    { icon: 'inventory_2', value: 500, suffix: '+', label: 'Products Available' },
-    { icon: 'storefront', value: 50, suffix: '+', label: 'Trusted Brands' },
-    { icon: 'groups', value: 10000, suffix: '+', label: 'Happy Makers' },
-    { icon: 'star', value: 4.8, suffix: '★', label: 'Average Rating' },
-];
 
 const testimonials = [
     { name: 'Alex Nguyen', role: 'IoT Engineer', rating: 5, quote: 'STEM Gear has become my go-to supplier. The quality is consistent and shipping is blazing fast. Highly recommended!' },
