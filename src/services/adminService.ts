@@ -419,6 +419,20 @@ export const deleteCategory = async (id: number): Promise<void> => {
     }
 };
 
+export const uploadCategoryImage = async (categoryId: number, file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post<AdminApiResponse<{ imageUrl: string }>>(
+        `/categories/${categoryId}/image`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to upload image');
+    }
+    return response.data.data.imageUrl;
+};
+
 // ===== Reviews =====
 
 export const deleteReview = async (reviewId: number): Promise<void> => {

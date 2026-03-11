@@ -30,6 +30,7 @@ export interface UserProfile {
     role: string;
     phone?: string;
     address?: string;
+    avatarUrl?: string;
     createdAt?: string;
 }
 
@@ -58,26 +59,46 @@ const authService = {
     },
 
     getProfile: async (): Promise<ApiResponse<UserProfile>> => {
-        const storedUser = authService.getStoredUser();
-        if (!storedUser?.userId) {
-            return { success: false, message: 'No user ID found' };
-        }
-        // Backend returns UserDto directly from GET /api/users/{id}
-        const response = await api.get<any>(`/users/${storedUser.userId}`);
-        const data = response.data;
-        return {
-            success: true,
-            message: 'OK',
-            data: {
-                userId: data.userId,
-                username: data.username,
-                email: data.email,
-                role: data.roleName || data.role,
-                phone: data.phone,
-                address: data.address,
-                createdAt: data.createdAt
+        try {
+            const response = await api.get<any>(`/users/me`);
+            const data = response.data;
+            return {
+                success: true,
+                message: 'OK',
+                data: {
+                    userId: data.id,
+                    username: data.username,
+                    email: data.email,
+                    role: data.role,
+                    phone: data.phone,
+                    address: data.address,
+                    avatarUrl: data.avatarUrl,
+                    createdAt: data.createdAt
+                }
+            };
+        } catch {
+            // Fallback to old endpoint
+            const storedUser = authService.getStoredUser();
+            if (!storedUser?.userId) {
+                return { success: false, message: 'No user ID found' };
             }
-        };
+            const response = await api.get<any>(`/users/${storedUser.userId}`);
+            const data = response.data;
+            return {
+                success: true,
+                message: 'OK',
+                data: {
+                    userId: data.userId,
+                    username: data.username,
+                    email: data.email,
+                    role: data.roleName || data.role,
+                    phone: data.phone,
+                    address: data.address,
+                    avatarUrl: data.avatarUrl,
+                    createdAt: data.createdAt
+                }
+            };
+        }
     },
 
     updateProfile: async (userId: number, data: { email: string; phone?: string; address?: string }): Promise<string> => {
@@ -109,6 +130,20 @@ const authService = {
 
     isAuthenticated: (): boolean => {
         return !!localStorage.getItem('token');
+    },
+
+    uploadAvatar: async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post<{ success: boolean; data: { avatarUrl: string }; message: string }>(
+            '/users/me/avatar',
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to upload avatar');
+        }
+        return response.data.data.avatarUrl;
     },
 };
 

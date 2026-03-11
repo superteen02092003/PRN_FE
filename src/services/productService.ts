@@ -14,12 +14,10 @@ import type {
     CreateReviewDto,
     ProductBundleDto,
 } from '../types/product.types';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES, MOCK_BRANDS } from '@/data/mockData';
 
 // ===== Response Types from API =====
 
 type ProductsApiResponse = ApiResponse<PaginatedResponse<ProductResponseDto>>;
-type CategoriesApiResponse = ApiResponse<CategoryResponseDto[]>;
 type BrandsApiResponse = ApiResponse<BrandResponseDto[]>;
 
 // ===== Products Result with Pagination =====
@@ -68,31 +66,15 @@ export const getProducts = async (
             totalCount: pagination?.totalItems ?? raw.totalCount ?? raw.items.length,
             totalPages: pagination?.totalPages ?? raw.totalPages ?? 1,
         };
-        // DEMO: If API returns data without images, merge with mock data for visual demo
-        const hasImages = result.items.some(item => item.primaryImage);
-        if (!hasImages && result.items.length > 0) {
-            console.warn('[ProductService] API data has no images, enriching with mock images for demo');
-            result.items = result.items.map((item, idx) => ({
-                ...item,
-                primaryImage: item.primaryImage || MOCK_PRODUCTS[idx % MOCK_PRODUCTS.length]?.primaryImage || null,
-            }));
-        }
         return result;
-    } catch {
-        // Fallback to mock data when API fails
-        console.warn('[ProductService] API unavailable, using mock data');
-        let items = MOCK_PRODUCTS;
-        if (filter.productType) items = items.filter(p => p.productType === filter.productType);
-        if (filter.searchTerm) {
-            const term = filter.searchTerm.toLowerCase();
-            items = items.filter(p => p.name.toLowerCase().includes(term));
-        }
+    } catch (err) {
+        console.error('[ProductService] API unavailable:', err);
         return {
-            items,
+            items: [],
             pageNumber: 1,
             pageSize: 12,
-            totalCount: items.length,
-            totalPages: 1,
+            totalCount: 0,
+            totalPages: 0,
         };
     }
 };
@@ -138,21 +120,26 @@ export const getComponents = async (
  * Lấy tất cả categories
  */
 export const getCategories = async (): Promise<CategoryResponseDto[]> => {
-    // DEMO: Always return mock categories for consistent, image-rich demo experience
-    // Remove this block and uncomment the API call below when backend has category images
-    return MOCK_CATEGORIES;
-    /*
     try {
-        const response = await api.get<CategoriesApiResponse>('/Product/categories');
-        if (!response.data.success || !response.data.data) {
-            throw new Error(response.data.message || 'Failed to fetch categories');
+        const response = await api.get<any>('/categories', {
+            params: { pageNumber: 1, pageSize: 100 }
+        });
+        const data = response.data;
+        // Handle both wrapped (ApiResponse) and direct response formats
+        if (data.success && data.data) {
+            return data.data.items || [];
         }
-        return response.data.data;
-    } catch {
-        console.warn('[ProductService] Categories API unavailable, using mock data');
-        return MOCK_CATEGORIES;
+        if (data.items) {
+            return data.items;
+        }
+        if (Array.isArray(data)) {
+            return data;
+        }
+        return [];
+    } catch (err) {
+        console.error('[ProductService] Categories API unavailable:', err);
+        return [];
     }
-    */
 };
 
 /**
@@ -168,8 +155,8 @@ export const getBrands = async (): Promise<BrandResponseDto[]> => {
 
         return response.data.data;
     } catch {
-        console.warn('[ProductService] Brands API unavailable, using mock data');
-        return MOCK_BRANDS;
+        console.error('[ProductService] Brands API unavailable');
+        return [];
     }
 };
 

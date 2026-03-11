@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import authService from '../../services/authService';
 import { toast } from 'react-toastify';
 
@@ -10,6 +10,8 @@ const ProfilePage = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const avatarInputRef = useRef<HTMLInputElement>(null);
 
     // Edit form state
     const [formData, setFormData] = useState({
@@ -40,6 +42,28 @@ const ProfilePage = () => {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
+    };
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('File size must be under 5MB');
+            return;
+        }
+
+        setIsUploadingAvatar(true);
+        try {
+            await authService.uploadAvatar(file);
+            toast.success('Avatar updated!');
+            await refreshUser();
+        } catch (err: any) {
+            toast.error(err?.message || 'Failed to upload avatar');
+        } finally {
+            setIsUploadingAvatar(false);
+            if (avatarInputRef.current) avatarInputRef.current.value = '';
+        }
     };
 
     const handleSave = async () => {
@@ -195,23 +219,56 @@ const ProfilePage = () => {
                     position: 'relative',
                     zIndex: 10
                 }}>
-                    <div style={{
-                        width: '100px',
-                        height: '100px',
-                        borderRadius: '50%',
-                        backgroundColor: '#2463eb',
-                        border: '4px solid white',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '40px',
-                        fontWeight: 700,
-                        color: 'white',
-                        position: 'relative',
-                        zIndex: 20
-                    }}>
-                        {user?.username?.charAt(0).toUpperCase() || 'U'}
+                    <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        style={{ display: 'none' }}
+                    />
+                    <div
+                        onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
+                        style={{
+                            width: '100px',
+                            height: '100px',
+                            borderRadius: '50%',
+                            backgroundColor: '#2463eb',
+                            border: '4px solid white',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '40px',
+                            fontWeight: 700,
+                            color: 'white',
+                            position: 'relative',
+                            zIndex: 20,
+                            cursor: 'pointer',
+                            overflow: 'hidden'
+                        }}
+                        title="Click to change avatar"
+                    >
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            user?.username?.charAt(0).toUpperCase() || 'U'
+                        )}
+                        {/* Camera overlay */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: '30px',
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'white' }}>
+                                {isUploadingAvatar ? 'hourglass_empty' : 'photo_camera'}
+                            </span>
+                        </div>
                     </div>
 
                     <h2 style={{
