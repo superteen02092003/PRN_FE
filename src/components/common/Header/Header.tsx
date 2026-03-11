@@ -10,6 +10,7 @@ interface User {
     email: string;
     role: string;
     avatar?: string;
+    avatarUrl?: string;
 }
 
 const Header = () => {
@@ -322,7 +323,9 @@ const Header = () => {
                                         onClick={() => setShowDropdown(!showDropdown)}
                                     >
                                         <div className="header__avatar">
-                                            {getUserInitial()}
+                                            {user?.avatarUrl ? (
+                                                <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                            ) : getUserInitial()}
                                         </div>
                                     </button>
 
@@ -330,7 +333,9 @@ const Header = () => {
                                         <div className="header__user-dropdown">
                                             <div className="header__user-info">
                                                 <div className="header__avatar header__avatar--lg">
-                                                    {getUserInitial()}
+                                                    {user?.avatarUrl ? (
+                                                        <img src={user.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                                    ) : getUserInitial()}
                                                 </div>
                                                 <div>
                                                     <p className="header__user-name">{user.username}</p>

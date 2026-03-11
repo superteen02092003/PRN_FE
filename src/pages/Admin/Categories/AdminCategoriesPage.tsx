@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
-import { getAdminCategories, createCategory, updateCategory, deleteCategory } from '@/services/adminService';
+import { getAdminCategories, createCategory, updateCategory, deleteCategory, uploadCategoryImage } from '@/services/adminService';
 import type { AdminCategoryResponse } from '@/types/admin.types';
 import { toast } from 'react-toastify';
 
@@ -13,7 +13,10 @@ const AdminCategoriesPage = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [formName, setFormName] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -35,16 +38,34 @@ const AdminCategoriesPage = () => {
         !searchTerm || c.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const resetForm = () => {
+        setFormName('');
+        setImageFile(null);
+        setImagePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     const openCreateForm = () => {
         setEditingId(null);
-        setFormName('');
+        resetForm();
         setShowForm(true);
     };
 
     const openEditForm = (cat: AdminCategoryResponse) => {
         setEditingId(cat.categoryId);
         setFormName(cat.name);
+        setImageFile(null);
+        setImagePreview(cat.imageUrl || null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         setShowForm(true);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -56,14 +77,30 @@ const AdminCategoriesPage = () => {
         try {
             setSaving(true);
             const data = { name: formName.trim() };
+            let categoryId: number;
+
             if (editingId) {
-                await updateCategory(editingId, data);
+                const updated = await updateCategory(editingId, data);
+                categoryId = updated.categoryId;
                 toast.success('Category updated successfully');
             } else {
-                await createCategory(data);
+                const created = await createCategory(data);
+                categoryId = created.categoryId;
                 toast.success('Category created successfully');
             }
+
+            // Upload image if selected
+            if (imageFile) {
+                try {
+                    await uploadCategoryImage(categoryId, imageFile);
+                    toast.success('Image uploaded successfully');
+                } catch (imgErr) {
+                    toast.error(imgErr instanceof Error ? imgErr.message : 'Failed to upload image');
+                }
+            }
+
             setShowForm(false);
+            resetForm();
             fetchCategories();
         } catch (err) {
             toast.error(err instanceof Error ? err.message : 'Failed to save category');
@@ -82,6 +119,11 @@ const AdminCategoriesPage = () => {
             toast.error(err instanceof Error ? err.message : 'Failed to delete category');
         }
     };
+
+    const formatTime = (d: Date) =>
+        d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+    void formatTime;
 
     return (
         <AdminLayout title="Categories">
@@ -124,11 +166,44 @@ const AdminCategoriesPage = () => {
                                 autoFocus
                             />
                         </div>
+                        <div className="admin-form-group">
+                            <label className="admin-form-label">Category Image</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                {imagePreview && (
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        style={{ width: '80px', height: '80px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #e5e7eb' }}
+                                    />
+                                )}
+                                <div>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="admin-btn ghost"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                                    >
+                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>cloud_upload</span>
+                                        {imageFile ? imageFile.name : 'Choose image...'}
+                                    </button>
+                                    <span style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px', display: 'block' }}>
+                                        JPG, PNG, WebP. Max 5MB.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                         <div className="admin-form-actions">
                             <button type="submit" className="admin-btn primary" disabled={saving}>
                                 {saving ? 'Saving...' : editingId ? 'Update' : 'Create'}
                             </button>
-                            <button type="button" className="admin-btn ghost" onClick={() => setShowForm(false)}>
+                            <button type="button" className="admin-btn ghost" onClick={() => { setShowForm(false); resetForm(); }}>
                                 Cancel
                             </button>
                         </div>
@@ -149,6 +224,7 @@ const AdminCategoriesPage = () => {
                             <thead>
                                 <tr>
                                     <th>ID</th>
+                                    <th>Image</th>
                                     <th>Name</th>
                                     <th>Products</th>
                                     <th>Actions</th>
@@ -159,16 +235,16 @@ const AdminCategoriesPage = () => {
                                     <tr key={cat.categoryId}>
                                         <td style={{ fontWeight: 600 }}>#{cat.categoryId}</td>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <div style={{
-                                                    width: '32px', height: '32px', borderRadius: '6px',
-                                                    backgroundColor: '#dbeafe', color: '#2463eb',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                }}>
+                                            {cat.imageUrl ? (
+                                                <img src={cat.imageUrl} alt={cat.name} style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '6px', backgroundColor: '#dbeafe', color: '#2463eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>category</span>
                                                 </div>
-                                                <span style={{ fontWeight: 600 }}>{cat.name}</span>
-                                            </div>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <span style={{ fontWeight: 600 }}>{cat.name}</span>
                                         </td>
                                         <td>
                                             <span className="status-badge confirmed">{cat.productCount} products</span>
@@ -186,7 +262,7 @@ const AdminCategoriesPage = () => {
                                     </tr>
                                 ))}
                                 {filteredCategories.length === 0 && (
-                                    <tr><td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>No categories found</td></tr>
+                                    <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>No categories found</td></tr>
                                 )}
                             </tbody>
                         </table>

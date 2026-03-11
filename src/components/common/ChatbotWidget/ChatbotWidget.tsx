@@ -1,49 +1,33 @@
 import { useState, useRef, useEffect } from 'react';
 import './ChatbotWidget.css';
+import api from '@/services/api';
 
 interface BotMessage {
     id: number;
     text: string;
     isBot: boolean;
     timestamp: Date;
+    source?: string; // 'faq' | 'ai' | 'fallback' | 'error'
 }
 
-const FAQ_RESPONSES: Record<string, string> = {
-    'shipping': '📦 We offer free shipping on orders over 200.000₫! Standard delivery takes 2-5 business days. Express shipping (1-2 days) is available for 30.000₫.',
-    'return': '🔄 We accept returns within 30 days of purchase. Items must be in original packaging. Contact our support team to initiate a return.',
-    'warranty': '🛡️ All products come with manufacturer warranty. You can check your warranty status in the "My Warranties" section of your account.',
-    'payment': '💳 We accept SePay bank transfer and Cash on Delivery (COD). All transactions are secured with STEM-Shield encryption.',
-    'order': '📋 You can track your order in the "My Orders" section. We\'ll also send you email updates as your order progresses.',
-    'account': '👤 You can manage your profile, view orders, and check warranties in your account dashboard. Visit "My Profile" to update your information.',
-};
-
 const QUICK_ACTIONS = [
-    { label: '📦 Shipping Info', key: 'shipping' },
-    { label: '🔄 Returns', key: 'return' },
-    { label: '🛡️ Warranty', key: 'warranty' },
-    { label: '💳 Payment', key: 'payment' },
-    { label: '📋 Track Order', key: 'order' },
+    { label: '📦 Shipping', question: 'What are the shipping fees?' },
+    { label: '🔄 Returns', question: 'What is the return policy?' },
+    { label: '🛡️ Warranty', question: 'What is the warranty policy?' },
+    { label: '💳 Payment', question: 'What payment methods are available?' },
+    { label: '📋 Ordering', question: 'How do I place an order?' },
 ];
 
-const findAnswer = (input: string): string => {
-    const lower = input.toLowerCase();
-    for (const [key, response] of Object.entries(FAQ_RESPONSES)) {
-        if (lower.includes(key)) return response;
+const askChatbot = async (question: string): Promise<{ answer: string; source: string }> => {
+    try {
+        const response = await api.post('/chatbot/ask', { question });
+        if (response.data.success && response.data.data) {
+            return response.data.data;
+        }
+        return { answer: 'Sorry, unable to connect to chatbot.', source: 'error' };
+    } catch {
+        return { answer: 'Sorry, server is busy. Please try again later.', source: 'error' };
     }
-    // Fuzzy matches
-    if (lower.includes('ship') || lower.includes('deliver')) return FAQ_RESPONSES.shipping;
-    if (lower.includes('refund') || lower.includes('return') || lower.includes('exchange')) return FAQ_RESPONSES.return;
-    if (lower.includes('warrant') || lower.includes('guarantee')) return FAQ_RESPONSES.warranty;
-    if (lower.includes('pay') || lower.includes('sepay') || lower.includes('cod')) return FAQ_RESPONSES.payment;
-    if (lower.includes('order') || lower.includes('track') || lower.includes('status')) return FAQ_RESPONSES.order;
-    if (lower.includes('account') || lower.includes('profile') || lower.includes('password')) return FAQ_RESPONSES.account;
-    if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey') || lower.includes('xin chào')) {
-        return '👋 Hello! I\'m STEM Gear\'s assistant. How can I help you today? You can ask about shipping, returns, warranty, payment, or your orders.';
-    }
-    if (lower.includes('thank') || lower.includes('cảm ơn')) {
-        return '😊 You\'re welcome! Is there anything else I can help with?';
-    }
-    return '🤔 I\'m not sure about that. For detailed help, please use our **Support Chat** to connect with a real agent, or try asking about: shipping, returns, warranty, payment, or orders.';
 };
 
 const ChatbotWidget = () => {
@@ -51,9 +35,10 @@ const ChatbotWidget = () => {
     const [messages, setMessages] = useState<BotMessage[]>([
         {
             id: 0,
-            text: '👋 Hi there! I\'m STEM Bot. How can I help you today?',
+            text: '👋 Hi there! I\'m STEM Bot — your AI assistant for STEM Store. How can I help you today?',
             isBot: true,
             timestamp: new Date(),
+            source: 'faq',
         },
     ]);
     const [input, setInput] = useState('');
@@ -69,15 +54,14 @@ const ChatbotWidget = () => {
         if (isOpen) inputRef.current?.focus();
     }, [isOpen]);
 
-    const addBotReply = (text: string) => {
+    const sendQuestion = async (question: string) => {
         setIsTyping(true);
-        setTimeout(() => {
-            setMessages(prev => [
-                ...prev,
-                { id: Date.now(), text, isBot: true, timestamp: new Date() },
-            ]);
-            setIsTyping(false);
-        }, 600 + Math.random() * 800);
+        const result = await askChatbot(question);
+        setMessages(prev => [
+            ...prev,
+            { id: Date.now(), text: result.answer, isBot: true, timestamp: new Date(), source: result.source },
+        ]);
+        setIsTyping(false);
     };
 
     const handleSend = () => {
@@ -89,18 +73,17 @@ const ChatbotWidget = () => {
             timestamp: new Date(),
         };
         setMessages(prev => [...prev, userMsg]);
-        const answer = findAnswer(input);
+        const question = input.trim();
         setInput('');
-        addBotReply(answer);
+        sendQuestion(question);
     };
 
-    const handleQuickAction = (key: string) => {
-        const label = QUICK_ACTIONS.find(a => a.key === key)?.label || key;
+    const handleQuickAction = (question: string, label: string) => {
         setMessages(prev => [
             ...prev,
             { id: Date.now(), text: label, isBot: false, timestamp: new Date() },
         ]);
-        addBotReply(FAQ_RESPONSES[key]);
+        sendQuestion(question);
     };
 
     const formatTime = (d: Date) =>
@@ -157,7 +140,7 @@ const ChatbotWidget = () => {
                         {messages.length <= 1 && !isTyping && (
                             <div className="chatbot-quick-actions">
                                 {QUICK_ACTIONS.map(a => (
-                                    <button key={a.key} onClick={() => handleQuickAction(a.key)}>
+                                    <button key={a.question} onClick={() => handleQuickAction(a.question, a.label)}>
                                         {a.label}
                                     </button>
                                 ))}

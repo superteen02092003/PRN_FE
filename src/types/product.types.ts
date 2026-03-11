@@ -50,6 +50,7 @@ export interface ProductResponseDto {
 export interface CategoryResponseDto {
   categoryId: number;
   name: string;
+  imageUrl?: string;
   productCount: number;
 }
 
