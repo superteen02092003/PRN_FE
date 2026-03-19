@@ -21,7 +21,7 @@ export default defineConfig({
         open: true,
         proxy: {
             '/api': {
-                target: 'http://127.0.0.1:5255',
+                target: 'https://prn232-backend-production.up.railway.app',
                 changeOrigin: true,
                 secure: false,
                 configure: function (proxy, _options) {
@@ -35,6 +35,12 @@ export default defineConfig({
                         console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
                     });
                 },
+            },
+            '/hubs': {
+                target: 'https://prn232-backend-production.up.railway.app',
+                changeOrigin: true,
+                secure: false,
+                ws: true,
             },
         },
     },
