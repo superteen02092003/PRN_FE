@@ -35,14 +35,22 @@ interface PagedChatResponse {
 let connection: signalR.HubConnection | null = null;
 
 const getBaseUrl = (): string => {
+    // In dev: use relative URL so Vite proxy handles /hubs/*
+    // In production: use the deployed BE base URL
+    if (import.meta.env.DEV) return '';
     const apiUrl = import.meta.env.VITE_API_URL || '/api';
-    // Remove /api suffix to get base URL for hub
     return apiUrl.replace(/\/api\/?$/, '');
 };
 
 export const connectToChat = (
     onReceiveMessage?: (message: ChatMessageDto) => void
 ): signalR.HubConnection => {
+    // Stop any existing connection first (handles React Strict Mode double-mount)
+    if (connection) {
+        connection.stop().catch(() => {});
+        connection = null;
+    }
+
     const token = localStorage.getItem('token') || '';
     const baseUrl = getBaseUrl();
 
@@ -69,7 +77,11 @@ export const connectToChat = (
 
 export const disconnectChat = async (): Promise<void> => {
     if (connection) {
-        await connection.stop();
+        try {
+            await connection.stop();
+        } catch {
+            // Ignore errors when stopping (e.g., connection not yet started)
+        }
         connection = null;
     }
 };

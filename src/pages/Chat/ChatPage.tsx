@@ -36,27 +36,39 @@ const ChatPage = () => {
     }, [navigate]);
 
     useEffect(() => {
+        let isCancelled = false;
+
         const load = async () => {
             try {
                 setLoading(true);
                 const data = await getChatHistory(1, 100);
-                setMessages((data.items || []).reverse());
+                if (!isCancelled) {
+                    setMessages((data.items || []).reverse());
+                }
                 // Mark admin messages as read when chat is opened
                 try { await markMyMessagesAsRead(); } catch { /* ignore */ }
             } catch (err) {
                 console.error('Failed to load chat history:', err);
             } finally {
-                setLoading(false);
+                if (!isCancelled) {
+                    setLoading(false);
+                }
             }
         };
         load();
 
-        // Connect SignalR
-        connectToChat((msg) => {
-            setMessages(prev => [...prev, msg]);
-        });
+        // Connect SignalR — delay slightly to avoid StrictMode race
+        const timer = setTimeout(() => {
+            if (!isCancelled) {
+                connectToChat((msg) => {
+                    setMessages(prev => [...prev, msg]);
+                });
+            }
+        }, 100);
 
         return () => {
+            isCancelled = true;
+            clearTimeout(timer);
             disconnectChat();
         };
     }, []);
