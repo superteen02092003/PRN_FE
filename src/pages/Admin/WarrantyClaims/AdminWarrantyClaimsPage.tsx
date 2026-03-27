@@ -11,6 +11,7 @@ const statusFilters: { label: string; value: string }[] = [
     { label: 'Approved', value: 'APPROVED' },
     { label: 'Rejected', value: 'REJECTED' },
     { label: 'Resolved', value: 'RESOLVED' },
+    { label: 'Unresolved', value: 'UNRESOLVED' },
 ];
 
 const statusColors: Record<ClaimStatus, { color: string; bg: string }> = {
@@ -18,6 +19,7 @@ const statusColors: Record<ClaimStatus, { color: string; bg: string }> = {
     APPROVED: { color: '#15803d', bg: '#dcfce7' },
     REJECTED: { color: '#991b1b', bg: '#fee2e2' },
     RESOLVED: { color: '#1d4ed8', bg: '#dbeafe' },
+    UNRESOLVED: { color: '#dc2626', bg: '#fecaca' },
 };
 
 const AdminWarrantyClaimsPage = () => {
@@ -30,7 +32,7 @@ const AdminWarrantyClaimsPage = () => {
     // Resolve dialog state
     const [resolveDialogOpen, setResolveDialogOpen] = useState(false);
     const [selectedClaim, setSelectedClaim] = useState<WarrantyClaimDto | null>(null);
-    const [resolution, setResolution] = useState<'APPROVED' | 'REJECTED' | 'RESOLVED'>('APPROVED');
+    const [resolution, setResolution] = useState<'APPROVED' | 'REJECTED' | 'RESOLVED' | 'UNRESOLVED'>('APPROVED');
     const [resolutionNote, setResolutionNote] = useState('');
     const [resolving, setResolving] = useState(false);
 
@@ -58,7 +60,7 @@ const AdminWarrantyClaimsPage = () => {
 
     const openResolveDialog = (claim: WarrantyClaimDto) => {
         setSelectedClaim(claim);
-        setResolution('APPROVED');
+        setResolution(claim.status === 'APPROVED' ? 'RESOLVED' : 'APPROVED');
         setResolutionNote('');
         setResolveDialogOpen(true);
     };
@@ -168,14 +170,16 @@ const AdminWarrantyClaimsPage = () => {
                                     )}
                                 </div>
 
-                                {claim.status === 'SUBMITTED' && (
+                                {(claim.status === 'SUBMITTED' || claim.status === 'APPROVED') && (
                                     <div className="claim-card-actions">
                                         <button
                                             className="admin-btn primary"
                                             onClick={() => openResolveDialog(claim)}
                                         >
-                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>gavel</span>
-                                            Resolve
+                                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                                                {claim.status === 'APPROVED' ? 'task_alt' : 'gavel'}
+                                            </span>
+                                            {claim.status === 'APPROVED' ? 'Finalize Resolution' : 'Resolve'}
                                         </button>
                                     </div>
                                 )}
@@ -205,39 +209,60 @@ const AdminWarrantyClaimsPage = () => {
                         <p className="resolve-issue">{selectedClaim.issueDescription}</p>
 
                         <div className="resolve-options">
-                            <label className="resolve-option">
-                                <input
-                                    type="radio"
-                                    name="resolution"
-                                    value="APPROVED"
-                                    checked={resolution === 'APPROVED'}
-                                    onChange={() => setResolution('APPROVED')}
-                                />
-                                <span className="option-label approved">Approved</span>
-                                <span className="option-desc">Accept claim, mark warranty as IN_REPAIR</span>
-                            </label>
-                            <label className="resolve-option">
-                                <input
-                                    type="radio"
-                                    name="resolution"
-                                    value="REJECTED"
-                                    checked={resolution === 'REJECTED'}
-                                    onChange={() => setResolution('REJECTED')}
-                                />
-                                <span className="option-label rejected">Rejected</span>
-                                <span className="option-desc">Deny this warranty claim</span>
-                            </label>
-                            <label className="resolve-option">
-                                <input
-                                    type="radio"
-                                    name="resolution"
-                                    value="RESOLVED"
-                                    checked={resolution === 'RESOLVED'}
-                                    onChange={() => setResolution('RESOLVED')}
-                                />
-                                <span className="option-label resolved">Resolved</span>
-                                <span className="option-desc">Issue fixed, mark warranty as REPAIRED</span>
-                            </label>
+                            {selectedClaim.status === 'SUBMITTED' && (
+                                <label className="resolve-option">
+                                    <input
+                                        type="radio"
+                                        name="resolution"
+                                        value="APPROVED"
+                                        checked={resolution === 'APPROVED'}
+                                        onChange={() => setResolution('APPROVED')}
+                                    />
+                                    <span className="option-label approved">Approved</span>
+                                    <span className="option-desc">Accept claim, mark warranty as IN_REPAIR</span>
+                                </label>
+                            )}
+                            
+                            {selectedClaim.status === 'SUBMITTED' && (
+                                <label className="resolve-option">
+                                    <input
+                                        type="radio"
+                                        name="resolution"
+                                        value="REJECTED"
+                                        checked={resolution === 'REJECTED'}
+                                        onChange={() => setResolution('REJECTED')}
+                                    />
+                                    <span className="option-label rejected">Rejected</span>
+                                    <span className="option-desc">Deny this warranty claim</span>
+                                </label>
+                            )}
+
+                            {selectedClaim.status === 'APPROVED' && (
+                                <>
+                                    <label className="resolve-option">
+                                        <input
+                                            type="radio"
+                                            name="resolution"
+                                            value="RESOLVED"
+                                            checked={resolution === 'RESOLVED'}
+                                            onChange={() => setResolution('RESOLVED')}
+                                        />
+                                        <span className="option-label resolved">Resolved</span>
+                                        <span className="option-desc">Issue fixed, mark warranty as REPAIRED</span>
+                                    </label>
+                                    <label className="resolve-option">
+                                        <input
+                                            type="radio"
+                                            name="resolution"
+                                            value="UNRESOLVED"
+                                            checked={resolution === 'UNRESOLVED'}
+                                            onChange={() => setResolution('UNRESOLVED')}
+                                        />
+                                        <span className="option-label rejected" style={{color: '#dc2626'}}>Cannot Fix</span>
+                                        <span className="option-desc">Issue cannot be fixed, return device as is</span>
+                                    </label>
+                                </>
+                            )}
                         </div>
 
                         <div className="resolve-note-group">

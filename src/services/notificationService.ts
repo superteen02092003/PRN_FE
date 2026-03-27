@@ -1,4 +1,20 @@
 import * as signalR from '@microsoft/signalr';
+import axiosInstance from './api';
+
+export interface NotificationDto {
+    notificationId: number;
+    title: string;
+    message: string;
+    type: string;
+    isRead: boolean;
+    linkUrl?: string;
+    createdAt: string;
+}
+
+export interface NotificationResponse {
+    items: NotificationDto[];
+    unreadCount: number;
+}
 
 export interface NotificationPayload {
     eventType: string;
@@ -53,6 +69,18 @@ export const disconnectNotifications = async (): Promise<void> => {
 const notificationService = {
     connectNotifications,
     disconnectNotifications,
+    getMyNotifications: async (page: number = 1, pageSize: number = 20) => {
+        const response = await axiosInstance.get(`/Notification`, { params: { page, pageSize } });
+        return response.data;
+    },
+    markAsRead: async (id: number) => {
+        const response = await axiosInstance.put(`/Notification/${id}/read`);
+        return response.data;
+    },
+    markAllAsRead: async () => {
+        const response = await axiosInstance.put(`/Notification/read-all`);
+        return response.data;
+    }
 };
 
 export default notificationService;

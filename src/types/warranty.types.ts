@@ -69,10 +69,10 @@ export interface WarrantyClaimDto {
     contactPhone: string | null;
     resolutionNote: string | null;
     submittedAt: string;
-    resolvedAt: string | null;
+    resolvedDate: string | null;
 }
 
-export type ClaimStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'RESOLVED';
+export type ClaimStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'RESOLVED' | 'UNRESOLVED';
 
 export interface ClaimsPaginatedResponse {
     items: WarrantyClaimDto[];
@@ -89,7 +89,7 @@ export interface ClaimsApiResponse {
 }
 
 export interface ResolveClaimRequest {
-    resolution: 'APPROVED' | 'REJECTED' | 'RESOLVED';
+    resolution: 'APPROVED' | 'REJECTED' | 'RESOLVED' | 'UNRESOLVED';
     resolutionNote?: string;
 }
 

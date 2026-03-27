@@ -33,7 +33,7 @@ export const getMyWarranties = async (): Promise<WarrantyDto[]> => {
  * Lấy thông tin chi tiết một bảo hành theo ID
  */
 export const getWarrantyById = async (id: number): Promise<WarrantyDto> => {
-    const response = await api.get<SingleWarrantyApiResponse>(`/warranties/${id}`);
+    const response = await api.get<SingleWarrantyApiResponse>(`/Warranty/${id}`);
 
     if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to fetch warranty details');
@@ -61,6 +61,23 @@ export const submitWarrantyClaim = async (
 
     if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to submit warranty claim');
+    }
+
+    return response.data.data;
+};
+
+/**
+ * API: Get My Warranty Claims (Customer)
+ */
+export const getMyClaims = async (
+    page: number = 1,
+    pageSize: number = 10
+): Promise<ClaimsPaginatedResponse> => {
+    const params: Record<string, string | number> = { page, pageSize };
+    const response = await api.get<ClaimsApiResponse>('/warranties/claims', { params });
+
+    if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch your warranty claims');
     }
 
     return response.data.data;
@@ -115,6 +132,7 @@ const warrantyService = {
     getMyWarranties,
     getWarrantyById,
     submitWarrantyClaim,
+    getMyClaims,
     getAllWarrantyClaims,
     resolveWarrantyClaim,
 };

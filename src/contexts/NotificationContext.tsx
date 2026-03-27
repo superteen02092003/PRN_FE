@@ -3,7 +3,7 @@ import notificationService from '@/services/notificationService';
 
 export interface Notification {
     id: string;
-    type: 'order' | 'payment' | 'warranty' | 'info';
+    type: string;
     title: string;
     message: string;
     timestamp: string;
@@ -14,119 +14,146 @@ export interface Notification {
 interface NotificationContextType {
     notifications: Notification[];
     unreadCount: number;
-    addNotification: (notif: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
-    markAsRead: (id: string) => void;
-    markAllAsRead: () => void;
+    addNotification: (notif: Notification) => void;
+    markAsRead: (id: string) => Promise<void>;
+    markAllAsRead: () => Promise<void>;
     clearAll: () => void;
     isConnected: boolean;
+    fetchNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
-const STORAGE_KEY = 'stem_gear_notifications';
-
-const getBaseUrl = (): string => {
-    // In dev: use relative URL so Vite proxy handles /hubs/*
-    // In production: use the deployed BE base URL
-    if (import.meta.env.DEV) return '';
-    const apiUrl = import.meta.env.VITE_API_URL || '/api';
-    return apiUrl.replace(/\/api\/?$/, '');
-};
-
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
-    const [notifications, setNotifications] = useState<Notification[]>(() => {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            return stored ? JSON.parse(stored) : [];
-        } catch {
-            return [];
-        }
-    });
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
-    const connectionRef = useRef<signalR.HubConnection | null>(null);
 
-    // Sync to localStorage
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications.slice(0, 50)));
-    }, [notifications]);
+    const fetchNotifications = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            const data = await notificationService.getMyNotifications(1, 50);
+            if (data?.data) {
+                const dtoItems = data.data.items || [];
+                setNotifications(dtoItems.map((n: any) => ({
+                    id: n.notificationId.toString(),
+                    type: n.type,
+                    title: n.title,
+                    message: n.message,
+                    timestamp: n.createdAt,
+                    read: n.isRead,
+                    link: n.linkUrl
+                })));
+                setUnreadCount(data.data.unreadCount || 0);
+            }
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+        }
+    }, []);
 
-    const unreadCount = notifications.filter(n => !n.read).length;
-
-    const addNotification = useCallback((notif: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
-        const newNotif: Notification = {
-            ...notif,
-            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            timestamp: new Date().toISOString(),
-            read: false,
-        };
-        setNotifications(prev => [newNotif, ...prev].slice(0, 50));
+    const addNotification = useCallback((notif: Notification) => {
+        setNotifications(prev => [notif, ...prev].slice(0, 50));
+        if (!notif.read) setUnreadCount(prev => prev + 1);
     }, []);
 
     // SignalR Connection
     useEffect(() => {
+        fetchNotifications();
+
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        notificationService.connectNotifications((eventType, data) => {
-            let title = 'New Notification';
-            let message = '';
-            let type: Notification['type'] = 'info';
-            let link: string | undefined = undefined;
+        try {
+            setIsConnected(true);
+            notificationService.connectNotifications((eventType, data) => {
+                const id = data.id?.toString() || `${Date.now()}`;
+                
+                let title = data.title || 'New Notification';
+                let message = data.message || '';
+                let type: string = eventType;
+                let link: string | undefined = undefined;
 
-            switch (eventType) {
-                case 'CartUpdated':
-                    type = 'order';
-                    title = 'Cart Updated';
-                    message = `You have ${data.totalItems} items in your cart.`;
-                    link = '/cart';
-                    break;
-                case 'OrderStatusChanged':
-                    type = 'order';
-                    title = 'Order Status Update';
-                    message = `Your order #${data.orderNumber} is now ${data.status.replace('_', ' ')}.`;
-                    link = `/profile/orders`; // Assuming this route exists
-                    break;
-                case 'PaymentConfirmed':
-                    type = 'payment';
-                    title = 'Payment Successful';
-                    message = `Payment of ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount)} confirmed for order #${data.orderNumber}.`;
-                    link = `/profile/orders`;
-                    break;
-                case 'PaymentExpired':
-                    type = 'payment';
-                    title = 'Payment Expired';
-                    message = `Payment for order #${data.orderNumber} has expired.`;
-                    link = `/profile/orders`;
-                    break;
-                default:
-                    title = `Notification: ${eventType}`;
-                    message = JSON.stringify(data);
-                    break;
-            }
+                if (!data.title) {
+                    switch (eventType) {
+                        case 'CartUpdated':
+                            type = 'order';
+                            title = 'Cart Updated';
+                            message = `You have ${data.totalItems} items in your cart.`;
+                            link = '/cart';
+                            break;
+                        case 'OrderStatusChanged':
+                            type = 'order';
+                            title = 'Order Status Update';
+                            message = `Your order #${data.orderNumber} is now ${data.status.replace('_', ' ')}.`;
+                            link = `/profile/orders`;
+                            break;
+                        case 'PaymentConfirmed':
+                            type = 'payment';
+                            title = 'Payment Successful';
+                            message = `Payment of ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount)} confirmed for order #${data.orderNumber}.`;
+                            link = `/profile/orders`;
+                            break;
+                        case 'PaymentExpired':
+                            type = 'payment';
+                            title = 'Payment Expired';
+                            message = `Payment for order #${data.orderNumber} has expired.`;
+                            link = `/profile/orders`;
+                            break;
+                        default:
+                            title = `Notification: ${eventType}`;
+                            message = JSON.stringify(data);
+                            break;
+                    }
+                } else {
+                    type = data.type;
+                    link = `/profile/orders`; // Best effort fallback for old unlinked ones if not passed
+                }
 
-            addNotification({ type, title, message, link });
-        });
+                addNotification({ 
+                    id,
+                    type, 
+                    title, 
+                    message, 
+                    link,
+                    read: false,
+                    timestamp: data.timestamp || new Date().toISOString()
+                });
+            });
+        } catch (error) {
+            console.error('Failed to initialize Notification SignalR:', error);
+            setIsConnected(false);
+        }
 
         return () => {
-            notificationService.disconnectNotifications();
+            notificationService.disconnectNotifications().catch(console.error);
         };
-    }, [addNotification]);
+    }, [addNotification, fetchNotifications]);
 
-    const markAsRead = useCallback((id: string) => {
+    const markAsRead = useCallback(async (id: string) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+        try {
+            await notificationService.markAsRead(parseInt(id, 10));
+        } catch (e) { console.error('Failed to mark as read API', e); }
     }, []);
 
-    const markAllAsRead = useCallback(() => {
+    const markAllAsRead = useCallback(async () => {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setUnreadCount(0);
+        try {
+            await notificationService.markAllAsRead();
+        } catch (e) { console.error('Failed to mark all as read API', e); }
     }, []);
 
     const clearAll = useCallback(() => {
         setNotifications([]);
+        setUnreadCount(0);
     }, []);
 
     return (
         <NotificationContext.Provider value={{
-            notifications, unreadCount, addNotification, markAsRead, markAllAsRead, clearAll, isConnected,
+            notifications, unreadCount, addNotification, markAsRead, markAllAsRead, clearAll, isConnected, fetchNotifications
         }}>
             {children}
         </NotificationContext.Provider>

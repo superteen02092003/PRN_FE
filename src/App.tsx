@@ -18,6 +18,7 @@ import AdminChatPage from './pages/Admin/Chat/AdminChatPage';
 import ProfilePage from './pages/Profile';
 import MyWarrantiesPage from './pages/Warranties/MyWarrantiesPage';
 import SubmitClaimPage from './pages/Warranties/SubmitClaimPage';
+import MyClaimsPage from './pages/Warranties/MyClaimsPage';
 import ChatPage from './pages/Chat/ChatPage';
 import StorePage from './pages/Store/StorePage';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -139,6 +140,13 @@ function App() {
                                 <ProtectedRoute>
                                     <PageTransition>
                                         <MyWarrantiesPage />
+                                    </PageTransition>
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/warranties/claims" element={
+                                <ProtectedRoute>
+                                    <PageTransition>
+                                        <MyClaimsPage />
                                     </PageTransition>
                                 </ProtectedRoute>
                             } />

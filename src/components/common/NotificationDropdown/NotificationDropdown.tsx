@@ -57,16 +57,15 @@ const NotificationDropdown = () => {
             {isOpen && (
                 <div className="notif-dropdown">
                     <div className="notif-dropdown-header">
-                        <span>Notifications</span>
-                        {unreadCount > 0 && (
-                            <button className="notif-mark-all" onClick={markAllAsRead}>
-                                Mark all as read
-                            </button>
-                        )}
+                        <span className="notif-title-header">New Notifications</span>
                     </div>
+                    
                     <div className="notif-dropdown-list">
                         {notifications.length === 0 ? (
-                            <div className="notif-empty">No notifications yet</div>
+                            <div className="notif-empty">
+                                <span className="material-symbols-outlined notif-empty-icon">notifications_off</span>
+                                <p>No notifications yet</p>
+                            </div>
                         ) : (
                             notifications.slice(0, 15).map(notif => (
                                 <div
@@ -74,17 +73,31 @@ const NotificationDropdown = () => {
                                     className={`notif-item ${notif.read ? '' : 'unread'}`}
                                     onClick={() => handleNotifClick(notif)}
                                 >
-                                    <span className={`material-symbols-outlined notif-icon notif-icon-${notif.type}`}>
-                                        {typeIcons[notif.type] || 'info'}
-                                    </span>
+                                    <div className={`notif-icon-circle notif-bg-${notif.type}`}>
+                                        <span className={`material-symbols-outlined notif-icon notif-icon-${notif.type}`}>
+                                            {typeIcons[notif.type] || 'info'}
+                                        </span>
+                                    </div>
                                     <div className="notif-content">
                                         <span className="notif-title">{notif.title}</span>
                                         <span className="notif-message">{notif.message}</span>
+                                        <span className="notif-time">{formatTime(notif.timestamp)}</span>
                                     </div>
-                                    <span className="notif-time">{formatTime(notif.timestamp)}</span>
+                                    {!notif.read && <div className="notif-unread-dot"></div>}
                                 </div>
                             ))
                         )}
+                    </div>
+                    
+                    <div className="notif-dropdown-footer">
+                        {unreadCount > 0 && (
+                            <button className="notif-btn-secondary" onClick={markAllAsRead}>
+                                Mark All as Read
+                            </button>
+                        )}
+                        <button className="notif-btn-primary" onClick={() => { setIsOpen(false); navigate('/profile/notifications'); }}>
+                            View All
+                        </button>
                     </div>
                 </div>
             )}

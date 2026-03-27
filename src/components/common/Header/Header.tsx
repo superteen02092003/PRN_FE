@@ -361,6 +361,10 @@ const Header = () => {
                                                     <span className="material-symbols-outlined">shield</span>
                                                     My Warranties
                                                 </Link>
+                                                <Link to="/warranties/claims" className="header__user-link" onClick={() => setShowDropdown(false)}>
+                                                    <span className="material-symbols-outlined">history</span>
+                                                    My Claims
+                                                </Link>
                                                 <button className="header__user-link header__user-link--logout" onClick={handleLogout}>
                                                     <span className="material-symbols-outlined">logout</span>
                                                     Sign Out
