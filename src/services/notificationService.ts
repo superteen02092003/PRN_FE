@@ -51,6 +51,8 @@ export const connectNotifications = (
     connection.on('OrderStatusChanged', (data: any) => onNotificationReceived('OrderStatusChanged', data));
     connection.on('PaymentConfirmed', (data: any) => onNotificationReceived('PaymentConfirmed', data));
     connection.on('PaymentExpired', (data: any) => onNotificationReceived('PaymentExpired', data));
+    connection.on('WarrantyClaimStatus', (data: any) => onNotificationReceived('WarrantyClaimStatus', data));
+    connection.on('NewChatMessage', (data: any) => onNotificationReceived('NewChatMessage', data));
 
     connection.start().catch(err => {
         console.warn('SignalR notification connection failed:', err);

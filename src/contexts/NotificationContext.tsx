@@ -86,19 +86,31 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
                             type = 'order';
                             title = 'Order Status Update';
                             message = `Your order #${data.orderNumber} is now ${data.status.replace('_', ' ')}.`;
-                            link = `/profile/orders`;
+                            link = `/orders`;
                             break;
                         case 'PaymentConfirmed':
                             type = 'payment';
                             title = 'Payment Successful';
                             message = `Payment of ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount)} confirmed for order #${data.orderNumber}.`;
-                            link = `/profile/orders`;
+                            link = `/orders`;
                             break;
                         case 'PaymentExpired':
                             type = 'payment';
                             title = 'Payment Expired';
                             message = `Payment for order #${data.orderNumber} has expired.`;
-                            link = `/profile/orders`;
+                            link = `/orders`;
+                            break;
+                        case 'WarrantyClaimStatus':
+                            type = 'warranty';
+                            title = `Warranty Claim ${data.status ? data.status.charAt(0) + data.status.slice(1).toLowerCase() : 'Updated'}`;
+                            message = `Your warranty claim for '${data.productName}' status: ${data.status}.`;
+                            link = `/warranties/claims`;
+                            break;
+                        case 'NewChatMessage':
+                            type = 'chat';
+                            title = `New message from ${data.senderName}`;
+                            message = data.messagePreview || 'You have a new message.';
+                            link = `/chat`;
                             break;
                         default:
                             title = `Notification: ${eventType}`;
@@ -107,7 +119,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
                     }
                 } else {
                     type = data.type;
-                    link = `/profile/orders`; // Best effort fallback for old unlinked ones if not passed
+                    link = data.linkUrl || `/orders`; 
                 }
 
                 addNotification({ 

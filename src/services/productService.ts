@@ -162,7 +162,6 @@ export const getBrands = async (): Promise<BrandResponseDto[]> => {
 
 // ===== Product Detail APIs =====
 
-type BundleApiResponse = ApiResponse<ProductBundleDto>;
 type ReviewApiResponse = ApiResponse<ReviewDto>;
 
 /**
@@ -269,13 +268,42 @@ export const getProductReviews = async (
  * Lấy danh sách components trong bundle (cho KIT products)
  */
 export const getProductBundle = async (productId: number): Promise<ProductBundleDto> => {
-    const response = await api.get<BundleApiResponse>(`/Product/${productId}/bundle`);
+    const response = await api.get<any>(`/Product/${productId}/bundle`);
 
     if (!response.data.success || !response.data.data) {
         throw new Error(response.data.message || 'Failed to fetch bundle');
     }
 
-    return response.data.data;
+    // Backend returns an array of items (IEnumerable<ProductBundleResponse>)
+    const data = response.data.data;
+    
+    if (!Array.isArray(data) || data.length === 0) {
+        return {
+            kitProductId: productId,
+            kitName: 'Kit Product',
+            totalComponents: 0,
+            components: []
+        };
+    }
+
+    const kitName = data[0].parentProductName || 'Kit Product';
+    
+    const components = data.map((item: any) => ({
+        productId: item.childProductId,
+        sku: item.childProductSku || 'N/A',
+        name: item.childProductName,
+        quantity: item.quantity,
+        price: item.childProductPrice,
+        primaryImage: item.childProductImage || null,
+        productType: item.childProductType || 'COMPONENT' // Fallback to COMPONENT since it's not present in DTO
+    }));
+
+    return {
+        kitProductId: productId,
+        kitName: kitName,
+        totalComponents: components.length,
+        components: components
+    };
 };
 
 /**

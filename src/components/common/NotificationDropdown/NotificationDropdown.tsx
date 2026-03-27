@@ -7,7 +7,14 @@ const typeIcons: Record<string, string> = {
     order: 'shopping_bag',
     payment: 'payments',
     warranty: 'shield',
+    chat: 'chat',
     info: 'info',
+    CartUpdated: 'shopping_cart',
+    OrderStatusChanged: 'shopping_bag',
+    PaymentConfirmed: 'payments',
+    PaymentExpired: 'timer_off',
+    WarrantyClaimStatus: 'shield',
+    NewChatMessage: 'chat',
 };
 
 const NotificationDropdown = () => {

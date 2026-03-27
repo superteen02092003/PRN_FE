@@ -1,0 +1,189 @@
+.notif-page-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.notif-page-main {
+    flex: 1;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.notif-page-container {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.notif-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.notif-page-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notif-page-title h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.notif-page-badge {
+    background-color: #ef4444;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notif-page-markall {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #3b82f6;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.notif-page-markall:hover {
+    background: #eff6ff;
+}
+
+.notif-page-content {
+    min-height: 400px;
+}
+
+.notif-page-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+    color: #64748b;
+}
+
+.notif-page-empty .material-symbols-outlined {
+    font-size: 80px;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+}
+
+.notif-page-empty h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 12px;
+}
+
+.notif-page-empty p {
+    font-size: 15px;
+    margin-bottom: 24px;
+}
+
+.notif-page-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.notif-page-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 24px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+    background: #ffffff;
+}
+
+.notif-page-item:hover {
+    background: #f8fafc;
+}
+
+.notif-page-item.unread {
+    background: #fff5f5; /* Shopee unread tint */
+}
+
+.notif-page-item.unread:hover {
+    background: #fff0f0;
+}
+
+.notif-page-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.bg-order { background: #e0f2fe; }
+.bg-payment { background: #dcfce7; }
+.bg-warranty { background: #fef3c7; }
+.bg-info { background: #f1f5f9; }
+
+.notif-page-icon-wrapper .material-symbols-outlined {
+    font-size: 28px;
+}
+
+.icon-order { color: #0284c7; }
+.icon-payment { color: #16a34a; }
+.icon-warranty { color: #d97706; }
+.icon-info { color: #475569; }
+
+.notif-page-details {
+    flex: 1;
+}
+
+.notif-page-item-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.notif-page-item-message {
+    font-size: 15px;
+    color: #475569;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.notif-page-item-time {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.notif-page-unread-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #ee4d2d; /* Shopee brand color */
+    border-radius: 50%;
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+}

@@ -21,6 +21,7 @@ import SubmitClaimPage from './pages/Warranties/SubmitClaimPage';
 import MyClaimsPage from './pages/Warranties/MyClaimsPage';
 import ChatPage from './pages/Chat/ChatPage';
 import StorePage from './pages/Store/StorePage';
+import NotificationPage from './pages/Notification/NotificationPage';
 import { NotificationProvider } from './contexts/NotificationContext';
 import ScrollToTop from './components/common/ScrollToTop/ScrollToTop';
 import ChatbotWidget from './components/common/ChatbotWidget/ChatbotWidget';
@@ -131,6 +132,14 @@ function App() {
                                 <ProtectedRoute>
                                     <PageTransition>
                                         <ProfilePage />
+                                    </PageTransition>
+                                </ProtectedRoute>
+                            } />
+
+                            <Route path="/profile/notifications" element={
+                                <ProtectedRoute>
+                                    <PageTransition>
+                                        <NotificationPage />
                                     </PageTransition>
                                 </ProtectedRoute>
                             } />
