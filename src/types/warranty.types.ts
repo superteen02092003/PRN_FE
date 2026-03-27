@@ -23,6 +23,12 @@ export interface WarrantyApiResponse {
     data: WarrantyDto[];
 }
 
+export interface SingleWarrantyApiResponse {
+    success: boolean;
+    message: string;
+    data: WarrantyDto;
+}
+
 // ===== Warranty Claim Types =====
 
 export interface SubmitClaimRequest {

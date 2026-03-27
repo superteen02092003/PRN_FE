@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
-import * as signalR from '@microsoft/signalr';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import notificationService from '@/services/notificationService';
 
 export interface Notification {
     id: string;
@@ -62,90 +62,53 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         setNotifications(prev => [newNotif, ...prev].slice(0, 50));
     }, []);
 
-    // ===== SignalR Connection =====
+    // SignalR Connection
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const baseUrl = getBaseUrl();
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${baseUrl}/hubs/notification`, {
-                accessTokenFactory: () => token,
-            })
-            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
-            .configureLogging(signalR.LogLevel.Warning)
-            .build();
+        notificationService.connectNotifications((eventType, data) => {
+            let title = 'New Notification';
+            let message = '';
+            let type: Notification['type'] = 'info';
+            let link: string | undefined = undefined;
 
-        // Listen for CartUpdated
-        connection.on('CartUpdated', (data: { totalItems: number; timestamp: string }) => {
-            addNotification({
-                type: 'info',
-                title: 'Cart Updated',
-                message: `Your cart now has ${data.totalItems} item(s)`,
-                link: '/cart',
-            });
+            switch (eventType) {
+                case 'CartUpdated':
+                    type = 'order';
+                    title = 'Cart Updated';
+                    message = `You have ${data.totalItems} items in your cart.`;
+                    link = '/cart';
+                    break;
+                case 'OrderStatusChanged':
+                    type = 'order';
+                    title = 'Order Status Update';
+                    message = `Your order #${data.orderNumber} is now ${data.status.replace('_', ' ')}.`;
+                    link = `/profile/orders`; // Assuming this route exists
+                    break;
+                case 'PaymentConfirmed':
+                    type = 'payment';
+                    title = 'Payment Successful';
+                    message = `Payment of ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount)} confirmed for order #${data.orderNumber}.`;
+                    link = `/profile/orders`;
+                    break;
+                case 'PaymentExpired':
+                    type = 'payment';
+                    title = 'Payment Expired';
+                    message = `Payment for order #${data.orderNumber} has expired.`;
+                    link = `/profile/orders`;
+                    break;
+                default:
+                    title = `Notification: ${eventType}`;
+                    message = JSON.stringify(data);
+                    break;
+            }
+
+            addNotification({ type, title, message, link });
         });
-
-        // Listen for OrderStatusChanged
-        connection.on('OrderStatusChanged', (data: { orderId: number; orderNumber: string; status: string }) => {
-            addNotification({
-                type: 'order',
-                title: 'Order Status Updated',
-                message: `Order #${data.orderNumber} is now ${data.status}`,
-                link: `/orders/${data.orderId}`,
-            });
-        });
-
-        // Listen for PaymentConfirmed
-        connection.on('PaymentConfirmed', (data: { orderId: number; orderNumber: string; amount: number }) => {
-            const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount);
-            addNotification({
-                type: 'payment',
-                title: 'Payment Confirmed ✅',
-                message: `Order #${data.orderNumber} — ${formattedAmount} received successfully`,
-                link: `/orders/${data.orderId}`,
-            });
-        });
-
-        // Listen for PaymentExpired
-        connection.on('PaymentExpired', (data: { orderId: number; orderNumber: string }) => {
-            addNotification({
-                type: 'payment',
-                title: 'Payment Expired ⏰',
-                message: `Payment for order #${data.orderNumber} has expired`,
-                link: `/orders/${data.orderId}`,
-            });
-        });
-
-        connection.onreconnecting(() => {
-            console.log('[NotificationHub] Reconnecting...');
-            setIsConnected(false);
-        });
-
-        connection.onreconnected(() => {
-            console.log('[NotificationHub] Reconnected');
-            setIsConnected(true);
-        });
-
-        connection.onclose(() => {
-            console.log('[NotificationHub] Disconnected');
-            setIsConnected(false);
-        });
-
-        connection.start()
-            .then(() => {
-                console.log('[NotificationHub] Connected');
-                setIsConnected(true);
-            })
-            .catch(err => {
-                console.warn('[NotificationHub] Connection failed:', err);
-            });
-
-        connectionRef.current = connection;
 
         return () => {
-            connection.stop();
-            connectionRef.current = null;
+            notificationService.disconnectNotifications();
         };
     }, [addNotification]);
 

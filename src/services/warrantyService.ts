@@ -9,6 +9,7 @@ import type {
     ClaimsApiResponse,
     ResolveClaimRequest,
     ResolveClaimApiResponse,
+    SingleWarrantyApiResponse,
 } from '../types/warranty.types';
 
 // ===== Customer: Warranty APIs =====
@@ -22,6 +23,20 @@ export const getMyWarranties = async (): Promise<WarrantyDto[]> => {
 
     if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to fetch warranties');
+    }
+
+    return response.data.data;
+};
+
+/**
+ * API: Get Warranty by ID
+ * Lấy thông tin chi tiết một bảo hành theo ID
+ */
+export const getWarrantyById = async (id: number): Promise<WarrantyDto> => {
+    const response = await api.get<SingleWarrantyApiResponse>(`/warranties/${id}`);
+
+    if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to fetch warranty details');
     }
 
     return response.data.data;
@@ -98,6 +113,7 @@ export const resolveWarrantyClaim = async (
 
 const warrantyService = {
     getMyWarranties,
+    getWarrantyById,
     submitWarrantyClaim,
     getAllWarrantyClaims,
     resolveWarrantyClaim,
