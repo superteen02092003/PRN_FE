@@ -1,5 +1,11 @@
 import axios from 'axios';
 
+// In dev: use relative /api so Vite proxy handles all requests (no CORS)
+// In production: use the full deployed BE URL
+const baseURL = import.meta.env.DEV
+    ? '/api'
+    : (import.meta.env.VITE_API_URL || '/api');
+
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '/api',
     timeout: 60000,

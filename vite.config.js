@@ -36,6 +36,12 @@ export default defineConfig({
                     });
                 },
             },
+            '/hubs': {
+                target: 'https://prn232-backend-production.up.railway.app',
+                changeOrigin: true,
+                secure: false,
+                ws: true,
+            },
         },
     },
 });
