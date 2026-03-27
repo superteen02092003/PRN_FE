@@ -22,7 +22,7 @@ export default defineConfig({
         open: true,
         proxy: {
             '/api': {
-                target: 'http://127.0.0.1:5255',
+                target: 'https://prn232-backend-production.up.railway.app',
                 changeOrigin: true,
                 secure: false,
                 configure: (proxy, _options) => {
