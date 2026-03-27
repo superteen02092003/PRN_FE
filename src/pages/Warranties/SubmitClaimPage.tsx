@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header/Header';
 import Footer from '@/components/common/Footer/Footer';
-import { getMyWarranties, submitWarrantyClaim } from '@/services/warrantyService';
+import { getWarrantyById, submitWarrantyClaim } from '@/services/warrantyService';
 import type { WarrantyDto } from '@/types/warranty.types';
 import { toast } from 'react-toastify';
 import './SubmitClaimPage.css';
@@ -24,8 +24,7 @@ const SubmitClaimPage = () => {
         const loadWarranty = async () => {
             try {
                 setLoading(true);
-                const warranties = await getMyWarranties();
-                const found = warranties.find(w => w.warrantyId === Number(warrantyId));
+                const found = await getWarrantyById(Number(warrantyId));
                 if (!found) {
                     setError('Warranty not found or does not belong to you.');
                     return;
