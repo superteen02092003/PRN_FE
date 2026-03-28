@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import authService, { RegisterRequest, ApiError } from '../../services/authService';
+import authService, { RegisterRequest } from '../../services/authService';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -72,19 +72,30 @@ const RegisterPage = () => {
 
             // Redirect to login page on success
             navigate('/login', { state: { message: 'Registration successful! Please login.' } });
-        } catch (err: unknown) {
-            console.error('Registration failed:', err);
-            const axiosError = err as { response?: { data?: string | ApiError } };
-            if (typeof axiosError.response?.data === 'string') {
-                setError(axiosError.response.data);
-            } else if (axiosError.response?.data?.message) {
-                setError(axiosError.response.data.message);
-            } else if (axiosError.response?.data?.errors) {
-                const errorMessages = Object.values(axiosError.response.data.errors).flat();
-                setError(errorMessages.join(', '));
-            } else {
-                setError('Registration failed. Please try again.');
+        } catch (err: any) {
+            console.error('Registration failed full error:', err);
+            
+            let errorMessage = 'Registration failed. Please try again.';
+            
+            if (err.response) {
+                const data = err.response.data;
+                console.log('API Error Data:', data);
+                
+                if (typeof data === 'string') {
+                    errorMessage = data;
+                } else if (data.message) {
+                    errorMessage = data.message;
+                } else if (data.errors) {
+                    const errorMessages = Object.values(data.errors).flat();
+                    errorMessage = errorMessages.join(', ');
+                } else if (data.title) {
+                    errorMessage = data.title; // Default ASP.NET validation error title
+                }
+            } else if (err.message) {
+                errorMessage = err.message;
             }
+            
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }

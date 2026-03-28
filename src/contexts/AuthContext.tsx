@@ -53,14 +53,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         // Response is now directly AuthResponseData
         localStorage.setItem('token', response.accessToken);
-        const userProfile: UserProfile = {
-            userId: response.userId,
-            username: response.username,
-            email: response.email,
-            role: response.role,
-        };
-        localStorage.setItem('user', JSON.stringify(userProfile));
-        setUser(userProfile);
+        await refreshUser();
         window.dispatchEvent(new Event('authChange'));
 
         return response;
@@ -68,14 +61,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const oauthLogin = (response: AuthResponseData) => {
         localStorage.setItem('token', response.accessToken);
-        const userProfile: UserProfile = {
-            userId: response.userId,
-            username: response.username,
-            email: response.email,
-            role: response.role,
-        };
-        localStorage.setItem('user', JSON.stringify(userProfile));
-        setUser(userProfile);
+        refreshUser();
         window.dispatchEvent(new Event('authChange'));
     };
 

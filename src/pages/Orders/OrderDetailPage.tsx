@@ -116,7 +116,7 @@ const OrderDetailPage = () => {
         );
     }
 
-    const canCancel = order.status === 'PENDING';
+    const canCancel = order.status === 'PENDING' || order.status === 'CONFIRMED';
     const canPay = order.payment?.status === 'PENDING' && order.payment?.paymentMethod === 'SEPAY';
     const statusInfo = statusConfig[order.status] || statusConfig.PENDING;
     const paymentStatus = order.payment

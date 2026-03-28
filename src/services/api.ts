@@ -31,9 +31,17 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Don't redirect on login/register failures - let the page handle the error
+            const currentToken = localStorage.getItem('token');
+            const requestTokenHeader = error.config?.headers?.Authorization as string;
+            const requestToken = requestTokenHeader ? requestTokenHeader.replace('Bearer ', '') : null;
+
+            // Only log out and redirect if the token that failed 401 is the same as our current token.
+            // If we just logged in and got a NEW token, ignore 401s from older requests in flight.
             const url = error.config?.url || '';
-            if (!url.includes('/login') && !url.includes('/register')) {
+            const isAuthApi = url.includes('/login') || url.includes('/register') || url.includes('/auth/');
+            const isAuthPage = window.location.pathname.includes('/login') || window.location.pathname.includes('/register') || window.location.pathname.includes('/auth/');
+
+            if (!isAuthApi && !isAuthPage && requestToken === currentToken) {
                 localStorage.removeItem('token');
                 window.location.href = '/login';
             }

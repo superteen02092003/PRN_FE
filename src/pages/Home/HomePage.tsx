@@ -96,7 +96,27 @@ const HomePage = () => {
         }
     }, [location.state]);
 
-
+    // Profile incomplete warning
+    useEffect(() => {
+        if (user && (!user.phone || !user.address)) {
+            const hasShown = sessionStorage.getItem('profilePromptShown');
+            if (!hasShown) {
+                toast.info(
+                    <div>
+                        <p style={{ marginBottom: '8px', color: '#1f2937' }}>Bạn nên cập nhật thông tin địa chỉ và số điện thoại để việc mua sắm thuận tiện hơn.</p>
+                        <button 
+                            onClick={() => navigate('/profile')}
+                            style={{ padding: '6px 12px', background: '#2563eb', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}
+                        >
+                            Cập nhật ngay
+                        </button>
+                    </div>,
+                    { autoClose: false, position: 'bottom-right', closeOnClick: false }
+                );
+                sessionStorage.setItem('profilePromptShown', 'true');
+            }
+        }
+    }, [user, navigate]);
 
     // Stats counter observer
     useEffect(() => {

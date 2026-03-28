@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import authService, { AuthResponseData } from '../../services/authService';
@@ -8,8 +8,12 @@ const OAuthCallbackPage = () => {
     const { oauthLogin } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const hasFetched = useRef(false);
 
     useEffect(() => {
+        if (hasFetched.current) return;
+        hasFetched.current = true;
+
         const processOAuth = async () => {
             const params = new URLSearchParams(location.search);
             const code = params.get('code');
@@ -45,13 +49,7 @@ const OAuthCallbackPage = () => {
                 console.error('OAuth login failed:', err);
                 const errorMessage = err?.response?.data?.message || err.message || 'Authentication failed';
                 
-                if (errorMessage.includes('User not registered') || errorMessage.includes('register a new account')) {
-                    navigate('/register', { 
-                        state: { error: 'Bạn chưa đăng ký tài khoản này. Vui lòng tạo tài khoản mới!' },
-                        replace: true 
-                    });
-                    return;
-                }
+
 
                 setError(errorMessage);
                 // After 3 seconds, redirect back to login
