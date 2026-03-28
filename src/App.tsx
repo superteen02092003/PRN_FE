@@ -11,6 +11,8 @@ import { CartPage } from './pages/Cart';
 import { CheckoutPage } from './pages/Checkout';
 import { PaymentSuccessPage, PaymentErrorPage, PaymentCancelPage, PaymentPendingPage } from './pages/Payment';
 import { OrderHistoryPage, OrderDetailPage } from './pages/Orders';
+import MyReturnRequestsPage from './pages/Orders/MyReturnRequestsPage';
+import AdminReturnRequestsPage from './pages/Admin/ReturnRequests/AdminReturnRequestsPage';
 import PageTransition from './components/common/PageTransition';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -132,6 +134,13 @@ function App() {
                                     </PageTransition>
                                 </ProtectedRoute>
                             } />
+                            <Route path="/orders/returns" element={
+                                <ProtectedRoute>
+                                    <PageTransition>
+                                        <MyReturnRequestsPage />
+                                    </PageTransition>
+                                </ProtectedRoute>
+                            } />
 
                             {/* Protected Profile Route - All authenticated users */}
                             <Route path="/profile" element={
@@ -236,6 +245,11 @@ function App() {
                             <Route path="/admin/warranty-claims" element={
                                 <ProtectedRoute allowedRoles={['Admin']}>
                                     <AdminWarrantyClaimsPage />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/admin/return-requests" element={
+                                <ProtectedRoute allowedRoles={['Admin']}>
+                                    <AdminReturnRequestsPage />
                                 </ProtectedRoute>
                             } />
                             <Route path="/admin/chat" element={

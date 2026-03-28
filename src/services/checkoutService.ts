@@ -18,11 +18,15 @@ import type {
  * Validate checkout - kiểm tra cart, stock, shipping, coupon
  */
 export const validateCheckout = async (
-    couponCode?: string
+    couponCode?: string,
+    province?: string
 ): Promise<ValidateCheckoutResponse> => {
     const request: ValidateCheckoutRequest = {};
     if (couponCode) {
         request.couponCode = couponCode;
+    }
+    if (province) {
+        request.province = province;
     }
 
     const response = await api.post<ValidateCheckoutApiResponse>(

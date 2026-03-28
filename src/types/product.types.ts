@@ -118,6 +118,10 @@ export interface ProductDetailDto {
   createdAt: string;
   updatedAt: string;
   bundleComponents?: BundleItemDto[];
+  compatibilityInfo?: string;
+  specifications?: SpecificationDto[];
+  documents?: DocumentDto[];
+  relatedProducts?: RelatedProductDto[];
 }
 
 // ===== Review Types =====
@@ -158,6 +162,43 @@ export interface ReviewFilterParams {
 export interface CreateReviewDto {
   rating: number;
   comment: string;
+}
+
+// ===== STEM-specific Types =====
+
+export type DocumentType = 'DATASHEET' | 'TUTORIAL' | 'PINOUT' | 'CODE_EXAMPLE' | 'OTHER';
+export type RelationType = 'ACCESSORY' | 'SIMILAR' | 'BUNDLE_SUGGESTION';
+
+export interface SpecificationDto {
+  specificationId: number;
+  specName: string;
+  specValue: string;
+  displayOrder: number;
+}
+
+export interface DocumentDto {
+  documentId: number;
+  documentType: DocumentType;
+  title: string;
+  url: string;
+  displayOrder: number;
+}
+
+export interface RelatedProductDto {
+  relatedProductId: number;
+  productId: number;
+  name: string;
+  sku: string;
+  price: number;
+  primaryImage: string | null;
+  relationType: RelationType;
+  displayOrder: number;
+}
+
+export interface CreateRelatedProductDto {
+  relatedToProductId: number;
+  relationType: RelationType;
+  displayOrder?: number;
 }
 
 // ===== Bundle Types (for KIT products) =====

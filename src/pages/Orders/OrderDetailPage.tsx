@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useOrderDetail } from '../../hooks/useOrders';
 import OrderTimeline from '../../components/order/OrderTimeline';
 import CancelOrderModal from '../../components/order/CancelOrderModal';
+import ReturnRequestModal from '../../components/order/ReturnRequestModal';
 import { redirectToSepayCheckout } from '../../services/paymentService';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import Header from '../../components/common/Header';
@@ -45,10 +46,11 @@ const paymentStatusLabels: Record<string, { label: string; cssClass: string }> =
 
 const OrderDetailPage = () => {
     const { id } = useParams<{ id: string }>();
-    const { order, isLoading, error, isCancelling, handleCancelOrder } = useOrderDetail(
+    const { order, isLoading, error, isCancelling, handleCancelOrder, refetch } = useOrderDetail(
         id ? Number(id) : undefined
     );
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [showReturnModal, setShowReturnModal] = useState(false);
 
     if (isLoading) {
         return (
@@ -118,6 +120,7 @@ const OrderDetailPage = () => {
 
     const canCancel = order.status === 'PENDING' || order.status === 'CONFIRMED';
     const canPay = order.payment?.status === 'PENDING' && order.payment?.paymentMethod === 'SEPAY';
+    const canReturn = order.status === 'DELIVERED';
     const statusInfo = statusConfig[order.status] || statusConfig.PENDING;
     const paymentStatus = order.payment
         ? (paymentStatusLabels[order.payment.status] || paymentStatusLabels.PENDING)
@@ -351,7 +354,12 @@ const OrderDetailPage = () => {
                     {canCancel ? (
                         <button className="od-btn-cancel" onClick={() => setShowCancelModal(true)}>
                             <span className="material-symbols-outlined">cancel</span>
-                            Cancel Order
+                            Huỷ đơn hàng
+                        </button>
+                    ) : canReturn ? (
+                        <button className="od-btn-return" onClick={() => setShowReturnModal(true)}>
+                            <span className="material-symbols-outlined">undo</span>
+                            Yêu cầu Trả / Đổi hàng
                         </button>
                     ) : (
                         <div />
@@ -359,12 +367,12 @@ const OrderDetailPage = () => {
                     <div className="od-action-right">
                         <Link to="/orders" className="od-btn-support" style={{ textDecoration: 'none' }}>
                             <span className="material-symbols-outlined">arrow_back</span>
-                            Back to Orders
+                            Quay lại đơn hàng
                         </Link>
                         {canPay && (
                             <button className="od-btn-pay" onClick={() => redirectToSepayCheckout(order.orderId)}>
                                 <span className="material-symbols-outlined">payment</span>
-                                Pay Now
+                                Thanh toán ngay
                             </button>
                         )}
                     </div>
@@ -378,6 +386,15 @@ const OrderDetailPage = () => {
                 onConfirm={handleCancelOrder}
                 isCancelling={isCancelling}
                 orderNumber={order.orderNumber}
+            />
+
+            {/* Return/Exchange Modal */}
+            <ReturnRequestModal
+                isOpen={showReturnModal}
+                onClose={() => setShowReturnModal(false)}
+                orderId={order.orderId}
+                orderNumber={order.orderNumber}
+                onSuccess={refetch}
             />
 
             <Footer />

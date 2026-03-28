@@ -40,6 +40,8 @@ export interface CheckoutSummaryDto {
     shippingFee: number;
     discount: number;
     total: number;
+    isFreeShipping?: boolean;
+    freeShippingThreshold?: number;
 }
 
 export interface StockErrorDto {
@@ -78,6 +80,7 @@ export interface PaymentMethodDto {
 
 export interface ValidateCheckoutRequest {
     couponCode?: string;
+    province?: string;
 }
 
 // ===== Order Request DTOs =====

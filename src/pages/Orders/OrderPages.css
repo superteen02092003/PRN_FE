@@ -1232,6 +1232,29 @@
     font-size: 18px;
 }
 
+.od-btn-return {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    border: 2px solid #ea580c;
+    background: transparent;
+    color: #ea580c;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.od-btn-return:hover {
+    background: #fff7ed;
+}
+
+.od-btn-return .material-symbols-outlined {
+    font-size: 18px;
+}
+
 .od-action-right {
     display: flex;
     gap: 1rem;

@@ -4,7 +4,7 @@ import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
 import { createProduct, updateProduct, uploadProductImages, deleteProductImage, createKit, addProductToBundle, removeProductFromBundle, getWarrantyPolicies } from '@/services/adminService';
 import type { WarrantyPolicyOption } from '@/services/adminService';
 import { getProductDetail, getCategories, getBrands, getProducts } from '@/services/productService';
-import type { CategoryResponseDto, BrandResponseDto, ProductImageDto, BundleItemDto } from '@/types/product.types';
+import type { CategoryResponseDto, BrandResponseDto, ProductImageDto, BundleItemDto, SpecificationDto, DocumentDto } from '@/types/product.types';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import { toast } from 'react-toastify';
 
@@ -29,6 +29,12 @@ const AdminProductFormPage = () => {
     const [newPreviews, setNewPreviews] = useState<string[]>([]);
     const [uploadingImages, setUploadingImages] = useState(false);
 
+    // STEM feature states
+    interface SpecRow { specName: string; specValue: string; displayOrder: number; }
+    interface DocRow { documentType: string; title: string; url: string; displayOrder: number; }
+    const [specs, setSpecs] = useState<SpecRow[]>([]);
+    const [docs, setDocs] = useState<DocRow[]>([]);
+
     // KIT bundle state
     interface KitComponent {
         productId: number;
@@ -47,6 +53,7 @@ const AdminProductFormPage = () => {
         name: '',
         sku: '',
         description: '',
+        compatibilityInfo: '',
         productType: 'MODULE',
         price: 0,
         stockQuantity: 0,
@@ -71,6 +78,7 @@ const AdminProductFormPage = () => {
                         name: product.name,
                         sku: product.sku,
                         description: product.description || '',
+                        compatibilityInfo: product.compatibilityInfo || '',
                         productType: product.productType,
                         price: product.price,
                         stockQuantity: product.stockQuantity,
@@ -80,6 +88,16 @@ const AdminProductFormPage = () => {
                         categoryIds: product.categories?.map(c => c.categoryId) || [],
                     });
                     setExistingImages(product.images || []);
+                    if (product.specifications) {
+                        setSpecs(product.specifications.map((s: SpecificationDto) => ({
+                            specName: s.specName, specValue: s.specValue, displayOrder: s.displayOrder,
+                        })));
+                    }
+                    if (product.documents) {
+                        setDocs(product.documents.map((d: DocumentDto) => ({
+                            documentType: d.documentType, title: d.title, url: d.url, displayOrder: d.displayOrder,
+                        })));
+                    }
                     // Load existing KIT components
                     if (product.productType === 'KIT' && product.bundleComponents) {
                         const comps: KitComponent[] = product.bundleComponents.map((b: BundleItemDto) => ({
@@ -217,7 +235,10 @@ const AdminProductFormPage = () => {
             if (isEdit) {
                 const data = {
                     ...form,
+                    compatibilityInfo: form.compatibilityInfo || undefined,
                     warrantyPolicyId: form.warrantyPolicyId || undefined,
+                    specifications: specs,
+                    documents: docs,
                 };
                 await updateProduct(Number(id), data);
                 productId = Number(id);
@@ -256,10 +277,13 @@ const AdminProductFormPage = () => {
                     name: form.name,
                     sku: form.sku,
                     description: form.description || undefined,
+                    compatibilityInfo: form.compatibilityInfo || undefined,
                     price: form.price,
                     brandId: form.brandId,
                     warrantyPolicyId: form.warrantyPolicyId || undefined,
                     categoryIds: form.categoryIds,
+                    specifications: specs,
+                    documents: docs,
                     components: kitComponents.map(c => ({ productId: c.productId, quantity: c.quantity })),
                 }) as any;
                 productId = created?.productId ?? created?.data?.productId ?? 0;
@@ -267,7 +291,10 @@ const AdminProductFormPage = () => {
             } else {
                 const data = {
                     ...form,
+                    compatibilityInfo: form.compatibilityInfo || undefined,
                     warrantyPolicyId: form.warrantyPolicyId || undefined,
+                    specifications: specs,
+                    documents: docs,
                 };
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const created = await createProduct(data) as any;
@@ -354,6 +381,127 @@ const AdminProductFormPage = () => {
                             onChange={(e) => setForm(p => ({ ...p, description: e.target.value }))}
                             placeholder="Product description..."
                         />
+                    </div>
+
+                    {/* Compatibility Info */}
+                    <div className="admin-form-group">
+                        <label className="admin-form-label">Thông tin tương thích</label>
+                        <input
+                            className="admin-form-input"
+                            value={form.compatibilityInfo}
+                            onChange={(e) => setForm(p => ({ ...p, compatibilityInfo: e.target.value }))}
+                            placeholder="Ví dụ: Arduino Uno, ESP32, Raspberry Pi..."
+                            maxLength={2000}
+                        />
+                        <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
+                            Hiển thị tại trang chi tiết sản phẩm giúp người mua biết phần cứng tương thích.
+                        </p>
+                    </div>
+
+                    {/* Technical Specifications */}
+                    <div className="admin-form-group" style={{ marginTop: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <label className="admin-form-label" style={{ fontSize: '15px', fontWeight: 700, marginBottom: 0 }}>
+                                Thông số kỹ thuật
+                            </label>
+                            <button
+                                type="button"
+                                onClick={() => setSpecs(prev => [...prev, { specName: '', specValue: '', displayOrder: prev.length }])}
+                                style={{ padding: '4px 12px', background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '6px', color: '#1d4ed8', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                + Thêm thông số
+                            </button>
+                        </div>
+                        {specs.length === 0 ? (
+                            <p style={{ fontSize: '12px', color: '#94a3b8' }}>Chưa có thông số nào. Nhấn "+ Thêm thông số" để bắt đầu.</p>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {specs.map((spec, idx) => (
+                                    <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <input
+                                            className="admin-form-input"
+                                            value={spec.specName}
+                                            onChange={(e) => setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, specName: e.target.value } : s))}
+                                            placeholder="Tên thông số (VD: Điện áp)"
+                                            style={{ flex: 1 }}
+                                        />
+                                        <input
+                                            className="admin-form-input"
+                                            value={spec.specValue}
+                                            onChange={(e) => setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, specValue: e.target.value } : s))}
+                                            placeholder="Giá trị (VD: 3.3V - 5V)"
+                                            style={{ flex: 2 }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setSpecs(prev => prev.filter((_, i) => i !== idx))}
+                                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                                        >
+                                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Product Documents */}
+                    <div className="admin-form-group" style={{ marginTop: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <label className="admin-form-label" style={{ fontSize: '15px', fontWeight: 700, marginBottom: 0 }}>
+                                Tài liệu đi kèm
+                            </label>
+                            <button
+                                type="button"
+                                onClick={() => setDocs(prev => [...prev, { documentType: 'DATASHEET', title: '', url: '', displayOrder: prev.length }])}
+                                style={{ padding: '4px 12px', background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '6px', color: '#1d4ed8', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                + Thêm tài liệu
+                            </button>
+                        </div>
+                        {docs.length === 0 ? (
+                            <p style={{ fontSize: '12px', color: '#94a3b8' }}>Chưa có tài liệu. Nhấn "+ Thêm tài liệu" để thêm datasheet, pinout, tutorial...</p>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {docs.map((doc, idx) => (
+                                    <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <select
+                                            value={doc.documentType}
+                                            onChange={(e) => setDocs(prev => prev.map((d, i) => i === idx ? { ...d, documentType: e.target.value } : d))}
+                                            className="admin-select"
+                                            style={{ width: '140px', flexShrink: 0 }}
+                                        >
+                                            <option value="DATASHEET">Datasheet</option>
+                                            <option value="TUTORIAL">Tutorial</option>
+                                            <option value="PINOUT">Pinout</option>
+                                            <option value="CODE_EXAMPLE">Code mẫu</option>
+                                            <option value="OTHER">Khác</option>
+                                        </select>
+                                        <input
+                                            className="admin-form-input"
+                                            value={doc.title}
+                                            onChange={(e) => setDocs(prev => prev.map((d, i) => i === idx ? { ...d, title: e.target.value } : d))}
+                                            placeholder="Tiêu đề (VD: Arduino Uno Datasheet)"
+                                            style={{ flex: 1, minWidth: '120px' }}
+                                        />
+                                        <input
+                                            className="admin-form-input"
+                                            value={doc.url}
+                                            onChange={(e) => setDocs(prev => prev.map((d, i) => i === idx ? { ...d, url: e.target.value } : d))}
+                                            placeholder="URL tài liệu"
+                                            style={{ flex: 2, minWidth: '180px' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setDocs(prev => prev.filter((_, i) => i !== idx))}
+                                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                                        >
+                                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="admin-form-row">

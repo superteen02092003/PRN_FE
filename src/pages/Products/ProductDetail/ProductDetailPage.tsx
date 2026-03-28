@@ -22,7 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { ReviewFilterParams } from '@/types/product.types';
 import './ProductDetailPage.css';
 
-type TabType = 'description' | 'reviews' | 'bundle';
+type TabType = 'description' | 'reviews' | 'bundle' | 'specifications' | 'documents';
 
 const ProductDetailPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -203,12 +203,18 @@ const ProductDetailPage = () => {
 
     // Determine available tabs
     const tabs: { key: TabType; label: string }[] = [
-        { key: 'description', label: 'Description' },
-        { key: 'reviews', label: `Reviews (${reviews?.summary?.totalReviews ?? product.totalReviews ?? 0})` },
+        { key: 'description', label: 'Mô tả' },
     ];
     if (product.productType === 'KIT') {
-        tabs.splice(1, 0, { key: 'bundle', label: 'Kit Contents' });
+        tabs.push({ key: 'bundle', label: 'Bộ kit bao gồm' });
     }
+    if (product.specifications && product.specifications.length > 0) {
+        tabs.push({ key: 'specifications', label: 'Thông số kỹ thuật' });
+    }
+    if (product.documents && product.documents.length > 0) {
+        tabs.push({ key: 'documents', label: 'Tài liệu' });
+    }
+    tabs.push({ key: 'reviews', label: `Đánh giá (${reviews?.summary?.totalReviews ?? product.totalReviews ?? 0})` });
 
     return (
         <>
@@ -266,15 +272,15 @@ const ProductDetailPage = () => {
                                 <div className="trust-badges">
                                     <div className="trust-badge">
                                         <span className="material-symbols-outlined">local_shipping</span>
-                                        <span>Free shipping over $50</span>
+                                        <span>Miễn phí ship đơn từ 500K</span>
                                     </div>
                                     <div className="trust-badge">
                                         <span className="material-symbols-outlined">undo</span>
-                                        <span>30-day returns</span>
+                                        <span>Hỗ trợ trả/đổi hàng</span>
                                     </div>
                                     <div className="trust-badge">
                                         <span className="material-symbols-outlined">lock</span>
-                                        <span>Secure payment</span>
+                                        <span>Thanh toán bảo mật</span>
                                     </div>
                                 </div>
                             </div>
@@ -304,8 +310,77 @@ const ProductDetailPage = () => {
                                             {product.description}
                                         </div>
                                     ) : (
-                                        <p className="no-description">No description available.</p>
+                                        <p className="no-description">Chưa có mô tả sản phẩm.</p>
                                     )}
+                                    {product.compatibilityInfo && (
+                                        <div className="compatibility-info">
+                                            <h4 className="compatibility-title">
+                                                <span className="material-symbols-outlined">cable</span>
+                                                Tương thích với
+                                            </h4>
+                                            <p className="compatibility-text">{product.compatibilityInfo}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Specifications Tab */}
+                            {activeTab === 'specifications' && (
+                                <div className="tab-panel specs-panel">
+                                    <h3 className="specs-title">Thông số kỹ thuật</h3>
+                                    <table className="specs-table">
+                                        <tbody>
+                                            {product.specifications?.map((spec) => (
+                                                <tr key={spec.specificationId}>
+                                                    <td className="spec-name">{spec.specName}</td>
+                                                    <td className="spec-value">{spec.specValue}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+
+                            {/* Documents Tab */}
+                            {activeTab === 'documents' && (
+                                <div className="tab-panel docs-panel">
+                                    <h3 className="docs-title">Tài liệu & Hướng dẫn</h3>
+                                    {(['DATASHEET', 'TUTORIAL', 'PINOUT', 'CODE_EXAMPLE', 'OTHER'] as const).map((type) => {
+                                        const docsOfType = product.documents?.filter((d) => d.documentType === type) ?? [];
+                                        if (docsOfType.length === 0) return null;
+                                        const typeLabel: Record<string, string> = {
+                                            DATASHEET: 'Datasheet',
+                                            TUTORIAL: 'Hướng dẫn',
+                                            PINOUT: 'Pinout Diagram',
+                                            CODE_EXAMPLE: 'Code Mẫu',
+                                            OTHER: 'Khác',
+                                        };
+                                        const typeIcon: Record<string, string> = {
+                                            DATASHEET: 'description',
+                                            TUTORIAL: 'school',
+                                            PINOUT: 'account_tree',
+                                            CODE_EXAMPLE: 'code',
+                                            OTHER: 'attach_file',
+                                        };
+                                        return (
+                                            <div key={type} className="doc-group">
+                                                <h4 className="doc-group-title">
+                                                    <span className="material-symbols-outlined">{typeIcon[type]}</span>
+                                                    {typeLabel[type]}
+                                                </h4>
+                                                <ul className="doc-list">
+                                                    {docsOfType.map((doc) => (
+                                                        <li key={doc.documentId}>
+                                                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="doc-link">
+                                                                <span className="material-symbols-outlined">open_in_new</span>
+                                                                {doc.title}
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
 
@@ -361,6 +436,40 @@ const ProductDetailPage = () => {
                             )}
                         </div>
                     </section>
+
+                    {/* Related Products Section */}
+                    {product.relatedProducts && product.relatedProducts.length > 0 && (
+                        <section className="related-products-section">
+                            <h2 className="related-title">Sản phẩm liên quan</h2>
+                            <div className="related-scroll">
+                                {product.relatedProducts.map((related) => (
+                                    <div
+                                        key={related.relatedProductId}
+                                        className="related-card"
+                                        onClick={() => navigate(`/products/${related.productId}`)}
+                                    >
+                                        <div className="related-img-wrap">
+                                            {related.primaryImage ? (
+                                                <img src={related.primaryImage} alt={related.name} className="related-img" />
+                                            ) : (
+                                                <div className="related-img-placeholder">
+                                                    <span className="material-symbols-outlined">image</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="related-info">
+                                            <span className={`relation-badge relation-badge--${related.relationType.toLowerCase()}`}>
+                                                {related.relationType === 'ACCESSORY' ? 'Phụ kiện' : related.relationType === 'SIMILAR' ? 'Tương tự' : 'Gợi ý bộ kit'}
+                                            </span>
+                                            <p className="related-name">{related.name}</p>
+                                            <p className="related-sku">{related.sku}</p>
+                                            <p className="related-price">{related.price.toLocaleString('vi-VN')}₫</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </div>
             </main>
             <Footer />

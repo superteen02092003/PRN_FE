@@ -146,10 +146,13 @@ interface CreateKitRequest {
     name: string;
     sku: string;
     description?: string;
+    compatibilityInfo?: string;
     price: number;
     brandId: number;
     warrantyPolicyId?: number;
     categoryIds: number[];
+    specifications?: { specName: string; specValue: string; displayOrder: number }[];
+    documents?: { documentType: string; title: string; url: string; displayOrder: number }[];
     components: { productId: number; quantity: number }[];
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getShippingInfo, getPaymentMethods, validateCheckout } from '../services/checkoutService';
@@ -174,11 +174,11 @@ export const useCheckout = (initialCoupon?: string): UseCheckoutReturn => {
         return Object.keys(errors).length === 0;
     }, [formData]);
 
-    // Re-validate checkout (when coupon changes)
+    // Re-validate checkout (when coupon or province changes)
     const revalidateCheckout = useCallback(async () => {
         setIsValidating(true);
         try {
-            const result = await validateCheckout(couponCode || undefined);
+            const result = await validateCheckout(couponCode || undefined, formData.province || undefined);
             setCheckoutValidation(result);
             if (result.couponError) {
                 setCouponCode('');
@@ -190,7 +190,16 @@ export const useCheckout = (initialCoupon?: string): UseCheckoutReturn => {
         } finally {
             setIsValidating(false);
         }
-    }, [couponCode]);
+    }, [couponCode, formData.province]);
+
+    // Re-validate when province changes to update shipping fee
+    const prevProvinceRef = useRef('');
+    useEffect(() => {
+        if (formData.province && formData.province !== prevProvinceRef.current && !isLoading) {
+            prevProvinceRef.current = formData.province;
+            revalidateCheckout();
+        }
+    }, [formData.province, isLoading, revalidateCheckout]);
 
     // Submit order
     const handleSubmit = useCallback(async () => {

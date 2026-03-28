@@ -16,6 +16,64 @@
     border-bottom: 1px solid #e5e7eb;
 }
 
+/* Free Shipping Banner */
+.free-shipping-banner {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+}
+
+.free-shipping-banner--achieved {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.free-shipping-banner__text {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #92400e;
+    margin-bottom: 0.5rem;
+}
+
+.free-shipping-banner--achieved .free-shipping-banner__text {
+    color: #166534;
+}
+
+.free-shipping-banner__text .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.free-shipping-progress {
+    height: 6px;
+    background: #fde68a;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.free-shipping-banner--achieved .free-shipping-progress {
+    background: #bbf7d0;
+}
+
+.free-shipping-progress__bar {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.free-shipping-banner--achieved .free-shipping-progress__bar {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.shipping-free-label {
+    color: #16a34a;
+    font-weight: 700;
+}
+
 .cart-summary__body {
     display: flex;
     flex-direction: column;
