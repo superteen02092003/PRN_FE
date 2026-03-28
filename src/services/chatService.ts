@@ -33,24 +33,20 @@ interface PagedChatResponse {
 // ===== SignalR Connection =====
 
 let connection: signalR.HubConnection | null = null;
+let isConnecting = false;
 
 const getBaseUrl = (): string => {
-    // In dev: use relative URL so Vite proxy handles /hubs/*
-    // In production: use the deployed BE base URL
     if (import.meta.env.DEV) return '';
     const apiUrl = import.meta.env.VITE_API_URL || '/api';
     return apiUrl.replace(/\/api\/?$/, '');
 };
 
-export const connectToChat = (
-    onReceiveMessage?: (message: ChatMessageDto) => void
-): signalR.HubConnection => {
-    // Stop any existing connection first (handles React Strict Mode double-mount)
-    if (connection) {
-        connection.stop().catch(() => {});
-        connection = null;
+export const connectToChat = async (): Promise<signalR.HubConnection> => {
+    if (connection && (connection.state === signalR.HubConnectionState.Connected || isConnecting)) {
+        return connection;
     }
 
+    isConnecting = true;
     const token = localStorage.getItem('token') || '';
     const baseUrl = getBaseUrl();
 
@@ -62,31 +58,41 @@ export const connectToChat = (
         .configureLogging(signalR.LogLevel.Warning)
         .build();
 
-    if (onReceiveMessage) {
-        connection.on('ReceiveMessage', (message: ChatMessageDto) => {
-            onReceiveMessage(message);
-        });
-    }
-
-    connection.start().catch(err => {
-        console.warn('SignalR connection failed, using REST fallback:', err);
+    // Global listener for realtime badge updates on ANY page
+    connection.on('ReceiveMessage', () => {
+        window.dispatchEvent(new Event('chatUnreadIncrement'));
     });
+
+    try {
+        await connection.start();
+    } catch (err) {
+        console.warn('SignalR connection failed, using REST fallback:', err);
+    } finally {
+        isConnecting = false;
+    }
 
     return connection;
 };
 
 export const disconnectChat = async (): Promise<void> => {
-    if (connection) {
-        try {
-            await connection.stop();
-        } catch {
-            // Ignore errors when stopping (e.g., connection not yet started)
-        }
-        connection = null;
-    }
+    // We intentionally DO NOT stop the connection anymore, 
+    // so that global unread counters continue to receive events.
 };
 
 export const getConnection = (): signalR.HubConnection | null => connection;
+
+// ===== Upload Image =====
+
+export const uploadChatImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const response = await api.post<{ success: boolean; data: { imageUrl: string } }>(
+        '/chat/upload-image',
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data.data.imageUrl;
+};
 
 // ===== Send Message =====
 
@@ -177,6 +183,7 @@ const chatService = {
     connectToChat,
     disconnectChat,
     sendMessage,
+    uploadChatImage,
     getChatHistory,
     getConversations,
     getChatHistoryWithUser,

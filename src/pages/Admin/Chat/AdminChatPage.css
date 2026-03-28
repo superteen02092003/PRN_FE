@@ -231,6 +231,86 @@
     margin-top: 4px;
 }
 
+/* Image in message bubble */
+.admin-chat-msg-image {
+    display: block;
+    max-width: 100%;
+    max-height: 240px;
+    border-radius: 10px;
+    object-fit: contain;
+    cursor: pointer;
+}
+
+/* Image preview above input bar */
+.admin-chat-image-preview {
+    position: relative;
+    display: inline-block;
+    margin: 0 20px 6px;
+    border-radius: 10px;
+    overflow: visible;
+}
+
+.admin-chat-image-preview img {
+    display: block;
+    max-height: 100px;
+    max-width: 160px;
+    border-radius: 10px;
+    border: 2px solid #bfdbfe;
+    object-fit: cover;
+}
+
+.admin-chat-image-preview-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.admin-chat-image-preview-remove .material-symbols-outlined {
+    font-size: 13px;
+}
+
+/* Image picker button */
+.admin-chat-image-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.admin-chat-image-btn:hover:not(:disabled) {
+    background: #dbeafe;
+    border-color: #93c5fd;
+    color: #2463eb;
+}
+
+.admin-chat-image-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.admin-chat-image-btn .material-symbols-outlined {
+    font-size: 18px;
+}
+
 /* Input */
 .admin-chat-input {
     display: flex;
@@ -253,7 +333,7 @@
     border-color: #2463eb;
 }
 
-.admin-chat-input button {
+.admin-chat-input button:not(.admin-chat-image-btn) {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -267,11 +347,11 @@
     flex-shrink: 0;
 }
 
-.admin-chat-input button:disabled {
+.admin-chat-input button:not(.admin-chat-image-btn):disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-.admin-chat-input button .material-symbols-outlined {
+.admin-chat-input button:not(.admin-chat-image-btn) .material-symbols-outlined {
     font-size: 18px;
 }

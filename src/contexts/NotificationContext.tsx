@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import notificationService from '@/services/notificationService';
+import { connectToChat } from '@/services/chatService';
 
 export interface Notification {
     id: string;
@@ -65,6 +66,9 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         if (!token) return;
 
         try {
+            // Also ensure ChatHub is connected globally so we receive chatUnreadIncrement on any page
+            connectToChat().catch(console.error);
+
             const conn = notificationService.connectNotifications(
                 (eventType, data) => {
                     const id = data.id?.toString() || `${Date.now()}`;
@@ -105,6 +109,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
                                 title = `New message from ${data.senderName}`;
                                 message = data.messagePreview || 'You have a new message.';
                                 link = `/chat`;
+                                window.dispatchEvent(new Event('chatUnreadIncrement'));
                                 break;
                             default:
                                 title = `Notification: ${eventType}`;

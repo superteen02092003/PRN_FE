@@ -30,7 +30,8 @@ const NotificationPage = () => {
     };
 
     const formatTime = (ts: string) => {
-        const date = new Date(ts);
+        const dateStr = (ts.endsWith('Z') || ts.includes('+') || (ts.includes('-') && ts.includes('T'))) ? ts : ts + 'Z';
+        const date = new Date(dateStr);
         const diff = Date.now() - date.getTime();
         const mins = Math.floor(diff / 60000);
         if (mins < 1) return 'Vừa xong';

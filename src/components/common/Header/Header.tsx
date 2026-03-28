@@ -60,33 +60,73 @@ const Header = () => {
 
     // Cart count listener
     useEffect(() => {
-        const updateCartCount = () => {
-            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const total = cart.reduce((sum: number, item: { quantity?: number }) => sum + (item.quantity || 1), 0);
-            setCartItemCount(total);
+        if (!user) {
+            setCartItemCount(0);
+            return;
+        }
+        const updateCartCount = async () => {
+            try {
+                const { getCart } = await import('@/services/cartService');
+                const cartData = await getCart();
+                setCartItemCount(cartData.items?.length || 0);
+            } catch (error) {
+                console.error('Failed to fetch cart:', error);
+            }
         };
         updateCartCount();
-        window.addEventListener('storage', updateCartCount);
-        window.addEventListener('cartUpdated', updateCartCount);
+        window.addEventListener('cartUpdate', updateCartCount);
         return () => {
-            window.removeEventListener('storage', updateCartCount);
-            window.removeEventListener('cartUpdated', updateCartCount);
+            window.removeEventListener('cartUpdate', updateCartCount);
         };
-    }, []);
+    }, [user]);
 
     // Chat unread count
     useEffect(() => {
-        if (!user) { setChatUnreadCount(0); return; }
-        const updateUnread = () => {
-            const count = parseInt(localStorage.getItem('chatUnreadCount') || '0', 10);
-            setChatUnreadCount(count);
+        if (!user) { 
+            setChatUnreadCount(0); 
+            return; 
+        }
+        
+        // Initial fetch on mount
+        const fetchInitialUnread = async () => {
+            try {
+                const { getUnreadCount } = await import('@/services/chatService');
+                const totalUnread = await getUnreadCount();
+                const watermark = parseInt(localStorage.getItem('chatWatermark') || '0', 10);
+                
+                // Real unread is the difference between total unread from backend and the watermark
+                // But it can never be negative
+                const displayCount = Math.max(0, totalUnread - watermark);
+                
+                setChatUnreadCount(displayCount);
+                localStorage.setItem('chatTotalUnread', totalUnread.toString());
+            } catch (error) {
+                // If API fails, safely default to 0
+                setChatUnreadCount(0);
+            }
         };
-        updateUnread();
-        window.addEventListener('storage', updateUnread);
-        window.addEventListener('chatUnreadUpdated', updateUnread);
+        fetchInitialUnread();
+        
+        // Listen to custom events internally
+        const handleIncrement = () => {
+            setChatUnreadCount(prev => prev + 1);
+            // Also increment the total tracking so if page reloads it's consistent
+            const total = parseInt(localStorage.getItem('chatTotalUnread') || '0', 10);
+            localStorage.setItem('chatTotalUnread', (total + 1).toString());
+        };
+
+        const handleClear = () => {
+            setChatUnreadCount(0);
+            // When cleared by clicking, we push the watermark up to match the current total
+            const total = parseInt(localStorage.getItem('chatTotalUnread') || '0', 10);
+            localStorage.setItem('chatWatermark', total.toString());
+        };
+
+        window.addEventListener('chatUnreadIncrement', handleIncrement);
+        window.addEventListener('chatUnreadClear', handleClear);
         return () => {
-            window.removeEventListener('storage', updateUnread);
-            window.removeEventListener('chatUnreadUpdated', updateUnread);
+            window.removeEventListener('chatUnreadIncrement', handleIncrement);
+            window.removeEventListener('chatUnreadClear', handleClear);
         };
     }, [user]);
 
@@ -301,7 +341,9 @@ const Header = () => {
                                 <NotificationDropdown />
 
                                 {/* Chat */}
-                                <Link to="/chat" className="header__action-btn" title="Chat Support">
+                                <Link to="/chat" className="header__action-btn" title="Chat Support" onClick={() => {
+                                    window.dispatchEvent(new Event('chatUnreadClear'));
+                                }}>
                                     <span className="material-symbols-outlined">chat</span>
                                     {chatUnreadCount > 0 && (
                                         <span className="header__badge">{chatUnreadCount > 99 ? '99+' : chatUnreadCount}</span>

@@ -76,9 +76,55 @@ const ProductDetailPage = () => {
     }, [activeTab, shouldLoadReviews]);
 
     // Handlers
+    const triggerFlyToCart = () => {
+        const img = document.querySelector('.main-image') as HTMLImageElement;
+        const cartIcon = document.querySelector('.header__action-btn[title="Cart"]') as HTMLElement;
+
+        if (!img || !cartIcon) return;
+
+        const imgRect = img.getBoundingClientRect();
+        const cartRect = cartIcon.getBoundingClientRect();
+
+        const clone = img.cloneNode(true) as HTMLImageElement;
+        clone.style.position = 'fixed';
+        clone.style.top = `${imgRect.top}px`;
+        clone.style.left = `${imgRect.left}px`;
+        clone.style.width = `${imgRect.width}px`;
+        clone.style.height = `${imgRect.height}px`;
+        clone.style.objectFit = 'cover';
+        clone.style.borderRadius = '50%';
+        clone.style.zIndex = '9999';
+        clone.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        clone.style.pointerEvents = 'none';
+
+        document.body.appendChild(clone);
+
+        // Force reflow
+        void clone.offsetWidth;
+
+        clone.style.top = `${cartRect.top + cartRect.height / 2 - 15}px`;
+        clone.style.left = `${cartRect.left + cartRect.width / 2 - 15}px`;
+        clone.style.width = '30px';
+        clone.style.height = '30px';
+        clone.style.opacity = '0.5';
+
+        setTimeout(() => {
+            clone.remove();
+            cartIcon.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            cartIcon.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                cartIcon.style.transform = 'scale(1)';
+            }, 200);
+        }, 800);
+    };
+
     const handleAddToCart = async (quantity: number): Promise<boolean> => {
         if (!productId) return false;
-        return await addToCart(productId, quantity);
+        const success = await addToCart(productId, quantity);
+        if (success) {
+            triggerFlyToCart();
+        }
+        return success;
     };
 
     const handleLoginClick = () => {

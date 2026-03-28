@@ -43,13 +43,16 @@ const NotificationDropdown = () => {
     };
 
     const formatTime = (ts: string) => {
-        const diff = Date.now() - new Date(ts).getTime();
+        // Robust parsing: if the string doesn't end with Z or include an offset, add Z to force UTC parsing
+        const dateStr = (ts.endsWith('Z') || ts.includes('+') || (ts.includes('-') && ts.includes('T'))) ? ts : ts + 'Z';
+        const date = new Date(dateStr);
+        const diff = Date.now() - date.getTime();
         const mins = Math.floor(diff / 60000);
-        if (mins < 1) return 'Just now';
-        if (mins < 60) return `${mins}m ago`;
+        if (mins < 1) return 'Vừa xong';
+        if (mins < 60) return `${mins}ph trước`;
         const hours = Math.floor(mins / 60);
-        if (hours < 24) return `${hours}h ago`;
-        return `${Math.floor(hours / 24)}d ago`;
+        if (hours < 24) return `${hours}h trước`;
+        return date.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' });
     };
 
     return (
