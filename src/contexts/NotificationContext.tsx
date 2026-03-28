@@ -25,10 +25,13 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
+import { useAuth } from './AuthContext';
+
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
+    const { isAuthenticated } = useAuth();
 
     const fetchNotifications = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -60,6 +63,13 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
     // SignalR Connection
     useEffect(() => {
+        if (!isAuthenticated) {
+            setIsConnected(false);
+            setNotifications([]);
+            setUnreadCount(0);
+            return;
+        }
+
         fetchNotifications();
 
         const token = localStorage.getItem('token');
@@ -150,7 +160,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         return () => {
             notificationService.disconnectNotifications().catch(console.error);
         };
-    }, [addNotification, fetchNotifications]);
+    }, [addNotification, fetchNotifications, isAuthenticated]);
 
     const markAsRead = useCallback(async (id: string) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));

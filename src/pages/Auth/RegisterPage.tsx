@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import authService, { RegisterRequest, ApiError } from '../../services/authService';
 
 const RegisterPage = () => {
@@ -17,6 +17,15 @@ const RegisterPage = () => {
         address: '',
         agreeTerms: false,
     });
+    const location = useLocation();
+
+    // Check for error message from OAuth redirect
+    useEffect(() => {
+        if (location.state?.error) {
+            setError(location.state.error);
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
 
     // Password strength calculation
     const getPasswordStrength = (pass: string) => {

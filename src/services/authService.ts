@@ -58,6 +58,16 @@ const authService = {
         return response.data;
     },
 
+    googleLogin: async (code: string, redirectUri: string): Promise<AuthResponseData> => {
+        const response = await api.post<AuthResponseData>('/auth/google', { code, redirectUri });
+        return response.data;
+    },
+
+    githubLogin: async (code: string, redirectUri: string): Promise<AuthResponseData> => {
+        const response = await api.post<AuthResponseData>('/auth/github', { code, redirectUri });
+        return response.data;
+    },
+
     getProfile: async (): Promise<ApiResponse<UserProfile>> => {
         try {
             const response = await api.get<any>(`/users/me`);
@@ -134,7 +144,7 @@ const authService = {
 
     uploadAvatar: async (file: File): Promise<string> => {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('files', file);
         const response = await api.post<{ success: boolean; data: { avatarUrl: string }; message: string }>(
             '/users/me/avatar',
             formData,

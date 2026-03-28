@@ -8,6 +8,7 @@ interface AuthContextType {
     login: (data: LoginRequest) => Promise<AuthResponseData>;
     logout: () => void;
     refreshUser: () => Promise<void>;
+    oauthLogin: (response: AuthResponseData) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -65,6 +66,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return response;
     };
 
+    const oauthLogin = (response: AuthResponseData) => {
+        localStorage.setItem('token', response.accessToken);
+        const userProfile: UserProfile = {
+            userId: response.userId,
+            username: response.username,
+            email: response.email,
+            role: response.role,
+        };
+        localStorage.setItem('user', JSON.stringify(userProfile));
+        setUser(userProfile);
+        window.dispatchEvent(new Event('authChange'));
+    };
+
     const logout = () => {
         authService.logout();
         setUser(null);
@@ -96,6 +110,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             login,
             logout,
             refreshUser,
+            oauthLogin,
         }}>
             {children}
         </AuthContext.Provider>

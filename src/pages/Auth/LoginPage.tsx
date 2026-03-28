@@ -65,6 +65,20 @@ const LoginPage = () => {
         }
     };
 
+    const handleGoogleLogin = () => {
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+        const redirectUri = `${window.location.origin}/auth/callback`;
+        const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid email profile&state=google`;
+        window.location.href = url;
+    };
+
+    const handleGithubLogin = () => {
+        const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+        const redirectUri = `${window.location.origin}/auth/callback`;
+        const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email&state=github`;
+        window.location.href = url;
+    };
+
     return (
         <div style={{
             fontFamily: "'Inter', sans-serif",
@@ -219,6 +233,7 @@ const LoginPage = () => {
                     <div style={{ display: 'flex', gap: '12px' }}>
                         <button
                             type="button"
+                            onClick={handleGithubLogin}
                             style={{
                                 flex: 1,
                                 display: 'flex',
@@ -250,6 +265,7 @@ const LoginPage = () => {
                         </button>
                         <button
                             type="button"
+                            onClick={handleGoogleLogin}
                             style={{
                                 flex: 1,
                                 display: 'flex',
