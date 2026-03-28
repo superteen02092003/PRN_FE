@@ -168,8 +168,14 @@ export const useCart = (): UseCartResult => {
             }
             return result;
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to validate coupon');
-            return null;
+            // validateCouponApi đã bắt lỗi 4xx nội bộ — catch này chỉ chạy nếu có lỗi network thực sự.
+            // KHÔNG setError() ở đây vì lỗi coupon không phải lỗi fatal của cart page.
+            console.error('[useCart] validateCoupon unexpected error:', err);
+            return {
+                isValid: false,
+                message: err instanceof Error ? err.message : 'Failed to validate coupon',
+                coupon: null,
+            };
         }
     }, []);
 

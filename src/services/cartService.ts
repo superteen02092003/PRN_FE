@@ -137,36 +137,54 @@ export const clearCart = async (): Promise<void> => {
 
 /**
  * Validate và áp dụng mã giảm giá
- * Backend trả về ValidateCouponResponseDto, transform sang CouponValidationResult
+ * Backend trả về ValidateCouponResponseDto, transform sang CouponValidationResult.
+ * Luôn trả về CouponValidationResult (KHÔNG throw) — lỗi 4xx được bắt và trả về isValid: false.
  */
 export const validateCoupon = async (
     data: ValidateCouponDto
 ): Promise<CouponValidationResult> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await api.post<any>('/Cart/validate-coupon', data);
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response = await api.post<any>('/Cart/validate-coupon', data);
 
-    if (!response.data.success || !response.data.data) {
-        // Backend trả về lỗi → isValid = false
+        if (!response.data.success || !response.data.data) {
+            // Backend trả về success:false với HTTP 200 (hiếm gặp, nhưng xử lý an toàn)
+            return {
+                isValid: false,
+                message: response.data.message || 'Invalid coupon code',
+                coupon: null,
+            };
+        }
+
+        // Transform backend ValidateCouponResponseDto → CouponValidationResult
+        const raw = response.data.data;
+        return {
+            isValid: true,
+            message: raw.message ?? 'Coupon applied successfully',
+            coupon: {
+                couponCode: raw.code ?? '',
+                discountType: (raw.discountType === 'PERCENTAGE' ? 'PERCENTAGE' : 'FIXED') as 'PERCENTAGE' | 'FIXED',
+                discountValue: raw.discountValue ?? 0,
+                discountAmount: raw.calculatedDiscount ?? 0,
+            },
+            // Truyền thêm newTotal để useCart cập nhật summary
+            _newTotal: raw.newTotal ?? 0,
+            _cartSubtotal: raw.cartSubtotal ?? 0,
+        } as CouponValidationResult & { _newTotal: number; _cartSubtotal: number };
+    } catch (err: unknown) {
+        // Axios throw khi backend trả về HTTP 4xx (vd: 400 "You have already used this coupon code.")
+        // Bắt lỗi này và trả về isValid: false thay vì để exception lan ra ngoài
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        const message: string =
+            axiosErr?.response?.data?.message ||
+            axiosErr?.message ||
+            'Invalid coupon code';
+        console.warn('[cartService] validateCoupon 4xx:', message);
         return {
             isValid: false,
-            message: response.data.message || 'Invalid coupon code',
+            message,
             coupon: null,
         };
     }
-
-    // Transform backend ValidateCouponResponseDto → CouponValidationResult
-    const raw = response.data.data;
-    return {
-        isValid: true,
-        message: raw.message ?? 'Coupon applied successfully',
-        coupon: {
-            couponCode: raw.code ?? '',
-            discountType: (raw.discountType === 'PERCENTAGE' ? 'PERCENTAGE' : 'FIXED') as 'PERCENTAGE' | 'FIXED',
-            discountValue: raw.discountValue ?? 0,
-            discountAmount: raw.calculatedDiscount ?? 0,
-        },
-        // Truyền thêm newTotal để useCart cập nhật summary
-        _newTotal: raw.newTotal ?? 0,
-        _cartSubtotal: raw.cartSubtotal ?? 0,
-    } as CouponValidationResult & { _newTotal: number; _cartSubtotal: number };
 };

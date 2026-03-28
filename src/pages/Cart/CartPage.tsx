@@ -73,6 +73,9 @@ const CartPage = () => {
         const result = await validateCoupon(code);
         if (result?.isValid) {
             toast.success('Coupon applied successfully!');
+        } else {
+            // Hiển thị rõ lý do coupon không hợp lệ thay vì crash page
+            toast.error(result?.message || 'Invalid coupon code');
         }
         return result;
     };
