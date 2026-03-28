@@ -65,73 +65,78 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         if (!token) return;
 
         try {
-            setIsConnected(true);
-            notificationService.connectNotifications((eventType, data) => {
-                const id = data.id?.toString() || `${Date.now()}`;
-                
-                let title = data.title || 'New Notification';
-                let message = data.message || '';
-                let type: string = eventType;
-                let link: string | undefined = undefined;
+            const conn = notificationService.connectNotifications(
+                (eventType, data) => {
+                    const id = data.id?.toString() || `${Date.now()}`;
 
-                if (!data.title) {
-                    switch (eventType) {
-                        case 'CartUpdated':
-                            type = 'order';
-                            title = 'Cart Updated';
-                            message = `You have ${data.totalItems} items in your cart.`;
-                            link = '/cart';
-                            break;
-                        case 'OrderStatusChanged':
-                            type = 'order';
-                            title = 'Order Status Update';
-                            message = `Your order #${data.orderNumber} is now ${data.status.replace('_', ' ')}.`;
-                            link = `/orders`;
-                            break;
-                        case 'PaymentConfirmed':
-                            type = 'payment';
-                            title = 'Payment Successful';
-                            message = `Payment of ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount)} confirmed for order #${data.orderNumber}.`;
-                            link = `/orders`;
-                            break;
-                        case 'PaymentExpired':
-                            type = 'payment';
-                            title = 'Payment Expired';
-                            message = `Payment for order #${data.orderNumber} has expired.`;
-                            link = `/orders`;
-                            break;
-                        case 'WarrantyClaimStatus':
-                            type = 'warranty';
-                            title = `Warranty Claim ${data.status ? data.status.charAt(0) + data.status.slice(1).toLowerCase() : 'Updated'}`;
-                            message = `Your warranty claim for '${data.productName}' status: ${data.status}.`;
-                            link = `/warranties/claims`;
-                            break;
-                        case 'NewChatMessage':
-                            type = 'chat';
-                            title = `New message from ${data.senderName}`;
-                            message = data.messagePreview || 'You have a new message.';
-                            link = `/chat`;
-                            break;
-                        default:
-                            title = `Notification: ${eventType}`;
-                            message = JSON.stringify(data);
-                            break;
+                    let title = data.title || 'New Notification';
+                    let message = data.message || '';
+                    let type: string = eventType;
+                    let link: string | undefined = undefined;
+
+                    if (!data.title) {
+                        switch (eventType) {
+                            case 'OrderStatusChanged':
+                                type = 'order';
+                                title = 'Order Status Update';
+                                message = `Your order #${data.orderNumber} is now ${data.status.replace('_', ' ')}.`;
+                                link = `/orders`;
+                                break;
+                            case 'PaymentConfirmed':
+                                type = 'payment';
+                                title = 'Payment Successful';
+                                message = `Payment of ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount)} confirmed for order #${data.orderNumber}.`;
+                                link = `/orders`;
+                                break;
+                            case 'PaymentExpired':
+                                type = 'payment';
+                                title = 'Payment Expired';
+                                message = `Payment for order #${data.orderNumber} has expired.`;
+                                link = `/orders`;
+                                break;
+                            case 'WarrantyClaimStatus':
+                                type = 'warranty';
+                                title = `Warranty Claim ${data.status ? data.status.charAt(0) + data.status.slice(1).toLowerCase() : 'Updated'}`;
+                                message = `Your warranty claim for '${data.productName}' status: ${data.status}.`;
+                                link = `/warranties/claims`;
+                                break;
+                            case 'NewChatMessage':
+                                type = 'chat';
+                                title = `New message from ${data.senderName}`;
+                                message = data.messagePreview || 'You have a new message.';
+                                link = `/chat`;
+                                break;
+                            default:
+                                title = `Notification: ${eventType}`;
+                                message = JSON.stringify(data);
+                                break;
+                        }
+                    } else {
+                        type = data.type;
+                        link = data.linkUrl || `/orders`;
                     }
-                } else {
-                    type = data.type;
-                    link = data.linkUrl || `/orders`; 
-                }
 
-                addNotification({ 
-                    id,
-                    type, 
-                    title, 
-                    message, 
-                    link,
-                    read: false,
-                    timestamp: data.timestamp || new Date().toISOString()
-                });
+                    addNotification({
+                        id,
+                        type,
+                        title,
+                        message,
+                        link,
+                        read: false,
+                        timestamp: data.timestamp || new Date().toISOString()
+                    });
+                },
+                () => setIsConnected(true),   // onConnected
+                () => setIsConnected(false)    // onDisconnected
+            );
+
+            // Reconnection lifecycle handlers
+            conn.onreconnecting(() => setIsConnected(false));
+            conn.onreconnected(() => {
+                setIsConnected(true);
+                fetchNotifications(); // Re-fetch để bắt notifications bị miss khi mất kết nối
             });
+            conn.onclose(() => setIsConnected(false));
         } catch (error) {
             console.error('Failed to initialize Notification SignalR:', error);
             setIsConnected(false);

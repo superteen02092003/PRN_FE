@@ -29,9 +29,12 @@ const getBaseUrl = (): string => {
 };
 
 export const connectNotifications = (
-    onNotificationReceived: (eventType: string, data: any) => void
+    onNotificationReceived: (eventType: string, data: any) => void,
+    onConnected?: () => void,
+    onDisconnected?: () => void
 ): signalR.HubConnection => {
     if (connection && connection.state === signalR.HubConnectionState.Connected) {
+        onConnected?.();
         return connection;
     }
 
@@ -46,17 +49,19 @@ export const connectNotifications = (
         .configureLogging(signalR.LogLevel.Warning)
         .build();
 
-    // Register handlers based on backend events
-    connection.on('CartUpdated', (data: any) => onNotificationReceived('CartUpdated', data));
+    // Register handlers based on backend events (CartUpdated removed — không hiển thị cho UX)
     connection.on('OrderStatusChanged', (data: any) => onNotificationReceived('OrderStatusChanged', data));
     connection.on('PaymentConfirmed', (data: any) => onNotificationReceived('PaymentConfirmed', data));
     connection.on('PaymentExpired', (data: any) => onNotificationReceived('PaymentExpired', data));
     connection.on('WarrantyClaimStatus', (data: any) => onNotificationReceived('WarrantyClaimStatus', data));
     connection.on('NewChatMessage', (data: any) => onNotificationReceived('NewChatMessage', data));
 
-    connection.start().catch(err => {
-        console.warn('SignalR notification connection failed:', err);
-    });
+    connection.start()
+        .then(() => onConnected?.())
+        .catch(err => {
+            console.warn('SignalR notification connection failed:', err);
+            onDisconnected?.();
+        });
 
     return connection;
 };
