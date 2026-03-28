@@ -16,6 +16,7 @@ const OrderReview = ({ validation, isValidating, isSubmitting, onSubmit, payment
     const summary = validation?.summary;
     const items = validation?.cartItems || [];
     const coupon = validation?.coupon;
+    const couponError = validation?.couponError;
     const hasStockErrors = validation?.stockErrors && validation.stockErrors.length > 0;
     const canSubmit = !isSubmitting && !isValidating && !hasStockErrors && validation?.isValid;
 
@@ -56,7 +57,7 @@ const OrderReview = ({ validation, isValidating, isSubmitting, onSubmit, payment
                 </div>
             )}
 
-            {/* Coupon */}
+            {/* Coupon applied */}
             {coupon && (
                 <div className="coupon-strip">
                     <svg className="coupon-strip__icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -64,11 +65,31 @@ const OrderReview = ({ validation, isValidating, isSubmitting, onSubmit, payment
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
                     </svg>
                     <span className="coupon-strip__text">
-                        Coupon applied: <strong>{coupon.couponCode}</strong>
+                        Coupon applied: <strong>{coupon.code}</strong>
                     </span>
                     <span className="coupon-strip__amount">
                         -{formatPrice(coupon.discountAmount)}
                     </span>
+                </div>
+            )}
+
+            {/* Coupon error (invalid/expired coupon) */}
+            {couponError && (
+                <div style={{
+                    background: '#fff7ed',
+                    border: '1px solid #fed7aa',
+                    borderRadius: '8px',
+                    padding: '0.625rem 0.875rem',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    color: '#9a3412',
+                }}>
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ flexShrink: 0, marginTop: '1px' }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <span>Coupon not applied: {couponError}</span>
                 </div>
             )}
 

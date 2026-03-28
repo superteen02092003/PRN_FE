@@ -28,10 +28,11 @@ export interface CheckoutShippingInfoDto {
 }
 
 export interface CheckoutCouponDto {
-    couponCode: string;
-    discountType: string;
-    discountValue: number;
+    isApplied: boolean;
+    code: string | null;
     discountAmount: number;
+    // Legacy aliases (phòng khi backend thay đổi field name)
+    couponCode?: string;
 }
 
 export interface CheckoutSummaryDto {
@@ -55,6 +56,8 @@ export interface ValidateCheckoutResponse {
     coupon: CheckoutCouponDto | null;
     summary: CheckoutSummaryDto | null;
     stockErrors: StockErrorDto[] | null;
+    /** Non-null nếu coupon được truyền vào nhưng không hợp lệ. Checkout vẫn load bình thường. */
+    couponError?: string | null;
 }
 
 export interface ShippingInfoResponse {

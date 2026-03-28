@@ -146,17 +146,32 @@ export const useCart = (): UseCartResult => {
     ): Promise<CouponValidationResult | null> => {
         try {
             setError(null);
-            const result = await validateCouponApi({ couponCode });
-            if (result.isValid) {
-                // Refetch cart to get updated totals
-                await fetchCart();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = await validateCouponApi({ couponCode }) as any;
+            if (result.isValid && result.coupon) {
+                // Cập nhật cart state trực tiếp với discount từ response
+                // KHÔNG gọi fetchCart() vì GET /api/Cart luôn trả về discount=0, appliedCoupon=null
+                setCart(prev => {
+                    if (!prev) return prev;
+                    const discountAmount = result.coupon.discountAmount ?? 0;
+                    const newTotal = result._newTotal ?? (prev.summary.subtotal + prev.summary.shippingFee - discountAmount);
+                    return {
+                        ...prev,
+                        appliedCoupon: result.coupon,
+                        summary: {
+                            ...prev.summary,
+                            discount: discountAmount,
+                            total: newTotal,
+                        },
+                    };
+                });
             }
             return result;
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to validate coupon');
             return null;
         }
-    }, [fetchCart]);
+    }, []);
 
     const itemCount = cart?.summary.totalItems ?? 0;
 

@@ -105,6 +105,12 @@ export const useCheckout = (initialCoupon?: string): UseCheckoutReturn => {
                 setPaymentMethods(methodsResult);
                 setCheckoutValidation(validationResult);
 
+                // Nếu coupon không hợp lệ, xóa khỏi state để không gửi lên createOrder
+                if (validationResult.couponError) {
+                    setCouponCode('');
+                    toast.warn(`Coupon not applied: ${validationResult.couponError}`);
+                }
+
                 // Pre-fill form with user's shipping info
                 setFormData(prev => ({
                     ...prev,
@@ -174,6 +180,10 @@ export const useCheckout = (initialCoupon?: string): UseCheckoutReturn => {
         try {
             const result = await validateCheckout(couponCode || undefined);
             setCheckoutValidation(result);
+            if (result.couponError) {
+                setCouponCode('');
+                toast.warn(`Coupon not applied: ${result.couponError}`);
+            }
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Validation failed';
             toast.error(message);

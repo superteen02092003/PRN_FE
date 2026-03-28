@@ -78,8 +78,7 @@ const CartPage = () => {
     };
 
     const handleRemoveCoupon = () => {
-        // For now, we'll refetch cart to clear the coupon state
-        // In a real app, you might have a separate API to remove coupon
+        // Reset cart state: xóa coupon + reset discount về 0
         refetch();
         toast.info('Coupon removed');
     };
@@ -221,6 +220,13 @@ const CartPage = () => {
                             <CartSummary
                                 summary={cart.summary}
                                 appliedCoupon={cart.appliedCoupon}
+                                onCheckout={() =>
+                                    navigate(
+                                        cart.appliedCoupon
+                                            ? `/checkout?coupon=${cart.appliedCoupon.couponCode}`
+                                            : '/checkout'
+                                    )
+                                }
                             />
                         </div>
                     </div>
