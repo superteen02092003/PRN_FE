@@ -53,7 +53,6 @@ const getDateRange = (preset: RangePreset): { from: string; to: string } => {
             from = formatLocalDate(new Date(now.getTime() - 30 * 86400000));
     }
     
-    console.log(`[Revenue Chart] Preset: ${preset}, Date Range: ${from} to ${to}`);
     return { from, to };
 };
 
@@ -94,24 +93,14 @@ const AdminDashboard = () => {
     const fetchRevenueChart = useCallback(async (from: string, to: string) => {
         try {
             setRevenueLoading(true);
-            // When chartStatus is empty, we want to exclude cancelled orders
-            // But backend might not support this, so we fetch all and filter client-side
             const result = await getRevenueChart(from, to, chartStatus || undefined);
-            
-            // If no status filter selected, exclude CANCELLED orders client-side
-            if (!chartStatus) {
-                // Note: Backend should ideally handle this, but we filter here as workaround
-                // This assumes backend returns all orders when status is undefined
-                console.log('[Revenue Chart] No status filter - showing all orders (backend should exclude cancelled)');
-            }
-            
             setRevenueData(result);
         } catch {
             setRevenueData([]);
         } finally {
             setRevenueLoading(false);
         }
-    }, [chartStatus]); // ✅ Add chartStatus dependency
+    }, [chartStatus]);
 
     useEffect(() => {
         if (rangePreset === 'custom') {
@@ -261,7 +250,7 @@ const AdminDashboard = () => {
                         <p className="admin-chart-subtitle">
                             {chartStatus 
                                 ? `Showing ${chartStatus.toLowerCase()} orders only` 
-                                : 'All orders (backend should exclude cancelled - check if working correctly)'}
+                                : 'All orders (excluding cancelled)'}
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
