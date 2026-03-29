@@ -485,7 +485,7 @@
     gap: 1rem;
     overflow-x: auto;
     scroll-behavior: smooth;
-    padding: 0.5rem 0.25rem 1rem;
+    padding: 1rem 0.25rem 1rem;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -529,7 +529,7 @@
 .category-carousel__card:hover {
     border-color: #242aeb;
     box-shadow: 0 12px 35px rgba(36, 42, 235, 0.2);
-    transform: translateY(-8px) scale(1.05);
+    transform: translateY(-6px) scale(1.02);
 }
 
 .category-carousel__card:hover::before {
@@ -737,6 +737,7 @@
     gap: 1.5rem;
     position: relative;
     z-index: 10;
+    padding: 0.5rem 0;
 }
 
 @media (min-width: 640px) {
@@ -780,7 +781,7 @@
 
 .product-card:hover {
     box-shadow: 0 20px 50px rgba(36, 42, 235, 0.15);
-    transform: translateY(-8px);
+    transform: translateY(-6px);
     border-color: #242aeb;
 }
 
@@ -1740,6 +1741,7 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    padding: 0.5rem 0;
 }
 
 @media (min-width: 640px) {
@@ -1780,7 +1782,7 @@
 }
 
 .why-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-6px);
     box-shadow: 0 20px 40px rgba(36, 42, 235, 0.15);
     border-color: #242aeb;
 }
@@ -2021,6 +2023,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+    padding: 0.5rem 0;
 }
 
 @media (min-width: 1024px) {
@@ -2052,7 +2055,7 @@
 }
 
 .bestseller-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
     box-shadow: 0 20px 50px rgba(36, 42, 235, 0.18);
     border-color: #242aeb;
 }
