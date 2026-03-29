@@ -86,7 +86,7 @@ const AdminDashboard = () => {
         } finally {
             setRevenueLoading(false);
         }
-    }, []);
+    }, [chartStatus]); // ✅ Add chartStatus dependency
 
     useEffect(() => {
         if (rangePreset === 'custom') {
@@ -234,7 +234,9 @@ const AdminDashboard = () => {
                             Revenue Trend
                         </h3>
                         <p className="admin-chart-subtitle">
-                            {chartStatus ? `Showing: ${chartStatus} orders` : 'All orders (excl. cancelled)'}
+                            {chartStatus 
+                                ? `Showing ${chartStatus.toLowerCase()} orders only` 
+                                : 'All orders (excluding cancelled)'}
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -294,7 +296,9 @@ const AdminDashboard = () => {
                         <div style={{ fontSize: '22px', fontWeight: 700, color: '#2463eb' }}>{formatCurrency(totalChartRevenue)}</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>Delivered Orders</div>
+                        <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>
+                            {chartStatus ? `${chartStatus.charAt(0) + chartStatus.slice(1).toLowerCase()} Orders` : 'Total Orders'}
+                        </div>
                         <div style={{ fontSize: '22px', fontWeight: 700, color: '#f59e0b' }}>{totalChartOrders}</div>
                     </div>
                 </div>
