@@ -5,7 +5,6 @@ import type {
     AddToCartDto,
     UpdateCartItemDto,
     CouponValidationResult,
-    CouponApiResponse,
     ValidateCouponDto,
     CartItemDto,
 } from '../types/cart.types';
