@@ -37,10 +37,19 @@ const CartPage = () => {
     }, [isAuthenticated, authLoading, navigate]);
 
     // Handle quantity update
-    const handleUpdateQuantity = async (cartItemId: number, quantity: number): Promise<boolean> => {
+    const handleUpdateQuantity = async (cartItemId: number, quantity: number, stockQuantity?: number): Promise<boolean> => {
+        // Validate quantity against stock
+        if (stockQuantity !== undefined && quantity > stockQuantity) {
+            toast.error(`Cannot update quantity. Only ${stockQuantity} items available in stock.`);
+            return false;
+        }
+
         const success = await updateQuantity(cartItemId, quantity);
         if (success) {
             toast.success('Cart updated');
+        } else {
+            // Show error from backend if update fails
+            toast.error(error || 'Failed to update cart. Please check stock availability.');
         }
         return success;
     };

@@ -27,7 +27,17 @@ const CartItem: React.FC<CartItemProps> = ({
     const [isRemoving, setIsRemoving] = useState(false);
 
     const handleQuantityChange = async (newQuantity: number) => {
-        if (newQuantity < 1 || newQuantity > item.stockQuantity) return;
+        // Validate quantity
+        if (newQuantity < 1) {
+            return;
+        }
+        
+        if (newQuantity > item.stockQuantity) {
+            // Show toast error for exceeding stock
+            const { toast } = await import('react-toastify');
+            toast.error(`Cannot add more. Only ${item.stockQuantity} items available in stock.`);
+            return;
+        }
 
         setIsUpdating(true);
         await onUpdateQuantity(item.cartItemId, newQuantity);

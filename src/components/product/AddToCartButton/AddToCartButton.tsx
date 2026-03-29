@@ -30,6 +30,16 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         }
 
         if (!inStock || stockQuantity <= 0) {
+            setMessage({ type: 'error', text: 'Product is out of stock' });
+            return;
+        }
+
+        // Validate quantity before adding
+        if (quantity > stockQuantity) {
+            setMessage({ 
+                type: 'error', 
+                text: `Cannot add ${quantity} items. Only ${stockQuantity} available in stock.` 
+            });
             return;
         }
 
@@ -45,10 +55,21 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
                 setTimeout(() => setMessage(null), 3000);
             }
         } catch (error) {
-            setMessage({
-                type: 'error',
-                text: error instanceof Error ? error.message : 'Failed to add to cart',
-            });
+            // Extract detailed error message
+            let errorMessage = 'Failed to add to cart';
+            
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            
+            // Check if error message contains stock information
+            if (errorMessage.toLowerCase().includes('stock') || errorMessage.toLowerCase().includes('quantity')) {
+                // Error already has stock info, use as is
+                setMessage({ type: 'error', text: errorMessage });
+            } else {
+                // Generic error
+                setMessage({ type: 'error', text: errorMessage });
+            }
         } finally {
             setIsAdding(false);
         }

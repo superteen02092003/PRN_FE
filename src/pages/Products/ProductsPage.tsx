@@ -52,6 +52,9 @@ const ProductsPage = () => {
     const [selectedBrandId, setSelectedBrandId] = useState<number | null>(
         searchParams.get('brandId') ? Number(searchParams.get('brandId')) : null
     );
+    const [selectedProductType, setSelectedProductType] = useState<string | null>(
+        searchParams.get('productType') || null
+    );
     const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
     const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
     const [pageNumber, setPageNumber] = useState(
@@ -72,11 +75,12 @@ const ProductsPage = () => {
         if (debouncedSearchTerm) params.searchTerm = debouncedSearchTerm;
         if (selectedCategoryId) params.categoryId = selectedCategoryId;
         if (selectedBrandId) params.brandId = selectedBrandId;
+        if (selectedProductType) params.productType = selectedProductType;
         if (minPrice) params.minPrice = Number(minPrice);
         if (maxPrice) params.maxPrice = Number(maxPrice);
 
         return params;
-    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice, pageNumber, pageSize]);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice, pageNumber, pageSize]);
 
     // Fetch data using hooks
     const { products, pagination, loading: productsLoading, error: productsError } = useProducts(filterParams);
@@ -118,17 +122,18 @@ const ProductsPage = () => {
         if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
         if (selectedCategoryId) params.set('categoryId', String(selectedCategoryId));
         if (selectedBrandId) params.set('brandId', String(selectedBrandId));
+        if (selectedProductType) params.set('productType', selectedProductType);
         if (minPrice) params.set('minPrice', minPrice);
         if (maxPrice) params.set('maxPrice', maxPrice);
         if (pageNumber > 1) params.set('page', String(pageNumber));
 
         setSearchParams(params, { replace: true });
-    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice, pageNumber, setSearchParams]);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice, pageNumber, setSearchParams]);
 
     // Reset to page 1 when filters change
     useEffect(() => {
         setPageNumber(1);
-    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice]);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice]);
 
     // Handlers
     const handleCategoryChange = useCallback((categoryId: number) => {
@@ -148,6 +153,7 @@ const ProductsPage = () => {
         setSearchTerm('');
         setSelectedCategoryId(null);
         setSelectedBrandId(null);
+        setSelectedProductType(null);
         setMinPrice('');
         setMaxPrice('');
         setPageNumber(1);
