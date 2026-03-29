@@ -211,16 +211,22 @@ const HomePage = () => {
             <main className="home-page__main" ref={sectionsRef}>
                 {/* ===== 1. HERO ===== */}
                 <section className="hero-search">
-                    <div className="hero-search__3d-container">
-                        {!isMobile ? (
-                            <Suspense fallback={<div className="hero-search__3d-loading"><div className="hero-search__3d-spinner" /></div>}>
-                                <Spline
-                                    scene="https://prod.spline.design/cX2vHOXxH1nnhGEf/scene.splinecode"
-                                    onLoad={() => setSplineLoaded(true)}
-                                    style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
-                                />
-                            </Suspense>
-                        ) : (
+                    {/* Video Background - Only on desktop */}
+                    {!isMobile && (
+                        <video 
+                            autoPlay 
+                            loop 
+                            muted 
+                            playsInline
+                            className="hero-search__video"
+                        >
+                            <source src="https://cdn.pixabay.com/video/2023/05/02/160716-823980940_large.mp4" type="video/mp4" />
+                        </video>
+                    )}
+                    
+                    {/* Fallback 3D/Image for mobile or if video fails */}
+                    <div className="hero-search__3d-container" style={{ display: isMobile ? 'block' : 'none' }}>
+                        {isMobile && (
                             <div className="hero-search__background" style={{
                                 backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuChGPyK6HLZZn99akyoQexfblTEYbq4TGd6_crW-HEPM4CexDAYeSmPuhsurHOdbXnAHXmN_hSQ1WKmXtaOW6JyMGnGRkO5ztNcFU5UIU1IE8aB674lHC6YOUnLQ8sBD_iTx105MvFt1jW4mcOLlKm7ZnMrdGHLurrr-YVSs8scVhSMTRGevj3ix29gbokhMLYbLPgPKaPNHDEF2VTNlbWlXDkFXb0JCa131yfOWk3M3ZNfLoH3ItByxjdJdybgRMczvLmCbMX1IXM")'
                             }} />

@@ -112,6 +112,29 @@
     padding: 2rem;
 }
 
+/* Video Background */
+.hero-search__video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    object-fit: cover;
+    opacity: 0.4;
+    filter: brightness(0.7) contrast(1.1);
+}
+
+/* Ensure video doesn't show on mobile */
+@media (max-width: 768px) {
+    .hero-search__video {
+        display: none;
+    }
+}
+
 @media (min-width: 640px) {
     .hero-search {
         padding: 3rem;
@@ -178,7 +201,7 @@
     position: absolute;
     inset: 0;
     z-index: 10;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.5) 100%);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, rgba(15, 23, 42, 0.7) 100%);
     pointer-events: none;
     transition: opacity 0.8s ease, background 0.8s ease;
 }
