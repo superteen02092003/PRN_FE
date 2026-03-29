@@ -50,7 +50,28 @@ const ReviewProductModal = ({
             setRating(5);
             setComment('');
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to submit review');
+            // Log full error for debugging
+            console.error('Review submission error:', err);
+            
+            // Extract error message from different error types
+            let errorMessage = 'Failed to submit review';
+            
+            if (err instanceof Error) {
+                errorMessage = err.message;
+            } else if (typeof err === 'string') {
+                errorMessage = err;
+            }
+            
+            // Provide user-friendly message for common errors
+            if (errorMessage.includes('status code 400') || errorMessage.includes('400')) {
+                errorMessage = 'Unable to submit review. You may have already reviewed this product or haven\'t purchased it yet.';
+            } else if (errorMessage.includes('status code 403') || errorMessage.includes('403')) {
+                errorMessage = 'You don\'t have permission to review this product. Please make sure you\'ve purchased and received it.';
+            } else if (errorMessage.includes('status code 401') || errorMessage.includes('401')) {
+                errorMessage = 'Please login to submit a review.';
+            }
+            
+            setError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }
