@@ -149,8 +149,8 @@ export const useCart = (): UseCartResult => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result = await validateCouponApi({ couponCode }) as any;
             if (result.isValid && result.coupon) {
-                // Cập nhật cart state trực tiếp với discount từ response
-                // KHÔNG gọi fetchCart() vì GET /api/Cart luôn trả về discount=0, appliedCoupon=null
+                // Update cart state directly with discount from response
+                // DO NOT call fetchCart() because GET /api/Cart always returns discount=0, appliedCoupon=null
                 setCart(prev => {
                     if (!prev) return prev;
                     const discountAmount = result.coupon.discountAmount ?? 0;
@@ -168,8 +168,8 @@ export const useCart = (): UseCartResult => {
             }
             return result;
         } catch (err) {
-            // validateCouponApi đã bắt lỗi 4xx nội bộ — catch này chỉ chạy nếu có lỗi network thực sự.
-            // KHÔNG setError() ở đây vì lỗi coupon không phải lỗi fatal của cart page.
+            // validateCouponApi already catches 4xx errors internally — this catch only runs on actual network errors.
+            // DO NOT setError() here because coupon errors are not fatal to the cart page.
             console.error('[useCart] validateCoupon unexpected error:', err);
             return {
                 isValid: false,

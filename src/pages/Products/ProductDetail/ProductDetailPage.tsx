@@ -459,11 +459,11 @@ const ProductDetailPage = () => {
                                         </div>
                                         <div className="related-info">
                                             <span className={`relation-badge relation-badge--${related.relationType.toLowerCase()}`}>
-                                                {related.relationType === 'ACCESSORY' ? 'Phụ kiện' : related.relationType === 'SIMILAR' ? 'Tương tự' : 'Gợi ý bộ kit'}
+                                                {related.relationType === 'ACCESSORY' ? 'Accessory' : related.relationType === 'SIMILAR' ? 'Similar' : 'Suggested Kit'}
                                             </span>
                                             <p className="related-name">{related.name}</p>
                                             <p className="related-sku">{related.sku}</p>
-                                            <p className="related-price">{related.price.toLocaleString('vi-VN')}₫</p>
+                                            <p className="related-price">${related.price.toLocaleString('en-US')}</p>
                                         </div>
                                     </div>
                                 ))}

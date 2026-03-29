@@ -34,12 +34,12 @@ const NotificationPage = () => {
         const date = new Date(dateStr);
         const diff = Date.now() - date.getTime();
         const mins = Math.floor(diff / 60000);
-        if (mins < 1) return 'Vừa xong';
-        if (mins < 60) return `${mins} phút trước`;
+        if (mins < 1) return 'Just now';
+        if (mins < 60) return `${mins} minutes ago`;
         const hours = Math.floor(mins / 60);
-        if (hours < 24) return `${hours} giờ trước`;
-        if (hours < 48) return 'Hôm qua';
-        return date.toLocaleDateString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        if (hours < 24) return `${hours} hours ago`;
+        if (hours < 48) return 'Yesterday';
+        return date.toLocaleDateString('en-US', { hour: '2-digit', minute: '2-digit' });
     };
 
     return (

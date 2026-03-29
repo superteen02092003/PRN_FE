@@ -29,7 +29,7 @@ interface UseOrderDetailReturn {
 }
 
 /**
- * Hook quản lý danh sách đơn hàng (Order History)
+ * Hook for managing order list (Order History)
  */
 export const useOrders = (initialFilter?: Partial<OrderFilterRequest>): UseOrdersReturn => {
     const [orders, setOrders] = useState<OrderResponseDto[]>([]);
@@ -54,7 +54,7 @@ export const useOrders = (initialFilter?: Partial<OrderFilterRequest>): UseOrder
             setTotalCount(result.totalCount);
             setCurrentPage(result.pageNumber);
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Không thể tải danh sách đơn hàng';
+            const message = err instanceof Error ? err.message : 'Failed to load orders';
             setError(message);
             toast.error(message);
         } finally {
@@ -84,7 +84,7 @@ export const useOrders = (initialFilter?: Partial<OrderFilterRequest>): UseOrder
 };
 
 /**
- * Hook quản lý chi tiết đơn hàng
+ * Hook for managing order detail
  */
 export const useOrderDetail = (orderId: number | undefined): UseOrderDetailReturn => {
     const [order, setOrder] = useState<OrderDetailResponseDto | null>(null);
@@ -100,7 +100,7 @@ export const useOrderDetail = (orderId: number | undefined): UseOrderDetailRetur
             const result = await getOrderDetail(orderId);
             setOrder(result);
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Không thể tải chi tiết đơn hàng';
+            const message = err instanceof Error ? err.message : 'Failed to load order details';
             setError(message);
         } finally {
             setIsLoading(false);
@@ -116,11 +116,11 @@ export const useOrderDetail = (orderId: number | undefined): UseOrderDetailRetur
         setIsCancelling(true);
         try {
             await cancelOrder(orderId, reason);
-            toast.success('Đã hủy đơn hàng thành công');
+            toast.success('Order cancelled successfully');
             await fetchDetail(); // Refetch to get updated status
             return true;
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Không thể hủy đơn hàng';
+            const message = err instanceof Error ? err.message : 'Failed to cancel order';
             toast.error(message);
             return false;
         } finally {

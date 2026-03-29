@@ -105,7 +105,7 @@ export const useCheckout = (initialCoupon?: string): UseCheckoutReturn => {
                 setPaymentMethods(methodsResult);
                 setCheckoutValidation(validationResult);
 
-                // Nếu coupon không hợp lệ, xóa khỏi state để không gửi lên createOrder
+                // If coupon is invalid, remove from state so it won't be sent to createOrder
                 if (validationResult.couponError) {
                     setCouponCode('');
                     toast.warn(`Coupon not applied: ${validationResult.couponError}`);

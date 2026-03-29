@@ -16,7 +16,7 @@ import type {
 
 /**
  * API 12: Get My Warranties (Customer)
- * Lấy danh sách bảo hành của customer đang đăng nhập
+ * Get warranties for the currently logged-in customer
  */
 export const getMyWarranties = async (): Promise<WarrantyDto[]> => {
     const response = await api.get<WarrantyApiResponse>('/warranties');
@@ -30,7 +30,7 @@ export const getMyWarranties = async (): Promise<WarrantyDto[]> => {
 
 /**
  * API: Get Warranty by ID
- * Lấy thông tin chi tiết một bảo hành theo ID
+ * Get warranty details by ID
  */
 export const getWarrantyById = async (id: number): Promise<WarrantyDto> => {
     const response = await api.get<SingleWarrantyApiResponse>(`/Warranty/${id}`);
@@ -44,10 +44,10 @@ export const getWarrantyById = async (id: number): Promise<WarrantyDto> => {
 
 /**
  * API 13: Submit Warranty Claim
- * Customer gửi yêu cầu bảo hành cho một warranty cụ thể
+ * Customer submits a warranty claim for a specific warranty
  * Validation:
- * - warrantyId phải thuộc về chính user đang đăng nhập
- * - WARRANTY.status phải là ACTIVE
+ * - warrantyId must belong to the logged-in user
+ * - WARRANTY.status must be ACTIVE
  * - issueDescription: required, min 10 chars, max 1000 chars
  */
 export const submitWarrantyClaim = async (
@@ -87,7 +87,7 @@ export const getMyClaims = async (
 
 /**
  * API 14: Get All Warranty Claims (Admin)
- * Lấy danh sách tất cả warranty claims có phân trang và filter
+ * Get all warranty claims with pagination and filter
  */
 export const getAllWarrantyClaims = async (
     status?: string,
@@ -108,7 +108,7 @@ export const getAllWarrantyClaims = async (
 
 /**
  * API 15: Resolve Warranty Claim (Admin)
- * Admin xử lý claim: APPROVED / REJECTED / RESOLVED
+ * Admin resolves claim: APPROVED / REJECTED / RESOLVED
  * 
  * Business Logic:
  * - APPROVED: WARRANTY.status → 'IN_REPAIR'

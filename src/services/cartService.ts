@@ -57,7 +57,7 @@ const transformCart = (data: any): CartDto => {
 };
 
 /**
- * Lấy giỏ hàng của user hiện tại
+ * Get current user's cart
  */
 export const getCart = async (): Promise<CartDto> => {
     const response = await api.get<CartApiResponse>('/Cart');
@@ -70,7 +70,7 @@ export const getCart = async (): Promise<CartDto> => {
 };
 
 /**
- * Thêm sản phẩm vào giỏ hàng
+ * Add product to cart
  */
 export const addToCart = async (data: AddToCartDto): Promise<CartDto> => {
     const response = await api.post<CartApiResponse>('/Cart/items', data);
@@ -83,7 +83,7 @@ export const addToCart = async (data: AddToCartDto): Promise<CartDto> => {
 };
 
 /**
- * Cập nhật số lượng sản phẩm trong giỏ
+ * Update product quantity in cart
  */
 export const updateCartItem = async (
     cartItemId: number,
@@ -105,7 +105,7 @@ export const updateCartItem = async (
 };
 
 /**
- * Xóa 1 sản phẩm khỏi giỏ hàng
+ * Remove a product from cart
  */
 export const removeCartItem = async (cartItemId: number): Promise<CartDto | null> => {
     const response = await api.delete<CartApiResponse>(`/Cart/items/${cartItemId}`);
@@ -124,7 +124,7 @@ export const removeCartItem = async (cartItemId: number): Promise<CartDto | null
 };
 
 /**
- * Xóa toàn bộ giỏ hàng
+ * Clear entire cart
  */
 export const clearCart = async (): Promise<void> => {
     const response = await api.delete<ApiResponse<null>>('/Cart');
@@ -135,9 +135,9 @@ export const clearCart = async (): Promise<void> => {
 };
 
 /**
- * Validate và áp dụng mã giảm giá
- * Backend trả về ValidateCouponResponseDto, transform sang CouponValidationResult.
- * Luôn trả về CouponValidationResult (KHÔNG throw) — lỗi 4xx được bắt và trả về isValid: false.
+ * Validate and apply coupon code
+ * Backend returns ValidateCouponResponseDto, transformed to CouponValidationResult.
+ * Always returns CouponValidationResult (NEVER throws) — 4xx errors are caught and returned as isValid: false.
  */
 export const validateCoupon = async (
     data: ValidateCouponDto
@@ -147,7 +147,7 @@ export const validateCoupon = async (
         const response = await api.post<any>('/Cart/validate-coupon', data);
 
         if (!response.data.success || !response.data.data) {
-            // Backend trả về success:false với HTTP 200 (hiếm gặp, nhưng xử lý an toàn)
+            // Backend returns success:false with HTTP 200 (rare, but handled safely)
             return {
                 isValid: false,
                 message: response.data.message || 'Invalid coupon code',
@@ -166,13 +166,13 @@ export const validateCoupon = async (
                 discountValue: raw.discountValue ?? 0,
                 discountAmount: raw.calculatedDiscount ?? 0,
             },
-            // Truyền thêm newTotal để useCart cập nhật summary
+            // Pass newTotal so useCart can update the summary
             _newTotal: raw.newTotal ?? 0,
             _cartSubtotal: raw.cartSubtotal ?? 0,
         } as CouponValidationResult & { _newTotal: number; _cartSubtotal: number };
     } catch (err: unknown) {
-        // Axios throw khi backend trả về HTTP 4xx (vd: 400 "You have already used this coupon code.")
-        // Bắt lỗi này và trả về isValid: false thay vì để exception lan ra ngoài
+        // Axios throws when backend returns HTTP 4xx (e.g. 400 "You have already used this coupon code.")
+        // Catch the error and return isValid: false instead of letting the exception propagate
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const axiosErr = err as any;
         const message: string =

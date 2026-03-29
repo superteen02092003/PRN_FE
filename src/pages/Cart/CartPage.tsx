@@ -83,14 +83,14 @@ const CartPage = () => {
         if (result?.isValid) {
             toast.success('Coupon applied successfully!');
         } else {
-            // Hiển thị rõ lý do coupon không hợp lệ thay vì crash page
+            // Display the reason why the coupon is invalid instead of crashing the page
             toast.error(result?.message || 'Invalid coupon code');
         }
         return result;
     };
 
     const handleRemoveCoupon = () => {
-        // Reset cart state: xóa coupon + reset discount về 0
+        // Reset cart state: remove coupon + reset discount to 0
         refetch();
         toast.info('Coupon removed');
     };

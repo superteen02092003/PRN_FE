@@ -121,7 +121,7 @@ const OrderDetailPage = () => {
     const canCancel = order.status === 'PENDING' || order.status === 'CONFIRMED';
     const canPay = order.payment?.status === 'PENDING' && order.payment?.paymentMethod === 'SEPAY' && order.status !== 'CANCELLED';
     const canReturn = order.status === 'DELIVERED';
-    const isCancelledByExpiry = order.status === 'CANCELLED' && order.cancelReason && (order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán'));
+    const isCancelledByExpiry = order.status === 'CANCELLED' && order.cancelReason && (order.cancelReason.includes('Payment') || order.cancelReason.includes('payment expired'));
     const statusInfo = statusConfig[order.status] || statusConfig.PENDING;
     const paymentStatus = order.payment
         ? (paymentStatusLabels[order.payment.status] || paymentStatusLabels.PENDING)
@@ -165,18 +165,18 @@ const OrderDetailPage = () => {
 
                 {/* Cancel Reason */}
                 {order.cancelReason && (
-                    <div className={`od-cancel-reason ${order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán') ? 'od-cancel-reason--expired' : ''}`}>
+                    <div className={`od-cancel-reason ${order.cancelReason.includes('Payment') || order.cancelReason.includes('payment expired') ? 'od-cancel-reason--expired' : ''}`}>
                         <span className="material-symbols-outlined">
-                            {order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán') ? 'schedule' : 'info'}
+                            {order.cancelReason.includes('Payment') || order.cancelReason.includes('payment expired') ? 'schedule' : 'info'}
                         </span>
                         <div>
                             <strong>
-                                {order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán') 
+                                {order.cancelReason.includes('Payment') || order.cancelReason.includes('payment expired') 
                                     ? 'Order Cancelled - Payment Expired' 
                                     : 'Cancellation Reason'}:
                             </strong>
                             <p>{order.cancelReason}</p>
-                            {(order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán')) && (
+                            {(order.cancelReason.includes('Payment') || order.cancelReason.includes('payment expired')) && (
                                 <p className="od-cancel-reason-note">
                                     Don't worry! Product stock and any applied coupons have been automatically restored to your account.
                                 </p>

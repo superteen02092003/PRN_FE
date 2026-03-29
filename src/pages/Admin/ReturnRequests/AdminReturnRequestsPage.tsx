@@ -12,20 +12,20 @@ const statusColors: Record<ReturnStatus, { color: string; bg: string }> = {
 };
 
 const statusLabels: Record<ReturnStatus, string> = {
-    SUBMITTED: 'Chờ xử lý',
-    APPROVED: 'Đã duyệt',
-    REJECTED: 'Từ chối',
-    COMPLETED: 'Hoàn tất',
+    SUBMITTED: 'Pending',
+    APPROVED: 'Approved',
+    REJECTED: 'Rejected',
+    COMPLETED: 'Completed',
 };
 
 const typeLabels: Record<string, string> = {
-    RETURN: 'Trả hàng & hoàn tiền',
-    EXCHANGE: 'Đổi sản phẩm',
+    RETURN: 'Return & Refund',
+    EXCHANGE: 'Exchange Product',
 };
 
 const formatDate = (date: string | undefined): string => {
     if (!date) return '—';
-    return new Date(date).toLocaleDateString('vi-VN', {
+    return new Date(date).toLocaleDateString('en-US', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit',
     });
@@ -50,7 +50,7 @@ const AdminReturnRequestsPage = () => {
             setRequests(data.items);
             setTotalPages(data.totalPages);
         } catch (e: unknown) {
-            toast.error(e instanceof Error ? e.message : 'Không thể tải dữ liệu');
+            toast.error(e instanceof Error ? e.message : 'Failed to load data');
         } finally {
             setLoading(false);
         }
@@ -72,11 +72,11 @@ const AdminReturnRequestsPage = () => {
         setProcessing(true);
         try {
             await processReturnRequest(selected.returnRequestId, { status: newStatus, adminNote: adminNote || undefined });
-            toast.success('Đã xử lý yêu cầu thành công');
+            toast.success('Request processed successfully');
             setDialogOpen(false);
             loadRequests();
         } catch (e: unknown) {
-            toast.error(e instanceof Error ? e.message : 'Có lỗi xảy ra');
+            toast.error(e instanceof Error ? e.message : 'An error occurred');
         } finally {
             setProcessing(false);
         }
@@ -86,26 +86,26 @@ const AdminReturnRequestsPage = () => {
         <AdminLayout title="Return Requests">
             <div style={{ padding: '1.5rem' }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-                    Quản lý Yêu cầu Trả / Đổi hàng
+                    Manage Return / Exchange Requests
                 </h2>
 
                 {loading ? (
-                    <p style={{ color: '#6b7280' }}>Đang tải...</p>
+                    <p style={{ color: '#6b7280' }}>Loading...</p>
                 ) : requests.length === 0 ? (
-                    <p style={{ color: '#6b7280' }}>Chưa có yêu cầu nào.</p>
+                    <p style={{ color: '#6b7280' }}>No requests found.</p>
                 ) : (
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                             <thead>
                                 <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                                     <th style={thStyle}>ID</th>
-                                    <th style={thStyle}>Đơn hàng</th>
-                                    <th style={thStyle}>Người dùng</th>
-                                    <th style={thStyle}>Loại</th>
-                                    <th style={thStyle}>Lý do</th>
-                                    <th style={thStyle}>Trạng thái</th>
-                                    <th style={thStyle}>Ngày tạo</th>
-                                    <th style={thStyle}>Hành động</th>
+                                    <th style={thStyle}>Order</th>
+                                    <th style={thStyle}>User</th>
+                                    <th style={thStyle}>Type</th>
+                                    <th style={thStyle}>Reason</th>
+                                    <th style={thStyle}>Status</th>
+                                    <th style={thStyle}>Created</th>
+                                    <th style={thStyle}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -146,7 +146,7 @@ const AdminReturnRequestsPage = () => {
                                                             cursor: 'pointer',
                                                         }}
                                                     >
-                                                        Xử lý
+                                                        Process
                                                     </button>
                                                 )}
                                             </td>
@@ -164,7 +164,7 @@ const AdminReturnRequestsPage = () => {
                         <button disabled={page === 1} onClick={() => setPage((p) => p - 1)} style={pageBtnStyle}>
                             &lsaquo;
                         </button>
-                        <span style={{ fontSize: '0.875rem', color: '#374151' }}>Trang {page} / {totalPages}</span>
+                        <span style={{ fontSize: '0.875rem', color: '#374151' }}>Page {page} / {totalPages}</span>
                         <button disabled={page === totalPages} onClick={() => setPage((p) => p + 1)} style={pageBtnStyle}>
                             &rsaquo;
                         </button>
@@ -181,13 +181,13 @@ const AdminReturnRequestsPage = () => {
                         background: '#fff', borderRadius: '12px', padding: '1.5rem', width: '480px', maxWidth: '95vw',
                         zIndex: 1000, boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
                     }} onClick={(e) => e.stopPropagation()}>
-                        <h3 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Xử lý yêu cầu #{selected.returnRequestId}</h3>
+                        <h3 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Process Request #{selected.returnRequestId}</h3>
                         <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1.25rem' }}>
-                            Đơn hàng {selected.orderNumber} — {typeLabels[selected.type]}
+                            Order {selected.orderNumber} — {typeLabels[selected.type]}
                         </p>
 
                         <div style={{ marginBottom: '1rem' }}>
-                            <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>Trạng thái mới</p>
+                            <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>New Status</p>
                             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                 {(selected.status === 'SUBMITTED'
                                     ? (['APPROVED', 'REJECTED'] as const)
@@ -215,13 +215,13 @@ const AdminReturnRequestsPage = () => {
 
                         <div style={{ marginBottom: '1.25rem' }}>
                             <label style={{ fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>
-                                Ghi chú (tuỳ chọn)
+                                Notes (optional)
                             </label>
                             <textarea
                                 value={adminNote}
                                 onChange={(e) => setAdminNote(e.target.value)}
                                 rows={3}
-                                placeholder="Nhập ghi chú cho người dùng..."
+                                placeholder="Enter notes for the user..."
                                 style={{
                                     width: '100%', border: '1px solid #d1d5db', borderRadius: '6px',
                                     padding: '0.5rem 0.75rem', fontSize: '0.875rem', resize: 'vertical',
@@ -232,10 +232,10 @@ const AdminReturnRequestsPage = () => {
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                             <button onClick={() => setDialogOpen(false)} disabled={processing} style={{ padding: '0.5rem 1.25rem', borderRadius: '6px', border: '1px solid #d1d5db', background: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem' }}>
-                                Huỷ
+                                Cancel
                             </button>
                             <button onClick={handleProcess} disabled={processing} style={{ padding: '0.5rem 1.25rem', borderRadius: '6px', border: 'none', background: '#2563eb', color: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem' }}>
-                                {processing ? 'Đang xử lý...' : 'Xác nhận'}
+                                {processing ? 'Processing...' : 'Confirm'}
                             </button>
                         </div>
                     </div>

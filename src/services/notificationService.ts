@@ -49,7 +49,7 @@ export const connectNotifications = (
         .configureLogging(signalR.LogLevel.Warning)
         .build();
 
-    // Register handlers based on backend events (CartUpdated removed — không hiển thị cho UX)
+    // Register handlers based on backend events (CartUpdated removed — not displayed for UX)
     connection.on('OrderStatusChanged', (data: any) => onNotificationReceived('OrderStatusChanged', data));
     connection.on('PaymentConfirmed', (data: any) => onNotificationReceived('PaymentConfirmed', data));
     connection.on('PaymentExpired', (data: any) => onNotificationReceived('PaymentExpired', data));

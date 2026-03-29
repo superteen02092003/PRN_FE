@@ -213,7 +213,7 @@ const AdminChatPage = () => {
                                     <div className="convo-info">
                                         <div className="convo-name">{convo.userName}</div>
                                         <div className="convo-last-msg">
-                                            {convo.lastMessage.startsWith('[img]:') ? '📷 Hình ảnh' : convo.lastMessage}
+                                            {convo.lastMessage.startsWith('[img]:') ? '📷 Image' : convo.lastMessage}
                                         </div>
                                     </div>
                                     <div className="convo-meta">

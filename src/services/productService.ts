@@ -31,7 +31,7 @@ export interface ProductsResult {
 }
 
 /**
- * Lấy danh sách sản phẩm với filter và phân trang
+ * Get product list with filters and pagination
  */
 export const getProducts = async (
     filter: ProductFilterParams = {}
@@ -80,7 +80,7 @@ export const getProducts = async (
 };
 
 /**
- * Lấy danh sách sản phẩm theo productType
+ * Get product list by productType
  */
 export const getProductsByType = async (
     productType: ProductType,
@@ -90,7 +90,7 @@ export const getProductsByType = async (
 };
 
 /**
- * Lấy danh sách Modules
+ * Get Modules list
  */
 export const getModules = async (
     filter: Omit<ProductFilterParams, 'productType'> = {}
@@ -99,7 +99,7 @@ export const getModules = async (
 };
 
 /**
- * Lấy danh sách Kits
+ * Get Kits list
  */
 export const getKits = async (
     filter: Omit<ProductFilterParams, 'productType'> = {}
@@ -108,7 +108,7 @@ export const getKits = async (
 };
 
 /**
- * Lấy danh sách Components
+ * Get Components list
  */
 export const getComponents = async (
     filter: Omit<ProductFilterParams, 'productType'> = {}
@@ -117,7 +117,7 @@ export const getComponents = async (
 };
 
 /**
- * Lấy tất cả categories
+ * Get all categories
  */
 export const getCategories = async (): Promise<CategoryResponseDto[]> => {
     try {
@@ -143,7 +143,7 @@ export const getCategories = async (): Promise<CategoryResponseDto[]> => {
 };
 
 /**
- * Lấy tất cả brands
+ * Get all brands
  */
 export const getBrands = async (): Promise<BrandResponseDto[]> => {
     try {
@@ -165,7 +165,7 @@ export const getBrands = async (): Promise<BrandResponseDto[]> => {
 type ReviewApiResponse = ApiResponse<ReviewDto>;
 
 /**
- * Lấy chi tiết sản phẩm theo ID
+ * Get product detail by ID
  */
 export const getProductDetail = async (productId: number): Promise<ProductDetailDto> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -180,9 +180,9 @@ export const getProductDetail = async (productId: number): Promise<ProductDetail
     // Normalize data: handle case where API returns primaryImage instead of images array
     const normalizedData: ProductDetailDto = {
         ...data,
-        // Tính inStock từ stockQuantity nếu không có
+        // Compute inStock from stockQuantity if not provided
         inStock: data.inStock ?? (data.stockQuantity > 0),
-        // Nếu không có images array, tạo từ primaryImage
+        // If no images array, create from primaryImage
         images: data.images ?? (data.primaryImage ? [{
             imageId: 1,
             imageUrl: data.primaryImage,
@@ -200,7 +200,7 @@ export const getProductDetail = async (productId: number): Promise<ProductDetail
 };
 
 /**
- * Lấy danh sách reviews của sản phẩm
+ * Get product reviews list
  */
 export const getProductReviews = async (
     productId: number,
@@ -265,7 +265,7 @@ export const getProductReviews = async (
 };
 
 /**
- * Lấy danh sách components trong bundle (cho KIT products)
+ * Get bundle components list (for KIT products)
  */
 export const getProductBundle = async (productId: number): Promise<ProductBundleDto> => {
     const response = await api.get<any>(`/Product/${productId}/bundle`);
@@ -307,7 +307,7 @@ export const getProductBundle = async (productId: number): Promise<ProductBundle
 };
 
 /**
- * Tạo review mới cho sản phẩm (cần đăng nhập và đã mua sản phẩm)
+ * Create a new review for a product (requires login and having purchased the product)
  */
 export const createProductReview = async (
     productId: number,

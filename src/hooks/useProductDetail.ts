@@ -125,7 +125,7 @@ export const useProductBundle = (
     const [error, setError] = useState<string | null>(null);
 
     const fetchBundle = useCallback(async () => {
-        // Chỉ fetch bundle nếu sản phẩm là KIT
+        // Only fetch bundle if the product is a KIT
         if (!productId || !isKit) {
             setLoading(false);
             return;

@@ -444,16 +444,16 @@ const AdminProductFormPage = () => {
 
                     {/* Compatibility Info */}
                     <div className="admin-form-group">
-                        <label className="admin-form-label">Thông tin tương thích</label>
+                        <label className="admin-form-label">Compatibility Info</label>
                         <input
                             className="admin-form-input"
                             value={form.compatibilityInfo}
                             onChange={(e) => setForm(p => ({ ...p, compatibilityInfo: e.target.value }))}
-                            placeholder="Ví dụ: Arduino Uno, ESP32, Raspberry Pi..."
+                            placeholder="e.g. Arduino Uno, ESP32, Raspberry Pi..."
                             maxLength={2000}
                         />
                         <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
-                            Hiển thị tại trang chi tiết sản phẩm giúp người mua biết phần cứng tương thích.
+                            Displayed on product detail page to help buyers identify compatible hardware.
                         </p>
                     </div>
 
@@ -461,18 +461,18 @@ const AdminProductFormPage = () => {
                     <div className="admin-form-group" style={{ marginTop: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                             <label className="admin-form-label" style={{ fontSize: '15px', fontWeight: 700, marginBottom: 0 }}>
-                                Thông số kỹ thuật
+                                Specifications
                             </label>
                             <button
                                 type="button"
                                 onClick={() => setSpecs(prev => [...prev, { specName: '', specValue: '', displayOrder: prev.length }])}
                                 style={{ padding: '4px 12px', background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '6px', color: '#1d4ed8', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
                             >
-                                + Thêm thông số
+                                + Add Spec
                             </button>
                         </div>
                         {specs.length === 0 ? (
-                            <p style={{ fontSize: '12px', color: '#94a3b8' }}>Chưa có thông số nào. Nhấn "+ Thêm thông số" để bắt đầu.</p>
+                            <p style={{ fontSize: '12px', color: '#94a3b8' }}>No specifications yet. Click "+ Add Spec" to get started.</p>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {specs.map((spec, idx) => (
@@ -481,14 +481,14 @@ const AdminProductFormPage = () => {
                                             className="admin-form-input"
                                             value={spec.specName}
                                             onChange={(e) => setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, specName: e.target.value } : s))}
-                                            placeholder="Tên thông số (VD: Điện áp)"
+                                            placeholder="Spec name (e.g. Voltage)"
                                             style={{ flex: 1 }}
                                         />
                                         <input
                                             className="admin-form-input"
                                             value={spec.specValue}
                                             onChange={(e) => setSpecs(prev => prev.map((s, i) => i === idx ? { ...s, specValue: e.target.value } : s))}
-                                            placeholder="Giá trị (VD: 3.3V - 5V)"
+                                            placeholder="Value (e.g. 3.3V - 5V)"
                                             style={{ flex: 2 }}
                                         />
                                         <button
@@ -508,18 +508,18 @@ const AdminProductFormPage = () => {
                     <div className="admin-form-group" style={{ marginTop: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                             <label className="admin-form-label" style={{ fontSize: '15px', fontWeight: 700, marginBottom: 0 }}>
-                                Tài liệu đi kèm
+                                Documents
                             </label>
                             <button
                                 type="button"
                                 onClick={() => setDocs(prev => [...prev, { documentType: 'DATASHEET', title: '', url: '', displayOrder: prev.length }])}
                                 style={{ padding: '4px 12px', background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '6px', color: '#1d4ed8', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
                             >
-                                + Thêm tài liệu
+                                + Add Document
                             </button>
                         </div>
                         {docs.length === 0 ? (
-                            <p style={{ fontSize: '12px', color: '#94a3b8' }}>Chưa có tài liệu. Nhấn "+ Thêm tài liệu" để thêm datasheet, pinout, tutorial...</p>
+                            <p style={{ fontSize: '12px', color: '#94a3b8' }}>No documents yet. Click "+ Add Document" to add datasheet, pinout, tutorial...</p>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 {docs.map((doc, idx) => (
@@ -533,21 +533,21 @@ const AdminProductFormPage = () => {
                                             <option value="DATASHEET">Datasheet</option>
                                             <option value="TUTORIAL">Tutorial</option>
                                             <option value="PINOUT">Pinout</option>
-                                            <option value="CODE_EXAMPLE">Code mẫu</option>
-                                            <option value="OTHER">Khác</option>
+                                            <option value="CODE_EXAMPLE">Code Example</option>
+                                            <option value="OTHER">Other</option>
                                         </select>
                                         <input
                                             className="admin-form-input"
                                             value={doc.title}
                                             onChange={(e) => setDocs(prev => prev.map((d, i) => i === idx ? { ...d, title: e.target.value } : d))}
-                                            placeholder="Tiêu đề (VD: Arduino Uno Datasheet)"
+                                            placeholder="Title (e.g. Arduino Uno Datasheet)"
                                             style={{ flex: 1, minWidth: '120px' }}
                                         />
                                         <input
                                             className="admin-form-input"
                                             value={doc.url}
                                             onChange={(e) => setDocs(prev => prev.map((d, i) => i === idx ? { ...d, url: e.target.value } : d))}
-                                            placeholder="URL tài liệu"
+                                            placeholder="Document URL"
                                             style={{ flex: 2, minWidth: '180px' }}
                                         />
                                         <button

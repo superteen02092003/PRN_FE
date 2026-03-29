@@ -149,7 +149,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
             conn.onreconnecting(() => setIsConnected(false));
             conn.onreconnected(() => {
                 setIsConnected(true);
-                fetchNotifications(); // Re-fetch để bắt notifications bị miss khi mất kết nối
+                fetchNotifications(); // Re-fetch to catch notifications missed during disconnection
             });
             conn.onclose(() => setIsConnected(false));
         } catch (error) {

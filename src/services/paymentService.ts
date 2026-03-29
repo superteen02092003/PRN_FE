@@ -12,7 +12,7 @@ import type {
 const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
 
 /**
- * Lấy trạng thái thanh toán (dùng cho polling)
+ * Get payment status (used for polling)
  */
 export const getPaymentStatus = async (
     orderId: number
@@ -29,13 +29,13 @@ export const getPaymentStatus = async (
 };
 
 /**
- * Tạo URL redirect đến SePay Payment Gateway
- * Backend sẽ render HTML form ẩn rồi auto-submit POST đến SePay
+ * Generate redirect URL to SePay Payment Gateway
+ * Backend renders a hidden HTML form and auto-submits POST to SePay
  *
- * @param orderId - ID đơn hàng
- * @param successUrl - URL redirect khi thanh toán thành công
- * @param errorUrl - URL redirect khi thanh toán lỗi
- * @param cancelUrl - URL redirect khi user hủy thanh toán
+ * @param orderId - Order ID
+ * @param successUrl - Redirect URL on successful payment
+ * @param errorUrl - Redirect URL on payment error
+ * @param cancelUrl - Redirect URL when user cancels payment
  */
 export const getSepayCheckoutUrl = (
     orderId: number,
@@ -55,8 +55,8 @@ export const getSepayCheckoutUrl = (
 };
 
 /**
- * Redirect trình duyệt đến SePay Payment Gateway
- * Sử dụng window.location.href để full page redirect
+ * Redirect browser to SePay Payment Gateway
+ * Uses window.location.href for full page redirect
  */
 export const redirectToSepayCheckout = (orderId: number): void => {
     const currentOrigin = window.location.origin;

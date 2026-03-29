@@ -103,12 +103,12 @@ const HomePage = () => {
             if (!hasShown) {
                 toast.info(
                     <div>
-                        <p style={{ marginBottom: '8px', color: '#1f2937' }}>Bạn nên cập nhật thông tin địa chỉ và số điện thoại để việc mua sắm thuận tiện hơn.</p>
+                        <p style={{ marginBottom: '8px', color: '#1f2937' }}>Please update your address and phone number for a better shopping experience.</p>
                         <button 
                             onClick={() => navigate('/profile')}
                             style={{ padding: '6px 12px', background: '#2563eb', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 500 }}
                         >
-                            Cập nhật ngay
+                            Update Now
                         </button>
                     </div>,
                     { autoClose: false, position: 'bottom-right', closeOnClick: false }

@@ -11,7 +11,7 @@ export const createReturnRequest = async (
 ): Promise<ReturnRequestDto> => {
     const response = await api.post<ApiResponse<ReturnRequestDto>>('/return-request', data);
     if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Không thể tạo yêu cầu trả hàng');
+        throw new Error(response.data.message || 'Failed to create return request');
     }
     return response.data.data;
 };
@@ -25,7 +25,7 @@ export const getMyReturnRequests = async (
         { params: { page, pageSize } }
     );
     if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Không thể tải danh sách yêu cầu');
+        throw new Error(response.data.message || 'Failed to load requests');
     }
     return response.data.data;
 };
@@ -33,7 +33,7 @@ export const getMyReturnRequests = async (
 export const getReturnRequestById = async (id: number): Promise<ReturnRequestDto> => {
     const response = await api.get<ApiResponse<ReturnRequestDto>>(`/return-request/${id}`);
     if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Không tìm thấy yêu cầu');
+        throw new Error(response.data.message || 'Request not found');
     }
     return response.data.data;
 };
@@ -47,7 +47,7 @@ export const getAllReturnRequests = async (
         { params: { page, pageSize } }
     );
     if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Không thể tải danh sách yêu cầu');
+        throw new Error(response.data.message || 'Failed to load requests');
     }
     return response.data.data;
 };
@@ -61,7 +61,7 @@ export const processReturnRequest = async (
         data
     );
     if (!response.data.success || !response.data.data) {
-        throw new Error(response.data.message || 'Không thể xử lý yêu cầu');
+        throw new Error(response.data.message || 'Failed to process request');
     }
     return response.data.data;
 };

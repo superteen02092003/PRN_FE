@@ -25,7 +25,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
         totalReviews = 0,
     } = product;
 
-    // Tính inStock từ stockQuantity nếu API không trả về field inStock
+    // Compute inStock from stockQuantity if API doesn't return inStock field
     const inStock = product.inStock ?? stockQuantity > 0;
 
     return (

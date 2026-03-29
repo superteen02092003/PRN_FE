@@ -20,7 +20,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-// ===== DTOs cơ bản =====
+// ===== Basic DTOs =====
 
 export interface BrandDto {
   brandId: number;

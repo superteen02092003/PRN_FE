@@ -9,7 +9,7 @@ const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 };
 
-// Fallback timeout = 10 phút (khớp với backend AddMinutes(10)), dùng khi chưa fetch được expiredAt
+// Fallback timeout = 10 minutes (matches backend AddMinutes(10)), used when expiredAt hasn't been fetched yet
 const PAYMENT_TIMEOUT_SECONDS = 10 * 60;
 
 const PaymentPendingPage = () => {
@@ -19,7 +19,7 @@ const PaymentPendingPage = () => {
     const orderNumber = searchParams.get('orderNumber');
 
     const [timeLeft, setTimeLeft] = useState(PAYMENT_TIMEOUT_SECONDS);
-    // initialTimeLeft dùng để tính % progress bar - sync từ backend
+    // initialTimeLeft used to calculate % progress bar - synced from backend
     const [initialTimeLeft, setInitialTimeLeft] = useState(PAYMENT_TIMEOUT_SECONDS);
     const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
     const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -43,7 +43,7 @@ const PaymentPendingPage = () => {
                         const now = Date.now();
                         const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
                         setTimeLeft(remaining);
-                        // Tính total duration từ expiredAt để progress bar hiển thị đúng
+                        // Calculate total duration from expiredAt for accurate progress bar display
                         const totalDuration = Math.floor((expiresAt - (now - remaining * 1000)) / 1000);
                         setInitialTimeLeft(Math.max(totalDuration, remaining));
                     }

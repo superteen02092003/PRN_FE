@@ -18,7 +18,7 @@ import type {
  */
 
 /**
- * Tạo đơn hàng từ giỏ hàng (Checkout)
+ * Create order from cart (Checkout)
  */
 export const createOrder = async (
     data: CreateOrderRequest
@@ -36,7 +36,7 @@ export const createOrder = async (
 };
 
 /**
- * Lấy danh sách đơn hàng của user (Order History)
+ * Get user's order list (Order History)
  */
 export const getMyOrders = async (
     filter?: OrderFilterRequest
@@ -63,7 +63,7 @@ export const getMyOrders = async (
 };
 
 /**
- * Lấy chi tiết đơn hàng
+ * Get order detail
  */
 export const getOrderDetail = async (
     orderId: number
@@ -80,7 +80,7 @@ export const getOrderDetail = async (
 };
 
 /**
- * Hủy đơn hàng
+ * Cancel order
  */
 export const cancelOrder = async (
     orderId: number,

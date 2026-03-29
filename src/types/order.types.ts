@@ -31,7 +31,7 @@ export interface CheckoutCouponDto {
     isApplied: boolean;
     code: string | null;
     discountAmount: number;
-    // Legacy aliases (phòng khi backend thay đổi field name)
+    // Legacy aliases (in case backend changes field name)
     couponCode?: string;
 }
 
@@ -58,7 +58,7 @@ export interface ValidateCheckoutResponse {
     coupon: CheckoutCouponDto | null;
     summary: CheckoutSummaryDto | null;
     stockErrors: StockErrorDto[] | null;
-    /** Non-null nếu coupon được truyền vào nhưng không hợp lệ. Checkout vẫn load bình thường. */
+    /** Non-null if a coupon was provided but is invalid. Checkout still loads normally. */
     couponError?: string | null;
 }
 

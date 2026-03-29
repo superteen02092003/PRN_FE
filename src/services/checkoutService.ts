@@ -15,7 +15,7 @@ import type {
  */
 
 /**
- * Validate checkout - kiểm tra cart, stock, shipping, coupon
+ * Validate checkout - check cart, stock, shipping, coupon
  */
 export const validateCheckout = async (
     couponCode?: string,
@@ -42,7 +42,7 @@ export const validateCheckout = async (
 };
 
 /**
- * Lấy thông tin giao hàng của user (pre-fill form)
+ * Get user's shipping info (pre-fill form)
  */
 export const getShippingInfo = async (): Promise<ShippingInfoResponse> => {
     const response = await api.get<ShippingInfoApiResponse>(
@@ -57,7 +57,7 @@ export const getShippingInfo = async (): Promise<ShippingInfoResponse> => {
 };
 
 /**
- * Lấy danh sách phương thức thanh toán
+ * Get available payment methods
  */
 export const getPaymentMethods = async (): Promise<PaymentMethodDto[]> => {
     const response = await api.get<PaymentMethodsApiResponse>(
