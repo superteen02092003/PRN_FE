@@ -16,6 +16,12 @@ const AdminChatPage = () => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const selectedUserIdRef = useRef<number | null>(null);
+
+    // Keep ref in sync with state so SignalR handlers always see the latest value
+    useEffect(() => {
+        selectedUserIdRef.current = selectedUserId;
+    }, [selectedUserId]);
 
     // Load conversations
     useEffect(() => {
@@ -59,7 +65,7 @@ const AdminChatPage = () => {
             };
 
             const handleRead = (userId: number) => {
-                if (selectedUserId === userId) {
+                if (selectedUserIdRef.current === userId) {
                     setMessages(prev => prev.map(m => m.isFromAdmin ? { ...m, isRead: true } : m));
                 }
             };
