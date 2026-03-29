@@ -129,11 +129,6 @@ const AdminChatPage = () => {
             }
         }
     };
-            } catch (err) {
-                console.error('Failed to mark as read:', err);
-            }
-        }
-    };
 
     useEffect(() => {
         const container = messagesContainerRef.current;
