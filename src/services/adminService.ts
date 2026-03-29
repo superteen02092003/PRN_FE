@@ -424,7 +424,7 @@ export const deleteCategory = async (id: number): Promise<void> => {
 
 export const uploadCategoryImage = async (categoryId: number, file: File): Promise<string> => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('files', file); // Backend expects 'files' (plural), not 'file'
     const response = await api.post<AdminApiResponse<{ imageUrl: string }>>(
         `/categories/${categoryId}/image`,
         formData,

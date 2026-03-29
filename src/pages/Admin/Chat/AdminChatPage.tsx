@@ -93,15 +93,23 @@ const AdminChatPage = () => {
     // Handle selecting a conversation - clear unread
     const handleSelectConversation = async (userId: number) => {
         setSelectedUserId(userId);
+        
+        // Find the conversation to check unread count
+        const conversation = conversations.find(c => c.userId === userId);
+        const hasUnread = conversation && conversation.unreadCount > 0;
+        
         // Clear unread count in UI immediately
         setConversations(prev =>
             prev.map(c => c.userId === userId ? { ...c, unreadCount: 0 } : c)
         );
-        // Call API to mark as read
-        try {
-            await markAsRead(userId);
-        } catch (err) {
-            console.error('Failed to mark as read:', err);
+        
+        // Only call API to mark as read if there are unread messages
+        if (hasUnread) {
+            try {
+                await markAsRead(userId);
+            } catch (err) {
+                console.error('Failed to mark as read:', err);
+            }
         }
     };
 
