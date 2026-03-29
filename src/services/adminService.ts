@@ -96,12 +96,13 @@ export const updateProduct = async (id: number, data: Record<string, unknown>): 
     }
 };
 
-export const deleteProduct = async (id: number): Promise<void> => {
+export const deleteProduct = async (id: number): Promise<string> => {
     try {
         const response = await api.delete<AdminApiResponse<unknown>>(`/admin/products/${id}`);
         if (!response.data.success) {
             throw new Error(response.data.message || 'Failed to delete product');
         }
+        return response.data.message || 'Xóa thành công';
     } catch (err) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const axiosErr = err as any;
