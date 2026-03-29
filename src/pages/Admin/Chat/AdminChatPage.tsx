@@ -106,6 +106,8 @@ const AdminChatPage = () => {
         const conversation = conversations.find(c => c.userId === userId);
         const hasUnread = conversation && conversation.unreadCount > 0;
         
+        console.log('[AdminChat] Selecting conversation:', { userId, hasUnread, currentUnreadCount: conversation?.unreadCount });
+        
         // Clear unread count in UI immediately
         setConversations(prev =>
             prev.map(c => c.userId === userId ? { ...c, unreadCount: 0 } : c)
@@ -114,10 +116,19 @@ const AdminChatPage = () => {
         // Only call API to mark as read if there are unread messages
         if (hasUnread) {
             try {
+                console.log('[AdminChat] Calling markAsRead API for userId:', userId);
                 await markAsRead(userId);
+                
+                console.log('[AdminChat] Refetching conversations after mark as read');
                 // Refetch conversations to get updated unread counts from backend
                 const updatedConvos = await getConversations();
+                console.log('[AdminChat] Updated conversations:', updatedConvos.map(c => ({ userId: c.userId, unreadCount: c.unreadCount })));
                 setConversations(updatedConvos || []);
+            } catch (err) {
+                console.error('[AdminChat] Failed to mark as read:', err);
+            }
+        }
+    };
             } catch (err) {
                 console.error('Failed to mark as read:', err);
             }
