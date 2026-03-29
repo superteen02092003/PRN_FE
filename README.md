@@ -1,80 +1,76 @@
-# Google Antigravity
+# PRN232 Frontend - E-commerce STEM Store
 
-[English](./README.md) | [Tiếng Việt](./README.vi.md)
+> React + TypeScript + Vite + Tailwind CSS
 
-> **The Ultimate AI Agent Brain.**  
-> *A comprehensive collection of Rules, Skills, and Workflows for modern AI Agents.*
+## 🚀 Live Demo
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+- **Production:** https://prn232.store
+- **Backend API:** https://prn232-backend-production.up.railway.app/api
 
-**Google Antigravity** is the core intelligence engine for building AI Agents. It provides a CLI tool (`npx`) to instantly scaffold agent-ready projects equipped with comprehensive professional skills and robust operational rules.
+## 📋 Features
 
-| **20+** Master Skills | **15+** Specialist Agents | **11** Workflows | **13** Shared Modules |
-| :---: | :---: | :---: | :---: |
-| Full-Stack Capabilities | Role-Based Personas | Development Processes | Reusable Standards |
+### Customer Features
+- 🛍️ Product browsing with filtering, search, and sorting
+- 📦 Product detail with images, reviews, and bundles
+- 🛒 Shopping cart with coupon support
+- 💳 Checkout (COD, SePay payment)
+- 📜 Order history and tracking
+- 🔄 Return requests
+- 🛡️ Warranty management
+- 💬 Real-time chat support
+- 🔔 Notifications
+- 👤 Profile management
+- 🔐 OAuth login (Google, GitHub)
+
+### Admin Features
+- 📊 Dashboard
+- 📦 Product management
+- 📋 Order management
+- 👥 User management
+- 🏷️ Brand & Category management
+- ⭐ Review moderation
+- 🛡️ Warranty claims
+- 🔄 Return processing
+- 💬 Support chat
+
+## 🛠️ Tech Stack
+
+- React 19 + TypeScript
+- Vite 6
+- Tailwind CSS 4
+- React Router v7
+- Axios
+- SignalR
+- Framer Motion
 
 ## 📦 Installation
 
-### Quick Start
-
-Run the following command:
-
-```sh
-# Option 1: Create a new project folder
-npx antigravity-ide my-agent-project
-
-# Option 2: Install in the current directory (Smart Install)
-npx antigravity-ide
+```bash
+npm install
+npm run dev
 ```
 
-Follow the interactive setup:
-1.  **Agent Engine**: Choose **Standard (Node.js)** for lightweight tasks or **Advanced (Python)** for AI/Data Science.
-2.  **Industry Domain**: Select your field (Finance, Education, etc.) to optimize the Agent's focus and skills.
+## 🔧 Environment Variables
 
-```sh
-npx antigravity-ide my-project --skip-prompts
+```env
+VITE_API_URL=https://prn232-backend-production.up.railway.app/api
+VITE_GOOGLE_CLIENT_ID=your-google-client-id
+VITE_GITHUB_CLIENT_ID=your-github-client-id
 ```
 
-### Update to Latest Version
+## 📜 Scripts
 
-Keep your Antigravity IDE up to date with the latest skills and brain features:
-
-```sh
-npx antigravity-ide update
+```bash
+npm run dev      # Start dev server
+npm run build    # Build for production
+npm run preview  # Preview build
+npm run lint     # Run ESLint
 ```
 
-## 🤖 AI Model Compatibility
+## 🚀 Deployment
 
-**Google Antigravity** is designed to be the "Brain" for any AI model.
-
-- **Google Gemini**: Fully compatible with 2M context window.
-- **Anthropic Claude**: Optimized reasoning with `.agent` rules.
-- **OpenAI GPT-4**: Standardized skill formats.
-
-👉 **See [GEMINI.md](./GEMINI.md) for integration guides.**
-
-## 🚀 Core Features
-
-### 🧠 **The Agent Brain (.agent)**
-The heart of the system is the `.agent` folder, which contains:
-- **Professional Skills**: Production-ready capabilities for Development, DevOps, Security, and Data interactions.
-- **Universal Compatibility**: Optimized for **Gemini Pro**, **Claude 3.5 Sonnet**, and **GPT-4o**.
-- **Operational Rules**: Pre-defined protocols for safe and effective agent behavior.
-
-### ⚡ **Project Scaffolding (CLI)**
-A smart CLI tool to bootstrap new projects:
-- **Smart Install**: Detects context to install in current directory or create a new one.
-- **Agent Engines**: **Standard** (Node.js, lightweight) or **Advanced** (Python, full-power).
-- **Industry Intelligence**: Installs all professional skills but prioritizes your specific domain (Finance, Logistics, etc.) in the Agent's configuration.
-- **Fast**: Minimal footprint, intelligent filtering.
-
-## 📂 Project Structure
-
-```text
-antigravity-ide/
-├── .agent/           # 🧠 THE BRAIN: Configs & 550+ Skills
-└── cli/              # ⚡ CLI TOOL: Project Scaffolding
-```
+Deployed on Vercel with automatic GitHub Actions deployment.
 
 ---
-*Created with ❤️ by Dokhacgiakhoa*
+
+Made with ❤️ by PRN232 Team
