@@ -217,8 +217,41 @@ const AdminProductFormPage = () => {
         e.preventDefault();
         setError(null);
 
+        // Basic required fields
         if (!form.name || !form.sku || form.brandId === 0) {
             setError('Name, SKU, and Brand are required');
+            return;
+        }
+
+        // Product name validation
+        const trimmedName = form.name.trim();
+        if (trimmedName.length < 2) {
+            setError('Product name must be at least 2 characters');
+            return;
+        }
+        if (trimmedName.length > 200) {
+            setError('Product name cannot exceed 200 characters');
+            return;
+        }
+        // Check if name contains at least one letter (not just numbers/symbols)
+        if (!/[a-zA-Z]/.test(trimmedName)) {
+            setError('Product name must contain at least one letter');
+            return;
+        }
+        // Check for invalid characters (allow letters, numbers, spaces, hyphens, parentheses, slashes, dots, commas)
+        if (!/^[a-zA-Z0-9\s\-()\/.,]+$/.test(trimmedName)) {
+            setError('Product name contains invalid characters. Only letters, numbers, spaces, and basic punctuation (- / . , ( )) are allowed');
+            return;
+        }
+
+        // SKU validation
+        const trimmedSku = form.sku.trim();
+        if (trimmedSku.length === 0) {
+            setError('SKU is required');
+            return;
+        }
+        if (trimmedSku.length > 50) {
+            setError('SKU cannot exceed 50 characters');
             return;
         }
 
@@ -359,7 +392,27 @@ const AdminProductFormPage = () => {
                                 onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))}
                                 placeholder="Product name"
                                 required
+                                maxLength={200}
                             />
+                            {form.name && form.name.trim().length > 0 && (
+                                <div style={{ marginTop: '4px', fontSize: '11px' }}>
+                                    {form.name.trim().length < 2 && (
+                                        <span style={{ color: '#ef4444' }}>⚠ Name must be at least 2 characters</span>
+                                    )}
+                                    {form.name.trim().length >= 2 && !/[a-zA-Z]/.test(form.name.trim()) && (
+                                        <span style={{ color: '#ef4444' }}>⚠ Name must contain at least one letter</span>
+                                    )}
+                                    {form.name.trim().length >= 2 && /[a-zA-Z]/.test(form.name.trim()) && !/^[a-zA-Z0-9\s\-()\/.,]+$/.test(form.name.trim()) && (
+                                        <span style={{ color: '#ef4444' }}>⚠ Invalid characters. Only letters, numbers, spaces, and - / . , ( ) allowed</span>
+                                    )}
+                                    {form.name.trim().length >= 2 && /[a-zA-Z]/.test(form.name.trim()) && /^[a-zA-Z0-9\s\-()\/.,]+$/.test(form.name.trim()) && (
+                                        <span style={{ color: '#10b981' }}>✓ Valid name</span>
+                                    )}
+                                    <span style={{ color: '#94a3b8', marginLeft: '8px' }}>
+                                        {form.name.length}/200
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <div className="admin-form-group">
                             <label className="admin-form-label">SKU *</label>
@@ -369,7 +422,13 @@ const AdminProductFormPage = () => {
                                 onChange={(e) => setForm(p => ({ ...p, sku: e.target.value }))}
                                 placeholder="e.g. ARD-UNO-001"
                                 required
+                                maxLength={50}
                             />
+                            {form.sku && form.sku.length > 0 && (
+                                <div style={{ marginTop: '4px', fontSize: '11px', color: '#94a3b8' }}>
+                                    {form.sku.length}/50
+                                </div>
+                            )}
                         </div>
                     </div>
 
