@@ -8,6 +8,7 @@
 html {
     font-size: 16px;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -17,6 +18,7 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
 
 a {
@@ -35,6 +37,8 @@ img {
     max-width: 100%;
     height: auto;
     display: block;
+    /* Improve image rendering */
+    will-change: transform;
 }
 
 /* Container */
