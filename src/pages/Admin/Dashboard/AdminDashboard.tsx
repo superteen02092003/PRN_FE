@@ -29,7 +29,11 @@ const getDateRange = (preset: RangePreset): { from: string; to: string } => {
         return `${year}-${month}-${day}`;
     };
     
-    const to = formatLocalDate(now);
+    // For "to" date, add 1 day to include today's data
+    // Backend likely uses date >= from AND date < to (exclusive end)
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const to = formatLocalDate(tomorrow);
     let from: string;
 
     switch (preset) {
@@ -48,6 +52,8 @@ const getDateRange = (preset: RangePreset): { from: string; to: string } => {
         default:
             from = formatLocalDate(new Date(now.getTime() - 30 * 86400000));
     }
+    
+    console.log(`[Revenue Chart] Preset: ${preset}, Date Range: ${from} to ${to}`);
     return { from, to };
 };
 
