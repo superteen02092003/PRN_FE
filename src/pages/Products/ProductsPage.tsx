@@ -93,37 +93,12 @@ const ProductsPage = () => {
     }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice, pageNumber, pageSize, sortBy, sortOrder]);
 
     // Fetch data using hooks
-    const { products: fetchedProducts, pagination, loading: productsLoading, error: productsError } = useProducts(filterParams);
+    const { products, pagination, loading: productsLoading, error: productsError } = useProducts(filterParams);
     const { categories, loading: categoriesLoading } = useCategories();
     const { brands, loading: brandsLoading } = useBrands();
 
-    // Client-side sorting (temporary until backend supports sorting)
-    const products = useMemo(() => {
-        if (!fetchedProducts || fetchedProducts.length === 0) return fetchedProducts;
-
-        const sorted = [...fetchedProducts];
-        
-        switch (sortBy) {
-            case 'price':
-                sorted.sort((a, b) => sortOrder === 'asc' ? a.price - b.price : b.price - a.price);
-                break;
-            case 'name':
-                sorted.sort((a, b) => {
-                    const comparison = a.name.localeCompare(b.name);
-                    return sortOrder === 'asc' ? comparison : -comparison;
-                });
-                break;
-            case 'createdAt':
-            default:
-                // Products already sorted by createdAt from backend
-                if (sortOrder === 'asc') {
-                    sorted.reverse();
-                }
-                break;
-        }
-
-        return sorted;
-    }, [fetchedProducts, sortBy, sortOrder]);
+    // Note: Sorting is now handled by backend
+    // If backend doesn't support sorting yet, products will be in default order (newest first)
 
     // Handle add to cart
     const handleAddToCart = useCallback(async (e: React.MouseEvent, productId: number, productName: string) => {
