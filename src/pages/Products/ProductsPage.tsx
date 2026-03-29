@@ -52,9 +52,13 @@ const ProductsPage = () => {
     const [selectedBrandId, setSelectedBrandId] = useState<number | null>(
         searchParams.get('brandId') ? Number(searchParams.get('brandId')) : null
     );
-    const [selectedProductType, setSelectedProductType] = useState<ProductType | null>(
-        (searchParams.get('productType') as ProductType) || null
-    );
+    const [selectedProductType, setSelectedProductType] = useState<ProductType | null>(() => {
+        const typeParam = searchParams.get('productType');
+        if (typeParam === 'MODULE' || typeParam === 'KIT' || typeParam === 'COMPONENT') {
+            return typeParam;
+        }
+        return null;
+    });
     const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || 'createdAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(
         (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc'
@@ -444,12 +448,12 @@ const ProductsPage = () => {
                         <div className="filter-group">
                             <h3 className="filter-group__title">Product Type</h3>
                             <div className="filter-group__options">
-                                {['MODULE', 'KIT', 'COMPONENT'].map(type => (
+                                {(['MODULE', 'KIT', 'COMPONENT'] as const).map(type => (
                                     <label key={type} className="filter-option">
                                         <input
                                             type="checkbox"
                                             checked={selectedProductType === type}
-                                            onChange={() => setSelectedProductType(prev => prev === type ? null : type)}
+                                            onChange={() => setSelectedProductType(prev => prev === type ? null : type as ProductType)}
                                         />
                                         <span className="filter-option__label">{type}</span>
                                     </label>
