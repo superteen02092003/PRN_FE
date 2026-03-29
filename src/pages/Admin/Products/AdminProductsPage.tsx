@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
 import { getAdminProducts, deleteProduct } from '@/services/adminService';
 import { getCategories, getBrands } from '@/services/productService';
+import { exportService } from '@/services/exportService';
 import type { AdminProductResponse, AdminProductFilter } from '@/types/admin.types';
 import type { CategoryResponseDto, BrandResponseDto } from '@/types/product.types';
 import { resolveImageUrl } from '@/utils/imageUrl';
@@ -20,6 +21,20 @@ const AdminProductsPage = () => {
         pageNumber: 1,
         pageSize: 15,
     });
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExport = async () => {
+        try {
+            setIsExporting(true);
+            toast.info('Đang xuất báo cáo, vui lòng đợi...', { autoClose: 2000 });
+            await exportService.exportProducts(filter);
+            toast.success('Xuất Excel thành công!');
+        } catch (error) {
+            toast.error('Lỗi khi xuất Excel products');
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     const fetchProducts = useCallback(async () => {
         try {
@@ -115,7 +130,32 @@ const AdminProductsPage = () => {
                     Low Stock Only
                 </label>
 
-                <div style={{ marginLeft: 'auto' }}>
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                    <button 
+                        onClick={handleExport} 
+                        disabled={isExporting}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 16px',
+                            backgroundColor: '#10b981', // emerald-500
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: isExporting ? 'not-allowed' : 'pointer',
+                            fontWeight: '500',
+                            fontSize: '14px',
+                            opacity: isExporting ? 0.7 : 1,
+                            transition: 'all 0.2sease',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                        }}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                            view_list
+                        </span>
+                        {isExporting ? 'Đang xuất...' : 'Xuất Kho Excel'}
+                    </button>
                     <button className="admin-btn primary" onClick={() => navigate('/admin/products/new')}>
                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
                         Add Product

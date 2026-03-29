@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
 import { getAdminOrders } from '@/services/adminService';
+import { exportService } from '@/services/exportService';
 import type { AdminOrderResponse, AdminOrderFilter } from '@/types/admin.types';
 import { toast } from 'react-toastify';
 
@@ -17,6 +18,20 @@ const AdminOrdersPage = () => {
         pageNumber: 1,
         pageSize: 15,
     });
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExport = async () => {
+        try {
+            setIsExporting(true);
+            toast.info('Đang xuất báo cáo, vui lòng đợi...', { autoClose: 2000 });
+            await exportService.exportOrders(filter);
+            toast.success('Xuất Excel thành công!');
+        } catch (error) {
+            toast.error('Lỗi khi xuất Excel orders');
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     const fetchOrders = useCallback(async () => {
         try {
@@ -85,6 +100,31 @@ const AdminOrdersPage = () => {
                     <option value="PAID">Paid</option>
                     <option value="EXPIRED">Expired</option>
                 </select>
+                <button 
+                    onClick={handleExport} 
+                    disabled={isExporting}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '8px 16px',
+                        backgroundColor: '#10b981', // emerald-500
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: isExporting ? 'not-allowed' : 'pointer',
+                        fontWeight: '500',
+                        fontSize: '14px',
+                        opacity: isExporting ? 0.7 : 1,
+                        transition: 'all 0.2sease',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                    }}
+                >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                        download
+                    </span>
+                    {isExporting ? 'Đang xuất...' : 'Xuất Excel'}
+                </button>
             </div>
 
             {/* Orders Table */}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
 import { getUsers } from '@/services/adminService';
+import { exportService } from '@/services/exportService';
 import type { AdminUserDto } from '@/types/admin.types';
 import { toast } from 'react-toastify';
 
@@ -8,6 +9,20 @@ const AdminUsersPage = () => {
     const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExport = async () => {
+        try {
+            setIsExporting(true);
+            toast.info('Đang xuất báo cáo, vui lòng đợi...', { autoClose: 2000 });
+            await exportService.exportUsers();
+            toast.success('Xuất Excel thành công!');
+        } catch (error) {
+            toast.error('Lỗi khi xuất Excel users');
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -51,8 +66,35 @@ const AdminUsersPage = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="admin-stat-sub" style={{ marginLeft: 'auto' }}>
-                    Total: <strong>{filteredUsers.length}</strong> users
+                <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div className="admin-stat-sub">
+                        Total: <strong>{filteredUsers.length}</strong> users
+                    </div>
+                    <button 
+                        onClick={handleExport} 
+                        disabled={isExporting}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 16px',
+                            backgroundColor: '#10b981', // emerald-500
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: isExporting ? 'not-allowed' : 'pointer',
+                            fontWeight: '500',
+                            fontSize: '14px',
+                            opacity: isExporting ? 0.7 : 1,
+                            transition: 'all 0.2sease',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                        }}
+                    >
+                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                            group_add
+                        </span>
+                        {isExporting ? 'Đang xuất...' : 'Xuất Users'}
+                    </button>
                 </div>
             </div>
 
