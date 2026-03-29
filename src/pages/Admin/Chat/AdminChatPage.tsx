@@ -54,13 +54,14 @@ const AdminChatPage = () => {
                     const cid = msg.isFromAdmin ? msg.receiverId : msg.senderId;
                     if (!cid) return prev;
                     const exists = prev.find(c => c.userId === cid);
+                    const isCurrentlyViewing = cid === selectedUserIdRef.current;
                     if (exists) {
                         return prev.map(c => c.userId === cid
-                            ? { ...c, lastMessage: msg.content, lastMessageAt: msg.sentAt, unreadCount: c.unreadCount + (msg.isFromAdmin ? 0 : 1) }
+                            ? { ...c, lastMessage: msg.content, lastMessageAt: msg.sentAt, unreadCount: c.unreadCount + (msg.isFromAdmin || isCurrentlyViewing ? 0 : 1) }
                             : c
                         ).sort((a, b) => new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime());
                     }
-                    return [{ userId: cid, userName: msg.senderName, lastMessage: msg.content, lastMessageAt: msg.sentAt, unreadCount: 1 }, ...prev];
+                    return [{ userId: cid, userName: msg.senderName, lastMessage: msg.content, lastMessageAt: msg.sentAt, unreadCount: isCurrentlyViewing ? 0 : 1 }, ...prev];
                 });
             };
 
