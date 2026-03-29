@@ -18,7 +18,7 @@ const HomePage = () => {
     const { addToCart } = useAddToCart();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const sectionsRef = useRef<HTMLDivElement>(null);
-    const [splineLoaded, setSplineLoaded] = useState(false);
+    const [_splineLoaded, setSplineLoaded] = useState(false);
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     // API data states
