@@ -155,6 +155,16 @@ const authService = {
         }
         return response.data.data.avatarUrl;
     },
+
+    forgotPassword: async (email: string): Promise<ApiResponse<string>> => {
+        const response = await api.post<ApiResponse<string>>('/auth/forgot-password', { email });
+        return response.data;
+    },
+
+    resetPassword: async (email: string, otp: string, newPassword: string): Promise<ApiResponse<string>> => {
+        const response = await api.post<ApiResponse<string>>('/auth/reset-password', { email, otp, newPassword });
+        return response.data;
+    },
 };
 
 export default authService;

@@ -451,13 +451,13 @@ const LoginPage = () => {
                                 />
                                 <span style={{ fontSize: '13px', fontWeight: 500, color: '#4d6599' }}>Remember this device</span>
                             </label>
-                            <a href="#" style={{
+                            <Link to="/forgot-password" style={{
                                 fontSize: '13px',
                                 fontWeight: 600,
                                 color: '#2463eb',
                                 textDecoration: 'none',
                                 transition: 'color 0.2s'
-                            }}>Forgot Password?</a>
+                            }}>Quên mật khẩu?</Link>
                         </div>
 
                         {/* Main CTA Button */}

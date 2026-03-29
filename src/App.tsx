@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import HomePage from './pages/Home/index';
 import { RegisterPage, LoginPage } from './pages/Auth';
 import OAuthCallbackPage from './pages/Auth/OAuthCallbackPage';
+import ForgotPasswordPage from './pages/Auth/ForgotPasswordPage';
 import ProductsPage from './pages/Products';
 import ProductDetailPage from './pages/Products/ProductDetail';
 import { CartPage } from './pages/Cart';
@@ -54,6 +55,11 @@ function App() {
                             <Route path="/login" element={
                                 <PageTransition>
                                     <LoginPage />
+                                </PageTransition>
+                            } />
+                            <Route path="/forgot-password" element={
+                                <PageTransition>
+                                    <ForgotPasswordPage />
                                 </PageTransition>
                             } />
                             <Route path="/auth/callback" element={
