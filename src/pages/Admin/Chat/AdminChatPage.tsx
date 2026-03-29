@@ -107,6 +107,9 @@ const AdminChatPage = () => {
         if (hasUnread) {
             try {
                 await markAsRead(userId);
+                // Refetch conversations to get updated unread counts from backend
+                const updatedConvos = await getConversations();
+                setConversations(updatedConvos || []);
             } catch (err) {
                 console.error('Failed to mark as read:', err);
             }
