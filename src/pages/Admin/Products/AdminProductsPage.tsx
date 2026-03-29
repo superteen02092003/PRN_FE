@@ -66,13 +66,13 @@ const AdminProductsPage = () => {
     }, []);
 
     const handleDelete = async (id: number, name: string) => {
-        if (!confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}"?`)) return;
+        if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
         try {
             const message = await deleteProduct(id);
-            toast.success(message);
+            toast.success(message || `Product "${name}" deleted successfully`);
             fetchProducts();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Xóa sản phẩm thất bại');
+            toast.error(err instanceof Error ? err.message : 'Failed to delete product');
         }
     };
 

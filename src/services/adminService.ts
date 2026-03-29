@@ -102,7 +102,7 @@ export const deleteProduct = async (id: number): Promise<string> => {
         if (!response.data.success) {
             throw new Error(response.data.message || 'Failed to delete product');
         }
-        return response.data.message || 'Xóa thành công';
+        return response.data.message || 'Product deleted successfully';
     } catch (err) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const axiosErr = err as any;
