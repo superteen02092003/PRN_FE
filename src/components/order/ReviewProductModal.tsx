@@ -33,6 +33,12 @@ const ReviewProductModal = ({
             return;
         }
 
+        // Frontend validation for minimum length
+        if (comment.trim().length < 10) {
+            setError('Review must be at least 10 characters long');
+            return;
+        }
+
         try {
             setIsSubmitting(true);
             setError(null);
@@ -64,7 +70,13 @@ const ReviewProductModal = ({
             
             // Provide user-friendly message for common errors
             if (errorMessage.includes('status code 400') || errorMessage.includes('400')) {
-                errorMessage = 'Unable to submit review. You may have already reviewed this product or haven\'t purchased it yet.';
+                // Check if backend provided specific message
+                if (errorMessage.toLowerCase().includes('character') || errorMessage.toLowerCase().includes('length')) {
+                    // Keep backend's specific validation message
+                    errorMessage = errorMessage;
+                } else {
+                    errorMessage = 'Unable to submit review. You may have already reviewed this product or haven\'t purchased it yet.';
+                }
             } else if (errorMessage.includes('status code 403') || errorMessage.includes('403')) {
                 errorMessage = 'You don\'t have permission to review this product. Please make sure you\'ve purchased and received it.';
             } else if (errorMessage.includes('status code 401') || errorMessage.includes('401')) {
@@ -143,7 +155,12 @@ const ReviewProductModal = ({
 
                     {/* Comment */}
                     <div className="review-modal-field">
-                        <label>Your Review</label>
+                        <label>
+                            Your Review
+                            <span className="review-char-count">
+                                {comment.trim().length}/10 characters minimum
+                            </span>
+                        </label>
                         <textarea
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}

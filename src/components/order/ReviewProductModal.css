@@ -102,6 +102,13 @@
     font-size: 0.9rem;
 }
 
+.review-char-count {
+    float: right;
+    font-weight: 400;
+    color: #9ca3af;
+    font-size: 0.8rem;
+}
+
 .review-modal-stars {
     display: flex;
     align-items: center;
