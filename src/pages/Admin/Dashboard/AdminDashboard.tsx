@@ -20,24 +20,33 @@ type RangePreset = '7d' | '30d' | 'month' | 'year' | 'custom';
 
 const getDateRange = (preset: RangePreset): { from: string; to: string } => {
     const now = new Date();
-    const to = now.toISOString().split('T')[0];
+    
+    // Helper to format date as YYYY-MM-DD in local timezone
+    const formatLocalDate = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    
+    const to = formatLocalDate(now);
     let from: string;
 
     switch (preset) {
         case '7d':
-            from = new Date(now.getTime() - 7 * 86400000).toISOString().split('T')[0];
+            from = formatLocalDate(new Date(now.getTime() - 7 * 86400000));
             break;
         case '30d':
-            from = new Date(now.getTime() - 30 * 86400000).toISOString().split('T')[0];
+            from = formatLocalDate(new Date(now.getTime() - 30 * 86400000));
             break;
         case 'month':
-            from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            from = formatLocalDate(new Date(now.getFullYear(), now.getMonth(), 1));
             break;
         case 'year':
-            from = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+            from = formatLocalDate(new Date(now.getFullYear(), 0, 1));
             break;
         default:
-            from = new Date(now.getTime() - 30 * 86400000).toISOString().split('T')[0];
+            from = formatLocalDate(new Date(now.getTime() - 30 * 86400000));
     }
     return { from, to };
 };
