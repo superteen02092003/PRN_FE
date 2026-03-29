@@ -58,10 +58,18 @@ const AdminChatPage = () => {
                 });
             };
 
+            const handleRead = (userId: number) => {
+                if (selectedUserId === userId) {
+                    setMessages(prev => prev.map(m => m.isFromAdmin ? { ...m, isRead: true } : m));
+                }
+            };
+            
             conn.on('ReceiveMessage', handleMsg);
+            conn.on('MessagesRead', handleRead);
             
             cleanupConn = () => {
                 conn.off('ReceiveMessage', handleMsg);
+                conn.off('MessagesRead', handleRead);
             };
         };
         
@@ -261,7 +269,12 @@ const AdminChatPage = () => {
                                         >
                                             <div className="admin-chat-msg-bubble">
                                                 {renderMessageContent(msg.content)}
-                                                <span className="admin-chat-msg-time">{formatTime(msg.sentAt)}</span>
+                                                <div className="admin-chat-msg-meta">
+                                                    <span className="admin-chat-msg-time">{formatTime(msg.sentAt)}</span>
+                                                    {msg.isFromAdmin && msg.isRead && (
+                                                        <span className="admin-chat-msg-status">Read</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))

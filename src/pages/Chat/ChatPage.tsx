@@ -76,10 +76,16 @@ const ChatPage = () => {
                 window.dispatchEvent(new Event('chatUnreadClear'));
             };
             
+            const handleRead = () => {
+                setMessages(prev => prev.map(m => !m.isFromAdmin ? { ...m, isRead: true } : m));
+            };
+            
             conn.on('ReceiveMessage', handleMsg);
+            conn.on('MessagesRead', handleRead);
             
             cleanupConn = () => {
                 conn.off('ReceiveMessage', handleMsg);
+                conn.off('MessagesRead', handleRead);
             };
         };
         
@@ -219,7 +225,12 @@ const ChatPage = () => {
                                                     <span className="chat-msg-sender">Support</span>
                                                 )}
                                                 {renderMessageContent(msg.content)}
-                                                <span className="chat-msg-time">{formatTime(msg.sentAt)}</span>
+                                                <div className="chat-msg-meta">
+                                                    <span className="chat-msg-time">{formatTime(msg.sentAt)}</span>
+                                                    {!msg.isFromAdmin && msg.isRead && (
+                                                        <span className="chat-msg-status">Read</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
