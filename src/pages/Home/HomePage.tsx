@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Header from '@components/common/Header';
@@ -9,8 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getProducts, getCategories, getBrands } from '@/services/productService';
 import type { ProductResponseDto, CategoryResponseDto, BrandResponseDto } from '@/types/product.types';
 
-const Spline = lazy(() => import('@splinetool/react-spline'));
-
 const HomePage = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -18,7 +16,6 @@ const HomePage = () => {
     const { addToCart } = useAddToCart();
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const sectionsRef = useRef<HTMLDivElement>(null);
-    const [_splineLoaded, setSplineLoaded] = useState(false);
     const isMobile = useMediaQuery('(max-width: 768px)');
 
     // API data states
