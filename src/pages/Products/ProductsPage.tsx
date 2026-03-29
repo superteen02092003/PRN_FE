@@ -171,6 +171,8 @@ const ProductsPage = () => {
         setSelectedProductType(null);
         setMinPrice('');
         setMaxPrice('');
+        setSortBy('createdAt');
+        setSortOrder('desc');
         setPageNumber(1);
     }, []);
 

@@ -49,6 +49,8 @@ export const getProducts = async (
         if (filter.minPrice !== undefined) params.MinPrice = filter.minPrice;
         if (filter.maxPrice !== undefined) params.MaxPrice = filter.maxPrice;
         if (filter.productType) params.ProductType = filter.productType;
+        if (filter.sortBy) params.SortBy = filter.sortBy;
+        if (filter.sortOrder) params.SortOrder = filter.sortOrder;
 
         const response = await api.get<ProductsApiResponse>('/Product', { params });
 
