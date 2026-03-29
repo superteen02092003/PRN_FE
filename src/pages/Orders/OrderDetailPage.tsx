@@ -119,8 +119,9 @@ const OrderDetailPage = () => {
     }
 
     const canCancel = order.status === 'PENDING' || order.status === 'CONFIRMED';
-    const canPay = order.payment?.status === 'PENDING' && order.payment?.paymentMethod === 'SEPAY';
+    const canPay = order.payment?.status === 'PENDING' && order.payment?.paymentMethod === 'SEPAY' && order.status !== 'CANCELLED';
     const canReturn = order.status === 'DELIVERED';
+    const isCancelledByExpiry = order.status === 'CANCELLED' && order.cancelReason && (order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán'));
     const statusInfo = statusConfig[order.status] || statusConfig.PENDING;
     const paymentStatus = order.payment
         ? (paymentStatusLabels[order.payment.status] || paymentStatusLabels.PENDING)
@@ -164,8 +165,23 @@ const OrderDetailPage = () => {
 
                 {/* Cancel Reason */}
                 {order.cancelReason && (
-                    <div className="od-cancel-reason">
-                        <strong>Cancellation reason:</strong> {order.cancelReason}
+                    <div className={`od-cancel-reason ${order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán') ? 'od-cancel-reason--expired' : ''}`}>
+                        <span className="material-symbols-outlined">
+                            {order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán') ? 'schedule' : 'info'}
+                        </span>
+                        <div>
+                            <strong>
+                                {order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán') 
+                                    ? 'Order Cancelled - Payment Expired' 
+                                    : 'Cancellation Reason'}:
+                            </strong>
+                            <p>{order.cancelReason}</p>
+                            {(order.cancelReason.includes('Payment') || order.cancelReason.includes('thanh toán')) && (
+                                <p className="od-cancel-reason-note">
+                                    Don't worry! Product stock and any applied coupons have been automatically restored to your account.
+                                </p>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -361,6 +377,11 @@ const OrderDetailPage = () => {
                             <span className="material-symbols-outlined">undo</span>
                             Return / Exchange Request
                         </button>
+                    ) : isCancelledByExpiry ? (
+                        <Link to="/products" className="od-btn-order-again">
+                            <span className="material-symbols-outlined">shopping_cart</span>
+                            Shop Again
+                        </Link>
                     ) : (
                         <div />
                     )}

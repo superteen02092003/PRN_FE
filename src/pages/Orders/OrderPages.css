@@ -852,11 +852,52 @@
 
 .od-cancel-reason {
     margin-top: 0.75rem;
-    padding: 0.75rem;
+    padding: 1rem;
     background: #fef2f2;
     border-radius: 0.5rem;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: #b91c1c;
+    border: 1px solid #fecaca;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.od-cancel-reason .material-symbols-outlined {
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.od-cancel-reason strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: #991b1b;
+}
+
+.od-cancel-reason p {
+    margin: 0.25rem 0 0;
+    line-height: 1.5;
+}
+
+.od-cancel-reason--expired {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
+}
+
+.od-cancel-reason--expired strong {
+    color: #78350f;
+}
+
+.od-cancel-reason--expired .material-symbols-outlined {
+    color: #f59e0b;
+}
+
+.od-cancel-reason-note {
+    margin-top: 0.5rem !important;
+    font-size: 0.8125rem;
+    color: #a16207;
+    font-style: italic;
 }
 
 /* ---- Content Grid ---- */
@@ -1252,6 +1293,30 @@
 }
 
 .od-btn-return .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.od-btn-order-again {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    border: 2px solid #10b981;
+    background: transparent;
+    color: #10b981;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.od-btn-order-again:hover {
+    background: #d1fae5;
+}
+
+.od-btn-order-again .material-symbols-outlined {
     font-size: 18px;
 }
 
