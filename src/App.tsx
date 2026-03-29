@@ -9,7 +9,7 @@ import ProductsPage from './pages/Products';
 import ProductDetailPage from './pages/Products/ProductDetail';
 import { CartPage } from './pages/Cart';
 import { CheckoutPage } from './pages/Checkout';
-import { PaymentSuccessPage, PaymentErrorPage, PaymentCancelPage, PaymentPendingPage } from './pages/Payment';
+import { PaymentSuccessPage, PaymentErrorPage, PaymentCancelPage, PaymentPendingPage, PaymentExpiredPage } from './pages/Payment';
 import { OrderHistoryPage, OrderDetailPage } from './pages/Orders';
 import MyReturnRequestsPage from './pages/Orders/MyReturnRequestsPage';
 import AdminReturnRequestsPage from './pages/Admin/ReturnRequests/AdminReturnRequestsPage';
@@ -109,6 +109,11 @@ function App() {
                             <Route path="/payment/cancel" element={
                                 <PageTransition>
                                     <PaymentCancelPage />
+                                </PageTransition>
+                            } />
+                            <Route path="/payment/expired" element={
+                                <PageTransition>
+                                    <PaymentExpiredPage />
                                 </PageTransition>
                             } />
                             <Route path="/payment/pending/:orderId" element={

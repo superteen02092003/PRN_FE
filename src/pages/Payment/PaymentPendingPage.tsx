@@ -66,6 +66,10 @@ const PaymentPendingPage = () => {
                 setIsPaid(true);
                 if (pollingRef.current) clearInterval(pollingRef.current);
                 navigate(`/payment/success?status=success&orderId=${orderId}&orderNumber=${orderNumber}&method=SEPAY&totalAmount=${totalAmount}`);
+            } else if (order.payment?.status === 'EXPIRED' || order.payment?.status === 'FAILED') {
+                // Payment expired or failed - redirect to expired page
+                if (pollingRef.current) clearInterval(pollingRef.current);
+                navigate(`/payment/expired?orderId=${orderId}&orderNumber=${orderNumber}`);
             }
         } catch { /* silent */ }
     }, [orderId, orderNumber, totalAmount, navigate]);
@@ -82,14 +86,15 @@ const PaymentPendingPage = () => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
                     clearInterval(timer);
-                    navigate(`/payment/error?message=Payment session has expired&orderId=${orderId}`);
+                    // Redirect to expired page instead of error page
+                    navigate(`/payment/expired?orderId=${orderId}&orderNumber=${orderNumber}`);
                     return 0;
                 }
                 return prev - 1;
             });
         }, 1000);
         return () => clearInterval(timer);
-    }, [timeLeft, isPaid, navigate, orderId]);
+    }, [timeLeft, isPaid, navigate, orderId, orderNumber]);
 
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
