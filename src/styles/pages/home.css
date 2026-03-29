@@ -509,30 +509,12 @@
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
     position: relative;
-    overflow: hidden;
-}
-
-.category-carousel__card::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    background: linear-gradient(135deg, #242aeb, #06b6d4, #8b5cf6);
-    background-size: 200% 200%;
-    border-radius: 0.75rem;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    animation: gradient-shift 3s ease infinite;
 }
 
 .category-carousel__card:hover {
     border-color: #242aeb;
     box-shadow: 0 12px 35px rgba(36, 42, 235, 0.2);
     transform: translateY(-8px) scale(1.05);
-}
-
-.category-carousel__card:hover::before {
-    opacity: 1;
 }
 
 .category-carousel__card--skeleton {
@@ -760,27 +742,12 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow: hidden;
-}
-
-.product-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(36, 42, 235, 0.03), rgba(6, 182, 212, 0.03));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
 }
 
 .product-card:hover {
     box-shadow: 0 20px 50px rgba(36, 42, 235, 0.15);
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px);
     border-color: #242aeb;
-}
-
-.product-card:hover::after {
-    opacity: 1;
 }
 
 .dark .product-card {
@@ -969,29 +936,12 @@
     gap: 1rem;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
-    overflow: hidden;
-}
-
-.arrival-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(180deg, #242aeb, #06b6d4);
-    transform: scaleY(0);
-    transition: transform 0.3s ease;
 }
 
 .arrival-card:hover {
-    border-color: rgba(36, 42, 235, 0.5);
+    border-color: #242aeb;
     box-shadow: 0 12px 35px rgba(36, 42, 235, 0.15);
-    transform: translateX(8px) scale(1.02);
-}
-
-.arrival-card:hover::before {
-    transform: scaleY(1);
+    transform: translateX(8px);
 }
 
 .dark .arrival-card {
@@ -1756,30 +1706,12 @@
     border: 1px solid #e7e8f3;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
-    overflow: hidden;
-}
-
-.why-card::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    background: linear-gradient(135deg, #242aeb, #06b6d4, #8b5cf6, #242aeb);
-    background-size: 300% 300%;
-    border-radius: 0.75rem;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    animation: gradient-shift 4s ease infinite;
 }
 
 .why-card:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(36, 42, 235, 0.15);
     border-color: #242aeb;
-}
-
-.why-card:hover::before {
-    opacity: 1;
 }
 
 .why-card__icon {
@@ -2030,24 +1962,10 @@
     position: relative;
 }
 
-.bestseller-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(36, 42, 235, 0.05), rgba(6, 182, 212, 0.05));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
 .bestseller-card:hover {
-    transform: translateY(-10px) scale(1.02);
+    transform: translateY(-10px);
     box-shadow: 0 20px 50px rgba(36, 42, 235, 0.18);
     border-color: #242aeb;
-}
-
-.bestseller-card:hover::after {
-    opacity: 1;
 }
 
 .bestseller-card__img {
