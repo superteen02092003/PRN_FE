@@ -195,6 +195,13 @@ const ProductsPage = () => {
             }
         }
 
+        if (selectedProductType) {
+            filters.push({
+                label: `Type: ${selectedProductType}`,
+                onRemove: () => setSelectedProductType(null),
+            });
+        }
+
         if (minPrice || maxPrice) {
             const priceLabel = minPrice && maxPrice
                 ? `Price: ${formatPrice(Number(minPrice))} - ${formatPrice(Number(maxPrice))}`
@@ -211,7 +218,7 @@ const ProductsPage = () => {
         }
 
         return filters;
-    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, minPrice, maxPrice, categories, brands]);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice, categories, brands]);
 
     // Generate pagination pages
     const paginationPages = useMemo(() => {
@@ -366,6 +373,23 @@ const ProductsPage = () => {
                                         </label>
                                     ))
                                 )}
+                            </div>
+                        </div>
+
+                        {/* Product Type Filter */}
+                        <div className="filter-group">
+                            <h3 className="filter-group__title">Product Type</h3>
+                            <div className="filter-group__options">
+                                {['MODULE', 'KIT', 'COMPONENT'].map(type => (
+                                    <label key={type} className="filter-option">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedProductType === type}
+                                            onChange={() => setSelectedProductType(prev => prev === type ? null : type)}
+                                        />
+                                        <span className="filter-option__label">{type}</span>
+                                    </label>
+                                ))}
                             </div>
                         </div>
 
