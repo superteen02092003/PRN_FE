@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createProductReview } from '@/services/productService';
+import Toast from '@/components/common/Toast';
 import './ReviewProductModal.css';
 
 interface ReviewProductModalProps {
@@ -24,6 +25,7 @@ const ReviewProductModal = ({
     const [hoveredRating, setHoveredRating] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,12 +51,17 @@ const ReviewProductModal = ({
             });
 
             // Success
-            if (onSuccess) onSuccess();
-            onClose();
+            setToast({ message: 'Thank you for your review!', type: 'success' });
             
-            // Reset form
-            setRating(5);
-            setComment('');
+            // Close modal after short delay
+            setTimeout(() => {
+                if (onSuccess) onSuccess();
+                onClose();
+                
+                // Reset form
+                setRating(5);
+                setComment('');
+            }, 1500);
         } catch (err) {
             // Log full error for debugging
             console.error('Review submission error:', err);
@@ -101,7 +108,15 @@ const ReviewProductModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="review-modal-overlay" onClick={handleClose}>
+        <>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
+            <div className="review-modal-overlay" onClick={handleClose}>
             <div className="review-modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="review-modal-header">
                     <h3>Write a Review</h3>
@@ -205,6 +220,7 @@ const ReviewProductModal = ({
                 </form>
             </div>
         </div>
+        </>
     );
 };
 

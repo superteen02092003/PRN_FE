@@ -123,6 +123,7 @@ const OrderDetailPage = () => {
     const canCancel = order.status === 'PENDING' || order.status === 'CONFIRMED';
     const canPay = order.payment?.status === 'PENDING' && order.payment?.paymentMethod === 'SEPAY' && order.status !== 'CANCELLED';
     const canReturn = order.status === 'DELIVERED';
+    const canReview = order.status === 'DELIVERED';
     const isCancelledByExpiry = order.status === 'CANCELLED' && order.cancelReason && (order.cancelReason.includes('Payment') || order.cancelReason.includes('payment expired'));
     const statusInfo = statusConfig[order.status] || statusConfig.PENDING;
     const paymentStatus = order.payment
@@ -234,24 +235,9 @@ const OrderDetailPage = () => {
                                                 <span className="od-item-price">{formatPrice(item.subtotal)}</span>
                                             </div>
                                             <p className="od-item-sku">SKU: {item.productSku || 'N/A'}</p>
-                                            <div className="od-item-bottom">
-                                                <span className="od-item-qty">
-                                                    Qty: {String(item.quantity).padStart(2, '0')}
-                                                </span>
-                                                {order.status === 'DELIVERED' && (
-                                                    <button
-                                                        className="od-item-review-btn"
-                                                        onClick={() => setReviewProduct({
-                                                            id: item.productId,
-                                                            name: item.productName || 'Product',
-                                                            image: resolveImageUrl(item.productImageUrl) || undefined,
-                                                        })}
-                                                    >
-                                                        <span className="material-symbols-outlined">rate_review</span>
-                                                        Write Review
-                                                    </button>
-                                                )}
-                                            </div>
+                                            <span className="od-item-qty">
+                                                Qty: {String(item.quantity).padStart(2, '0')}
+                                            </span>
                                         </div>
                                     </div>
                                 ))}
@@ -384,29 +370,61 @@ const OrderDetailPage = () => {
             {/* Bottom Action Bar */}
             <div className="od-action-bar">
                 <div className="od-action-bar-inner">
-                    {canCancel ? (
-                        <button className="od-btn-cancel" onClick={() => setShowCancelModal(true)}>
-                            <span className="material-symbols-outlined">cancel</span>
-                            Cancel Order
-                        </button>
-                    ) : canReturn ? (
-                        <button className="od-btn-return" onClick={() => setShowReturnModal(true)}>
-                            <span className="material-symbols-outlined">undo</span>
-                            Return / Exchange Request
-                        </button>
-                    ) : isCancelledByExpiry ? (
-                        <Link to="/products" className="od-btn-order-again">
-                            <span className="material-symbols-outlined">shopping_cart</span>
-                            Shop Again
-                        </Link>
-                    ) : (
-                        <div />
-                    )}
+                    <div className="od-action-left">
+                        {canCancel ? (
+                            <button className="od-btn-cancel" onClick={() => setShowCancelModal(true)}>
+                                <span className="material-symbols-outlined">cancel</span>
+                                Cancel Order
+                            </button>
+                        ) : canReturn ? (
+                            <button className="od-btn-return" onClick={() => setShowReturnModal(true)}>
+                                <span className="material-symbols-outlined">undo</span>
+                                Return / Exchange Request
+                            </button>
+                        ) : isCancelledByExpiry ? (
+                            <Link to="/products" className="od-btn-order-again">
+                                <span className="material-symbols-outlined">shopping_cart</span>
+                                Shop Again
+                            </Link>
+                        ) : null}
+                    </div>
                     <div className="od-action-right">
                         <Link to="/orders" className="od-btn-support" style={{ textDecoration: 'none' }}>
                             <span className="material-symbols-outlined">arrow_back</span>
                             Back to Orders
                         </Link>
+                        {canReview && (
+                            <div className="od-review-dropdown">
+                                <button className="od-btn-review">
+                                    <span className="material-symbols-outlined">rate_review</span>
+                                    Rate Products
+                                    <span className="material-symbols-outlined">expand_more</span>
+                                </button>
+                                <div className="od-review-dropdown-menu">
+                                    {order.items.map((item) => (
+                                        <button
+                                            key={item.orderItemId}
+                                            className="od-review-dropdown-item"
+                                            onClick={() => setReviewProduct({
+                                                id: item.productId,
+                                                name: item.productName || 'Product',
+                                                image: resolveImageUrl(item.productImageUrl) || undefined,
+                                            })}
+                                        >
+                                            <div className="od-review-dropdown-item-image">
+                                                {item.productImageUrl ? (
+                                                    <img src={resolveImageUrl(item.productImageUrl) || ''} alt={item.productName || ''} />
+                                                ) : (
+                                                    <span className="material-symbols-outlined">image</span>
+                                                )}
+                                            </div>
+                                            <span className="od-review-dropdown-item-name">{item.productName}</span>
+                                            <span className="material-symbols-outlined">chevron_right</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         {canPay && (
                             <button className="od-btn-pay" onClick={() => redirectToSepayCheckout(order.orderId)}>
                                 <span className="material-symbols-outlined">payment</span>

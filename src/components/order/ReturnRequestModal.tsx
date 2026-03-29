@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createReturnRequest } from '@/services/returnService';
+import Toast from '@/components/common/Toast';
 import type { ReturnType } from '@/types/return.types';
 
 interface ReturnRequestModalProps {
@@ -15,6 +16,7 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
     const [reason, setReason] = useState('');
     const [error, setError] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     const quickReasons = [
         'Product is defective / damaged',
@@ -32,12 +34,26 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
         setError('');
         try {
             await createReturnRequest({ orderId, type, reason });
-            setReason('');
-            setType('RETURN');
-            onSuccess?.();
-            onClose();
+            
+            // Show success toast
+            setToast({ 
+                message: type === 'RETURN' 
+                    ? 'Return request submitted successfully!' 
+                    : 'Exchange request submitted successfully!', 
+                type: 'success' 
+            });
+            
+            // Close modal after short delay
+            setTimeout(() => {
+                setReason('');
+                setType('RETURN');
+                onSuccess?.();
+                onClose();
+            }, 1500);
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : 'An error occurred, please try again');
+            const errorMessage = e instanceof Error ? e.message : 'An error occurred, please try again';
+            setError(errorMessage);
+            setToast({ message: errorMessage, type: 'error' });
         } finally {
             setSubmitting(false);
         }
@@ -47,6 +63,13 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
 
     return (
         <>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
+            )}
             <div className="cancel-modal-backdrop" onClick={onClose} />
             <div className="cancel-modal-container">
                 <div className="cancel-modal" onClick={(e) => e.stopPropagation()}>
