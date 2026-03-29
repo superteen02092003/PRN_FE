@@ -509,12 +509,32 @@
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
     position: relative;
+    overflow: hidden;
+}
+
+.category-carousel__card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #242aeb, #06b6d4, #8b5cf6);
+    background-size: 200% 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
 }
 
 .category-carousel__card:hover {
     border-color: #242aeb;
     box-shadow: 0 12px 35px rgba(36, 42, 235, 0.2);
     transform: translateY(-8px) scale(1.05);
+}
+
+.category-carousel__card:hover::before {
+    transform: scaleX(1);
+    animation: gradient-shift 2s ease infinite;
 }
 
 .category-carousel__card--skeleton {
@@ -742,12 +762,30 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow: hidden;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #242aeb, #06b6d4);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
 }
 
 .product-card:hover {
     box-shadow: 0 20px 50px rgba(36, 42, 235, 0.15);
     transform: translateY(-8px);
     border-color: #242aeb;
+}
+
+.product-card:hover::before {
+    transform: scaleX(1);
 }
 
 .dark .product-card {
@@ -936,12 +974,30 @@
     gap: 1rem;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
+    overflow: hidden;
+}
+
+.arrival-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #242aeb, #06b6d4);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.4s ease;
 }
 
 .arrival-card:hover {
     border-color: #242aeb;
     box-shadow: 0 12px 35px rgba(36, 42, 235, 0.15);
     transform: translateX(8px);
+}
+
+.arrival-card:hover::before {
+    transform: scaleY(1);
 }
 
 .dark .arrival-card {
@@ -1706,12 +1762,32 @@
     border: 1px solid #e7e8f3;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
+    overflow: hidden;
+}
+
+.why-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #242aeb, #06b6d4, #8b5cf6);
+    background-size: 200% 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
 }
 
 .why-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(36, 42, 235, 0.15);
     border-color: #242aeb;
+}
+
+.why-card:hover::before {
+    transform: scaleX(1);
+    animation: gradient-shift 2s ease infinite;
 }
 
 .why-card__icon {
@@ -1962,10 +2038,27 @@
     position: relative;
 }
 
+.bestseller-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #242aeb, #06b6d4);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
 .bestseller-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 20px 50px rgba(36, 42, 235, 0.18);
     border-color: #242aeb;
+}
+
+.bestseller-card:hover::before {
+    transform: scaleX(1);
 }
 
 .bestseller-card__img {
