@@ -7,7 +7,7 @@
     position: relative;
 }
 
-/* Animated Background Particles */
+/* Animated Background Particles - Optimized for smooth scrolling */
 .home-page::before {
     content: '';
     position: fixed;
@@ -22,23 +22,26 @@
         radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
     animation: float-background 25s ease-in-out infinite;
     pointer-events: none;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 @keyframes float-background {
     0%, 100% { 
-        transform: translate(0, 0) scale(1);
+        transform: translate3d(0, 0, 0) scale(1);
         opacity: 1;
     }
     25% { 
-        transform: translate(50px, -30px) scale(1.1);
+        transform: translate3d(50px, -30px, 0) scale(1.1);
         opacity: 0.8;
     }
     50% { 
-        transform: translate(-30px, 40px) scale(0.95);
+        transform: translate3d(-30px, 40px, 0) scale(0.95);
         opacity: 1;
     }
     75% { 
-        transform: translate(40px, 20px) scale(1.05);
+        transform: translate3d(40px, 20px, 0) scale(1.05);
         opacity: 0.9;
     }
 }
@@ -52,7 +55,7 @@
     position: relative;
 }
 
-/* Animated Dots Pattern */
+/* Animated Dots Pattern - Optimized */
 .home-page__main::before {
     content: '';
     position: fixed;
@@ -69,6 +72,8 @@
     animation: move-dots 30s linear infinite;
     pointer-events: none;
     opacity: 0.5;
+    will-change: background-position;
+    transform: translateZ(0);
 }
 
 @keyframes move-dots {
@@ -510,6 +515,8 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .category-carousel__card::before {
@@ -524,12 +531,13 @@
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.4s ease;
+    will-change: transform;
 }
 
 .category-carousel__card:hover {
     border-color: #242aeb;
     box-shadow: 0 12px 35px rgba(36, 42, 235, 0.2);
-    transform: translateY(-6px) scale(1.02);
+    transform: translate3d(0, -6px, 0) scale(1.02);
 }
 
 .category-carousel__card:hover::before {
@@ -557,16 +565,19 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .category-carousel__card:hover .category-carousel__image img {
-    transform: scale(1.08);
+    transform: translate3d(0, 0, 0) scale(1.08);
 }
 
 .category-carousel__icon {
     font-size: 2.5rem;
     color: #94a3b8;
     transition: all 0.3s ease;
+    will-change: transform;
 }
 
 .category-carousel__card:hover .category-carousel__icon {
@@ -752,7 +763,7 @@
     }
 }
 
-/* Product Card */
+/* Product Card - Optimized for smooth scrolling */
 .product-card {
     background-color: white;
     border-radius: 0.5rem;
@@ -764,6 +775,9 @@
     flex-direction: column;
     position: relative;
     overflow: hidden;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .product-card::before {
@@ -777,11 +791,12 @@
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.4s ease;
+    will-change: transform;
 }
 
 .product-card:hover {
     box-shadow: 0 20px 50px rgba(36, 42, 235, 0.15);
-    transform: translateY(-6px);
+    transform: translate3d(0, -6px, 0);
     border-color: #242aeb;
 }
 
@@ -810,10 +825,11 @@
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform;
 }
 
 .product-card:hover .product-card__badge {
-    transform: scale(1.1) translateY(-2px);
+    transform: translate3d(0, -2px, 0) scale(1.1);
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
@@ -824,10 +840,12 @@
     border-radius: 0.375rem;
     background-color: #f9fafb;
     transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .product-card:hover .product-card__image {
-    transform: scale(1.1) rotate(1deg);
+    transform: translate3d(0, 0, 0) scale(1.1) rotate(1deg);
 }
 
 .product-card__content {
