@@ -73,6 +73,8 @@ export interface ProductFilterParams {
   minPrice?: number;
   maxPrice?: number;
   productType?: ProductType;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 // ===== Pagination Info =====

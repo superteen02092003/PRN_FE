@@ -71,6 +71,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
                         src={resolveImageUrl(selectedImage?.imageUrl) || ''}
                         alt={`${productName} - Image ${selectedIndex + 1}`}
                         className="main-image"
+                        onError={(e) => {
+                            const img = e.target as HTMLImageElement;
+                            img.style.display = 'none';
+                            const parent = img.parentElement;
+                            if (parent && !parent.querySelector('.image-error')) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'image-error';
+                                errorDiv.innerHTML = '<span class="material-symbols-outlined">broken_image</span><p>Image failed to load</p>';
+                                errorDiv.style.cssText = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #9ca3af;';
+                                parent.appendChild(errorDiv);
+                            }
+                        }}
                     />
                 </div>
 

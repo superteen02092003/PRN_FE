@@ -7,7 +7,7 @@ import Footer from '../../components/common/Footer/Footer';
 import { useProducts, useCategories, useBrands } from '../../hooks/useProducts';
 import { useAddToCart } from '../../hooks/useCart';
 import { useAuth } from '../../contexts/AuthContext';
-import type { ProductFilterParams } from '../../types/product.types';
+import type { ProductFilterParams, ProductType } from '../../types/product.types';
 import './ProductsPage.css';
 
 // Debounce hook
@@ -52,8 +52,12 @@ const ProductsPage = () => {
     const [selectedBrandId, setSelectedBrandId] = useState<number | null>(
         searchParams.get('brandId') ? Number(searchParams.get('brandId')) : null
     );
-    const [selectedProductType, setSelectedProductType] = useState<string | null>(
-        searchParams.get('productType') || null
+    const [selectedProductType, setSelectedProductType] = useState<ProductType | null>(
+        (searchParams.get('productType') as ProductType) || null
+    );
+    const [sortBy, setSortBy] = useState<string>(searchParams.get('sortBy') || 'createdAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(
+        (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc'
     );
     const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
     const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
@@ -70,6 +74,8 @@ const ProductsPage = () => {
         const params: ProductFilterParams = {
             pageNumber,
             pageSize,
+            sortBy,
+            sortOrder,
         };
 
         if (debouncedSearchTerm) params.searchTerm = debouncedSearchTerm;
@@ -80,12 +86,40 @@ const ProductsPage = () => {
         if (maxPrice) params.maxPrice = Number(maxPrice);
 
         return params;
-    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice, pageNumber, pageSize]);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice, pageNumber, pageSize, sortBy, sortOrder]);
 
     // Fetch data using hooks
-    const { products, pagination, loading: productsLoading, error: productsError } = useProducts(filterParams);
+    const { products: fetchedProducts, pagination, loading: productsLoading, error: productsError } = useProducts(filterParams);
     const { categories, loading: categoriesLoading } = useCategories();
     const { brands, loading: brandsLoading } = useBrands();
+
+    // Client-side sorting (temporary until backend supports sorting)
+    const products = useMemo(() => {
+        if (!fetchedProducts || fetchedProducts.length === 0) return fetchedProducts;
+
+        const sorted = [...fetchedProducts];
+        
+        switch (sortBy) {
+            case 'price':
+                sorted.sort((a, b) => sortOrder === 'asc' ? a.price - b.price : b.price - a.price);
+                break;
+            case 'name':
+                sorted.sort((a, b) => {
+                    const comparison = a.name.localeCompare(b.name);
+                    return sortOrder === 'asc' ? comparison : -comparison;
+                });
+                break;
+            case 'createdAt':
+            default:
+                // Products already sorted by createdAt from backend
+                if (sortOrder === 'asc') {
+                    sorted.reverse();
+                }
+                break;
+        }
+
+        return sorted;
+    }, [fetchedProducts, sortBy, sortOrder]);
 
     // Handle add to cart
     const handleAddToCart = useCallback(async (e: React.MouseEvent, productId: number, productName: string) => {
@@ -123,17 +157,19 @@ const ProductsPage = () => {
         if (selectedCategoryId) params.set('categoryId', String(selectedCategoryId));
         if (selectedBrandId) params.set('brandId', String(selectedBrandId));
         if (selectedProductType) params.set('productType', selectedProductType);
+        if (sortBy !== 'createdAt') params.set('sortBy', sortBy);
+        if (sortOrder !== 'desc') params.set('sortOrder', sortOrder);
         if (minPrice) params.set('minPrice', minPrice);
         if (maxPrice) params.set('maxPrice', maxPrice);
         if (pageNumber > 1) params.set('page', String(pageNumber));
 
         setSearchParams(params, { replace: true });
-    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice, pageNumber, setSearchParams]);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, sortBy, sortOrder, minPrice, maxPrice, pageNumber, setSearchParams]);
 
     // Reset to page 1 when filters change
     useEffect(() => {
         setPageNumber(1);
-    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, minPrice, maxPrice]);
+    }, [debouncedSearchTerm, selectedCategoryId, selectedBrandId, selectedProductType, sortBy, sortOrder, minPrice, maxPrice]);
 
     // Handlers
     const handleCategoryChange = useCallback((categoryId: number) => {
@@ -263,6 +299,34 @@ const ProductsPage = () => {
                         </p>
                     </div>
                     <div className="page-header__actions">
+                        {/* Sort Dropdown */}
+                        <select 
+                            className="sort-select"
+                            value={`${sortBy}-${sortOrder}`}
+                            onChange={(e) => {
+                                const [newSortBy, newSortOrder] = e.target.value.split('-');
+                                setSortBy(newSortBy);
+                                setSortOrder(newSortOrder as 'asc' | 'desc');
+                            }}
+                            style={{
+                                padding: '0.5rem 2rem 0.5rem 1rem',
+                                borderRadius: '8px',
+                                border: '1px solid #e5e7eb',
+                                fontSize: '0.875rem',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                marginRight: '1rem',
+                                background: 'white'
+                            }}
+                        >
+                            <option value="createdAt-desc">Newest First</option>
+                            <option value="createdAt-asc">Oldest First</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                            <option value="name-asc">Name: A to Z</option>
+                            <option value="name-desc">Name: Z to A</option>
+                        </select>
+
                         <div className="view-toggle">
                             <button
                                 className={`view-toggle__btn ${viewMode === 'grid' ? 'active' : ''}`}
