@@ -18,10 +18,26 @@ const statusFilters: { value: string; label: string }[] = [
 
 const OrderHistoryPage = () => {
     const [searchInput, setSearchInput] = useState('');
+    const [fromDate, setFromDate] = useState('');
+    const [toDate, setToDate] = useState('');
     const { orders, totalPages, totalCount: _totalCount, currentPage, isLoading, error, filter, setFilter } = useOrders();
 
     const handleSearch = () => {
         setFilter({ searchTerm: searchInput || undefined, pageNumber: 1 });
+    };
+
+    const handleDateFilter = () => {
+        setFilter({ 
+            fromDate: fromDate || undefined, 
+            toDate: toDate || undefined, 
+            pageNumber: 1 
+        });
+    };
+
+    const handleClearDateFilter = () => {
+        setFromDate('');
+        setToDate('');
+        setFilter({ fromDate: undefined, toDate: undefined, pageNumber: 1 });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -53,6 +69,76 @@ const OrderHistoryPage = () => {
                         placeholder="Search by Order ID or product name..."
                         className="order-search-input"
                     />
+                </div>
+
+                {/* Date Range Filter */}
+                <div style={{ 
+                    display: 'flex', 
+                    gap: '1rem', 
+                    alignItems: 'center', 
+                    marginBottom: '1.5rem',
+                    flexWrap: 'wrap'
+                }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#64748b' }}>From:</label>
+                        <input
+                            type="date"
+                            value={fromDate}
+                            onChange={(e) => setFromDate(e.target.value)}
+                            style={{
+                                padding: '0.5rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                fontSize: '0.875rem'
+                            }}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#64748b' }}>To:</label>
+                        <input
+                            type="date"
+                            value={toDate}
+                            onChange={(e) => setToDate(e.target.value)}
+                            style={{
+                                padding: '0.5rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                fontSize: '0.875rem'
+                            }}
+                        />
+                    </div>
+                    <button
+                        onClick={handleDateFilter}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '0.5rem',
+                            border: 'none',
+                            background: '#0d69f2',
+                            color: 'white',
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Apply
+                    </button>
+                    {(fromDate || toDate) && (
+                        <button
+                            onClick={handleClearDateFilter}
+                            style={{
+                                padding: '0.5rem 1rem',
+                                borderRadius: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                background: 'transparent',
+                                color: '#64748b',
+                                fontSize: '0.875rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Clear
+                        </button>
+                    )}
                 </div>
 
                 {/* Filter Chips */}
