@@ -24,10 +24,15 @@ const MyWarrantiesPage = () => {
         const loadWarranties = async () => {
             try {
                 setLoading(true);
+                setError(null);
+                console.log('[MyWarrantiesPage] Fetching warranties...');
                 const data = await getMyWarranties();
+                console.log('[MyWarrantiesPage] Warranties received:', data);
                 setWarranties(data);
             } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to load warranties');
+                console.error('[MyWarrantiesPage] Error loading warranties:', err);
+                const errorMessage = err instanceof Error ? err.message : 'Failed to load warranties';
+                setError(errorMessage);
             } finally {
                 setLoading(false);
             }
@@ -47,10 +52,21 @@ const MyWarrantiesPage = () => {
             <main className="warranties-page">
                 <div className="container">
                     <div className="warranties-header">
-                        <h1>My Warranties</h1>
-                        <p className="warranties-subtitle">
-                            View your product warranties and submit claims for products that need repair.
-                        </p>
+                        <div className="warranties-header-top">
+                            <div>
+                                <h1>My Warranties</h1>
+                                <p className="warranties-subtitle">
+                                    View your product warranties and submit claims for products that need repair.
+                                </p>
+                            </div>
+                            <button 
+                                className="btn-view-claims"
+                                onClick={() => navigate('/warranties/claims')}
+                            >
+                                <span className="material-symbols-outlined">history</span>
+                                View Claim History
+                            </button>
+                        </div>
                     </div>
 
                     {loading && (

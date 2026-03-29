@@ -35,7 +35,9 @@ const MyClaimsPage = () => {
     const loadClaims = useCallback(async () => {
         try {
             setLoading(true);
+            console.log('[MyClaimsPage] Fetching claims, page:', page, 'filter:', statusFilter);
             const result = await getMyClaims(page, 10);
+            console.log('[MyClaimsPage] Claims received:', result);
             
             // Filter locally if user selected a status dropdown
             let filteredItems = result.items;
@@ -46,7 +48,9 @@ const MyClaimsPage = () => {
             setClaims(filteredItems);
             setTotalPages(result.totalPages);
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Failed to load claims');
+            console.error('[MyClaimsPage] Error loading claims:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load claims';
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

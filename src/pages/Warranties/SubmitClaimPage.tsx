@@ -63,15 +63,19 @@ const SubmitClaimPage = () => {
 
         try {
             setSubmitting(true);
+            console.log('[SubmitClaimPage] Submitting claim for warranty:', warrantyId);
             const result = await submitWarrantyClaim(Number(warrantyId), {
                 issueDescription: issueDescription.trim(),
                 contactPhone: contactPhone.trim() || undefined,
             });
+            console.log('[SubmitClaimPage] Claim submitted successfully:', result);
 
             toast.success(`Warranty claim submitted successfully! Claim ID: ${result.claimId}`);
-            navigate('/warranties');
+            navigate('/warranties/claims');
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Failed to submit claim');
+            console.error('[SubmitClaimPage] Error submitting claim:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to submit claim';
+            toast.error(errorMessage);
         } finally {
             setSubmitting(false);
         }
