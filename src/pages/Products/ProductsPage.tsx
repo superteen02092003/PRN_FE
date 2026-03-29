@@ -81,7 +81,7 @@ const ProductsPage = () => {
         if (debouncedSearchTerm) params.searchTerm = debouncedSearchTerm;
         if (selectedCategoryId) params.categoryId = selectedCategoryId;
         if (selectedBrandId) params.brandId = selectedBrandId;
-        if (selectedProductType) params.productType = selectedProductType;
+        if (selectedProductType) params.productType = selectedProductType as ProductType;
         if (minPrice) params.minPrice = Number(minPrice);
         if (maxPrice) params.maxPrice = Number(maxPrice);
 
