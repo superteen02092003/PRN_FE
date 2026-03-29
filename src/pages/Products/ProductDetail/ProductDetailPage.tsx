@@ -203,18 +203,18 @@ const ProductDetailPage = () => {
 
     // Determine available tabs
     const tabs: { key: TabType; label: string }[] = [
-        { key: 'description', label: 'Mô tả' },
+        { key: 'description', label: 'Description' },
     ];
     if (product.productType === 'KIT') {
-        tabs.push({ key: 'bundle', label: 'Bộ kit bao gồm' });
+        tabs.push({ key: 'bundle', label: 'Kit Contents' });
     }
     if (product.specifications && product.specifications.length > 0) {
-        tabs.push({ key: 'specifications', label: 'Thông số kỹ thuật' });
+        tabs.push({ key: 'specifications', label: 'Specifications' });
     }
     if (product.documents && product.documents.length > 0) {
-        tabs.push({ key: 'documents', label: 'Tài liệu' });
+        tabs.push({ key: 'documents', label: 'Documents' });
     }
-    tabs.push({ key: 'reviews', label: `Đánh giá (${reviews?.summary?.totalReviews ?? product.totalReviews ?? 0})` });
+    tabs.push({ key: 'reviews', label: `Reviews (${reviews?.summary?.totalReviews ?? product.totalReviews ?? 0})` });
 
     return (
         <>
@@ -272,15 +272,15 @@ const ProductDetailPage = () => {
                                 <div className="trust-badges">
                                     <div className="trust-badge">
                                         <span className="material-symbols-outlined">local_shipping</span>
-                                        <span>Miễn phí ship đơn từ 500K</span>
+                                        <span>Free shipping over 500K</span>
                                     </div>
                                     <div className="trust-badge">
                                         <span className="material-symbols-outlined">undo</span>
-                                        <span>Hỗ trợ trả/đổi hàng</span>
+                                        <span>Return & exchange support</span>
                                     </div>
                                     <div className="trust-badge">
                                         <span className="material-symbols-outlined">lock</span>
-                                        <span>Thanh toán bảo mật</span>
+                                        <span>Secure payment</span>
                                     </div>
                                 </div>
                             </div>
@@ -310,13 +310,13 @@ const ProductDetailPage = () => {
                                             {product.description}
                                         </div>
                                     ) : (
-                                        <p className="no-description">Chưa có mô tả sản phẩm.</p>
+                                        <p className="no-description">No description available.</p>
                                     )}
                                     {product.compatibilityInfo && (
                                         <div className="compatibility-info">
                                             <h4 className="compatibility-title">
                                                 <span className="material-symbols-outlined">cable</span>
-                                                Tương thích với
+                                                Compatible with
                                             </h4>
                                             <p className="compatibility-text">{product.compatibilityInfo}</p>
                                         </div>
@@ -327,7 +327,7 @@ const ProductDetailPage = () => {
                             {/* Specifications Tab */}
                             {activeTab === 'specifications' && (
                                 <div className="tab-panel specs-panel">
-                                    <h3 className="specs-title">Thông số kỹ thuật</h3>
+                                    <h3 className="specs-title">Specifications</h3>
                                     <table className="specs-table">
                                         <tbody>
                                             {product.specifications?.map((spec) => (
@@ -344,16 +344,16 @@ const ProductDetailPage = () => {
                             {/* Documents Tab */}
                             {activeTab === 'documents' && (
                                 <div className="tab-panel docs-panel">
-                                    <h3 className="docs-title">Tài liệu & Hướng dẫn</h3>
+                                    <h3 className="docs-title">Documents & Guides</h3>
                                     {(['DATASHEET', 'TUTORIAL', 'PINOUT', 'CODE_EXAMPLE', 'OTHER'] as const).map((type) => {
                                         const docsOfType = product.documents?.filter((d) => d.documentType === type) ?? [];
                                         if (docsOfType.length === 0) return null;
                                         const typeLabel: Record<string, string> = {
                                             DATASHEET: 'Datasheet',
-                                            TUTORIAL: 'Hướng dẫn',
+                                            TUTORIAL: 'Tutorial',
                                             PINOUT: 'Pinout Diagram',
-                                            CODE_EXAMPLE: 'Code Mẫu',
-                                            OTHER: 'Khác',
+                                            CODE_EXAMPLE: 'Code Example',
+                                            OTHER: 'Other',
                                         };
                                         const typeIcon: Record<string, string> = {
                                             DATASHEET: 'description',
@@ -440,7 +440,7 @@ const ProductDetailPage = () => {
                     {/* Related Products Section */}
                     {product.relatedProducts && product.relatedProducts.length > 0 && (
                         <section className="related-products-section">
-                            <h2 className="related-title">Sản phẩm liên quan</h2>
+                            <h2 className="related-title">Related Products</h2>
                             <div className="related-scroll">
                                 {product.relatedProducts.map((related) => (
                                     <div

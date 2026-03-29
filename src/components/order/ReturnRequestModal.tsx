@@ -17,15 +17,15 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
     const [submitting, setSubmitting] = useState(false);
 
     const quickReasons = [
-        'Sản phẩm bị lỗi / hư hỏng',
-        'Sản phẩm không đúng mô tả',
-        'Nhận sai sản phẩm',
-        'Chất lượng không như mong đợi',
+        'Product is defective / damaged',
+        'Product does not match description',
+        'Received wrong product',
+        'Quality not as expected',
     ];
 
     const handleSubmit = async () => {
         if (!reason.trim()) {
-            setError('Vui lòng nhập lý do yêu cầu');
+            setError('Please enter a reason for your request');
             return;
         }
         setSubmitting(true);
@@ -37,7 +37,7 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
             onSuccess?.();
             onClose();
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : 'Có lỗi xảy ra, vui lòng thử lại');
+            setError(e instanceof Error ? e.message : 'An error occurred, please try again');
         } finally {
             setSubmitting(false);
         }
@@ -56,12 +56,12 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
                                 <span className="material-symbols-outlined">undo</span>
                             </div>
                             <div>
-                                <h3 className="cancel-modal-title">Yêu cầu Trả / Đổi hàng</h3>
+                                <h3 className="cancel-modal-title">Return / Exchange Request</h3>
                                 <p className="cancel-modal-order">#{orderNumber}</p>
                             </div>
                         </div>
                         <p className="cancel-modal-desc">
-                            Vui lòng chọn loại yêu cầu và cung cấp lý do chi tiết.
+                            Please select a request type and provide a detailed reason.
                         </p>
                     </div>
 
@@ -75,7 +75,7 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
                                 style={{ flex: 1 }}
                             >
                                 <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 4 }}>keyboard_return</span>
-                                Trả hàng & hoàn tiền
+                                Return & Refund
                             </button>
                             <button
                                 type="button"
@@ -84,7 +84,7 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
                                 style={{ flex: 1 }}
                             >
                                 <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 4 }}>swap_horiz</span>
-                                Đổi sản phẩm khác
+                                Exchange Product
                             </button>
                         </div>
 
@@ -107,7 +107,7 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
                             <textarea
                                 value={reason}
                                 onChange={(e) => { setReason(e.target.value); setError(''); }}
-                                placeholder="Mô tả chi tiết lý do yêu cầu trả/đổi hàng..."
+                                placeholder="Describe the reason for your return/exchange request..."
                                 className={`cancel-modal-textarea ${error ? 'cancel-modal-textarea--error' : ''}`}
                                 rows={3}
                             />
@@ -121,7 +121,7 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
                             disabled={submitting}
                             className="cancel-modal-btn-keep"
                         >
-                            Huỷ
+                            Cancel
                         </button>
                         <button
                             onClick={handleSubmit}
@@ -132,10 +132,10 @@ const ReturnRequestModal = ({ isOpen, onClose, orderId, orderNumber, onSuccess }
                             {submitting ? (
                                 <>
                                     <div className="order-loading-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                                    Đang gửi...
+                                    Submitting...
                                 </>
                             ) : (
-                                'Gửi yêu cầu'
+                                'Submit Request'
                             )}
                         </button>
                     </div>

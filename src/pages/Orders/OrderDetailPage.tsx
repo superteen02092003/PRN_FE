@@ -354,12 +354,12 @@ const OrderDetailPage = () => {
                     {canCancel ? (
                         <button className="od-btn-cancel" onClick={() => setShowCancelModal(true)}>
                             <span className="material-symbols-outlined">cancel</span>
-                            Huỷ đơn hàng
+                            Cancel Order
                         </button>
                     ) : canReturn ? (
                         <button className="od-btn-return" onClick={() => setShowReturnModal(true)}>
                             <span className="material-symbols-outlined">undo</span>
-                            Yêu cầu Trả / Đổi hàng
+                            Return / Exchange Request
                         </button>
                     ) : (
                         <div />
@@ -367,12 +367,12 @@ const OrderDetailPage = () => {
                     <div className="od-action-right">
                         <Link to="/orders" className="od-btn-support" style={{ textDecoration: 'none' }}>
                             <span className="material-symbols-outlined">arrow_back</span>
-                            Quay lại đơn hàng
+                            Back to Orders
                         </Link>
                         {canPay && (
                             <button className="od-btn-pay" onClick={() => redirectToSepayCheckout(order.orderId)}>
                                 <span className="material-symbols-outlined">payment</span>
-                                Thanh toán ngay
+                                Pay Now
                             </button>
                         )}
                     </div>

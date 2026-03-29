@@ -39,7 +39,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
 
     return (
         <div className="cart-summary">
-            <h3 className="cart-summary__title">Tóm tắt đơn hàng</h3>
+            <h3 className="cart-summary__title">Order Summary</h3>
 
             {/* Free Shipping Banner */}
             <div className={`free-shipping-banner ${isFreeShipping ? 'free-shipping-banner--achieved' : ''}`}>
@@ -47,12 +47,12 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                     {isFreeShipping ? (
                         <>
                             <span className="material-symbols-outlined">local_shipping</span>
-                            Bạn được <strong>miễn phí vận chuyển</strong>!
+                            You qualify for <strong>free shipping</strong>!
                         </>
                     ) : (
                         <>
                             <span className="material-symbols-outlined">local_shipping</span>
-                            Mua thêm <strong>{formatPrice(remaining)}</strong> để được miễn phí ship
+                            Add <strong>{formatPrice(remaining)}</strong> more for free shipping
                         </>
                     )}
                 </div>
@@ -65,17 +65,17 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                 {/* Subtotal */}
                 <div className="summary-row">
                     <span className="summary-label">
-                        Tạm tính ({summary.totalItems} sản phẩm)
+                        Subtotal ({summary.totalItems} items)
                     </span>
                     <span className="summary-value">{formatPrice(summary.subtotal)}</span>
                 </div>
 
                 {/* Shipping */}
                 <div className="summary-row">
-                    <span className="summary-label">Phí vận chuyển</span>
+                    <span className="summary-label">Shipping</span>
                     <span className="summary-value summary-value--shipping">
                         {isFreeShipping ? (
-                            <span className="shipping-free-label">Miễn phí</span>
+                            <span className="shipping-free-label">Free</span>
                         ) : (
                             formatPrice(summary.shippingFee)
                         )}
@@ -87,7 +87,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                     <div className="summary-row summary-row--discount">
                         <span className="summary-label">
                             <span className="material-symbols-outlined">sell</span>
-                            Giảm giá
+                            Discount
                             {appliedCoupon && (
                                 <span className="coupon-code">({appliedCoupon.couponCode})</span>
                             )}
@@ -101,7 +101,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
 
                 {/* Total */}
                 <div className="summary-row summary-row--total">
-                    <span className="summary-label">Tổng cộng</span>
+                    <span className="summary-label">Total</span>
                     <span className="summary-value">{formatPrice(summary.total)}</span>
                 </div>
             </div>
@@ -115,12 +115,12 @@ const CartSummary: React.FC<CartSummaryProps> = ({
                 {loading ? (
                     <>
                         <div className="loading-spinner-small" />
-                        Đang xử lý...
+                        Processing...
                     </>
                 ) : (
                     <>
                         <span className="material-symbols-outlined">shopping_cart_checkout</span>
-                        Tiến hành thanh toán
+                        Proceed to Checkout
                     </>
                 )}
             </button>
@@ -128,7 +128,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
             {/* Secure Payment Note */}
             <p className="cart-summary__secure">
                 <span className="material-symbols-outlined">lock</span>
-                Thanh toán bảo mật với mã hóa SSL
+                Secure payment with SSL encryption
             </p>
         </div>
     );
