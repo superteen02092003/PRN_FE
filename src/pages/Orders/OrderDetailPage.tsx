@@ -4,6 +4,7 @@ import { useOrderDetail } from '../../hooks/useOrders';
 import OrderTimeline from '../../components/order/OrderTimeline';
 import CancelOrderModal from '../../components/order/CancelOrderModal';
 import ReturnRequestModal from '../../components/order/ReturnRequestModal';
+import ReviewProductModal from '../../components/order/ReviewProductModal';
 import { redirectToSepayCheckout } from '../../services/paymentService';
 import { resolveImageUrl } from '@/utils/imageUrl';
 import Header from '../../components/common/Header';
@@ -51,6 +52,7 @@ const OrderDetailPage = () => {
     );
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [showReturnModal, setShowReturnModal] = useState(false);
+    const [reviewProduct, setReviewProduct] = useState<{ id: number; name: string; image?: string } | null>(null);
 
     if (isLoading) {
         return (
@@ -232,9 +234,24 @@ const OrderDetailPage = () => {
                                                 <span className="od-item-price">{formatPrice(item.subtotal)}</span>
                                             </div>
                                             <p className="od-item-sku">SKU: {item.productSku || 'N/A'}</p>
-                                            <span className="od-item-qty">
-                                                Qty: {String(item.quantity).padStart(2, '0')}
-                                            </span>
+                                            <div className="od-item-bottom">
+                                                <span className="od-item-qty">
+                                                    Qty: {String(item.quantity).padStart(2, '0')}
+                                                </span>
+                                                {order.status === 'DELIVERED' && (
+                                                    <button
+                                                        className="od-item-review-btn"
+                                                        onClick={() => setReviewProduct({
+                                                            id: item.productId,
+                                                            name: item.productName || 'Product',
+                                                            image: resolveImageUrl(item.productImageUrl) || undefined,
+                                                        })}
+                                                    >
+                                                        <span className="material-symbols-outlined">rate_review</span>
+                                                        Write Review
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -417,6 +434,21 @@ const OrderDetailPage = () => {
                 orderNumber={order.orderNumber}
                 onSuccess={refetch}
             />
+
+            {/* Review Product Modal */}
+            {reviewProduct && (
+                <ReviewProductModal
+                    isOpen={true}
+                    onClose={() => setReviewProduct(null)}
+                    productId={reviewProduct.id}
+                    productName={reviewProduct.name}
+                    productImage={reviewProduct.image}
+                    onSuccess={() => {
+                        // Show success message or refresh
+                        alert('Thank you for your review!');
+                    }}
+                />
+            )}
 
             <Footer />
         </>

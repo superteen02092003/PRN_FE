@@ -1062,6 +1062,38 @@
     color: #475569;
 }
 
+.od-item-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    gap: 1rem;
+}
+
+.od-item-review-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    background: white;
+    border: 1px solid #2463eb;
+    color: #2463eb;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.od-item-review-btn:hover {
+    background: #2463eb;
+    color: white;
+}
+
+.od-item-review-btn .material-symbols-outlined {
+    font-size: 16px;
+}
+
 /* ---- Payment Details Card ---- */
 .od-payment-grid {
     display: grid;

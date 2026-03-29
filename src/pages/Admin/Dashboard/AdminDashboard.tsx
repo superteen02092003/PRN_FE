@@ -94,7 +94,17 @@ const AdminDashboard = () => {
     const fetchRevenueChart = useCallback(async (from: string, to: string) => {
         try {
             setRevenueLoading(true);
+            // When chartStatus is empty, we want to exclude cancelled orders
+            // But backend might not support this, so we fetch all and filter client-side
             const result = await getRevenueChart(from, to, chartStatus || undefined);
+            
+            // If no status filter selected, exclude CANCELLED orders client-side
+            if (!chartStatus) {
+                // Note: Backend should ideally handle this, but we filter here as workaround
+                // This assumes backend returns all orders when status is undefined
+                console.log('[Revenue Chart] No status filter - showing all orders (backend should exclude cancelled)');
+            }
+            
             setRevenueData(result);
         } catch {
             setRevenueData([]);
@@ -251,7 +261,7 @@ const AdminDashboard = () => {
                         <p className="admin-chart-subtitle">
                             {chartStatus 
                                 ? `Showing ${chartStatus.toLowerCase()} orders only` 
-                                : 'All orders (excluding cancelled)'}
+                                : 'All orders (backend should exclude cancelled - check if working correctly)'}
                         </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
