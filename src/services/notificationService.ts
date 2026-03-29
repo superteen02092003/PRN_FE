@@ -55,6 +55,7 @@ export const connectNotifications = (
     connection.on('PaymentExpired', (data: any) => onNotificationReceived('PaymentExpired', data));
     connection.on('WarrantyClaimStatus', (data: any) => onNotificationReceived('WarrantyClaimStatus', data));
     connection.on('NewChatMessage', (data: any) => onNotificationReceived('NewChatMessage', data));
+    connection.on('ReceiveAdminNotification', (data: any) => onNotificationReceived('ReceiveAdminNotification', data));
 
     connection.start()
         .then(() => onConnected?.())

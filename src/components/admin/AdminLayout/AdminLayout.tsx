@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import NotificationDropdown from '@/components/common/NotificationDropdown/NotificationDropdown';
 import './AdminLayout.css';
 
 interface AdminLayoutProps {
@@ -81,6 +82,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                     </div>
 
                     <div className="admin-header-actions">
+                        <NotificationDropdown />
                         <Link to="/profile" className="admin-header-profile">
                             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>person</span>
                             My Profile

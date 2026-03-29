@@ -15,6 +15,11 @@ const typeIcons: Record<string, string> = {
     PaymentExpired: 'timer_off',
     WarrantyClaimStatus: 'shield',
     NewChatMessage: 'chat',
+    AdminNewOrder: 'shopping_bag',
+    AdminPaymentConfirmed: 'payments',
+    AdminNewWarrantyClaim: 'shield',
+    AdminNewReturnRequest: 'undo',
+    AdminNewChatMessage: 'chat',
 };
 
 const NotificationDropdown = () => {
