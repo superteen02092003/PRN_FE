@@ -124,7 +124,11 @@ const ProductsPage = () => {
     // Show error toast when add to cart fails
     useEffect(() => {
         if (addToCartError) {
-            toast.error(addToCartError);
+            if (addToCartError.toLowerCase().includes('stock')) {
+                toast.warning(addToCartError);
+            } else {
+                toast.error(addToCartError);
+            }
         }
     }, [addToCartError]);
 
