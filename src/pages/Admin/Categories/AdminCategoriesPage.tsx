@@ -3,6 +3,7 @@ import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
 import { getAdminCategories, createCategory, updateCategory, deleteCategory, uploadCategoryImage } from '@/services/adminService';
 import type { AdminCategoryResponse } from '@/types/admin.types';
 import { toast } from 'react-toastify';
+import { resolveImageUrl } from '@/utils/imageUrl';
 
 const AdminCategoriesPage = () => {
     const [categories, setCategories] = useState<AdminCategoryResponse[]>([]);
@@ -55,7 +56,7 @@ const AdminCategoriesPage = () => {
         setEditingId(cat.categoryId);
         setFormName(cat.name);
         setImageFile(null);
-        setImagePreview(cat.imageUrl || null);
+        setImagePreview(cat.imageUrl ? resolveImageUrl(cat.imageUrl) : null);
         if (fileInputRef.current) fileInputRef.current.value = '';
         setShowForm(true);
     };
@@ -236,7 +237,7 @@ const AdminCategoriesPage = () => {
                                         <td style={{ fontWeight: 600 }}>#{cat.categoryId}</td>
                                         <td>
                                             {cat.imageUrl ? (
-                                                <img src={cat.imageUrl} alt={cat.name} style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }} />
+                                                <img src={resolveImageUrl(cat.imageUrl) || ''} alt={cat.name} style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover' }} />
                                             ) : (
                                                 <div style={{ width: '40px', height: '40px', borderRadius: '6px', backgroundColor: '#dbeafe', color: '#2463eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>category</span>
