@@ -136,23 +136,46 @@ const AdminWarrantyClaimsPage = () => {
                                 </div>
 
                                 <div className="claim-card-body">
+                                    <div className="claim-product-preview">
+                                        {claim.product.primaryImage ? (
+                                            <img src={claim.product.primaryImage} alt={claim.product.name} className="claim-product-img" />
+                                        ) : (
+                                            <div className="claim-product-img-placeholder">
+                                                <span className="material-symbols-outlined">image</span>
+                                            </div>
+                                        )}
+                                        <div className="claim-product-details">
+                                            <span className="claim-info-label">Product</span>
+                                            <span className="claim-info-value">{claim.product.name}</span>
+                                            <span className="claim-info-sku">SKU: {claim.product.sku}</span>
+                                        </div>
+                                    </div>
+
                                     <div className="claim-info-grid">
                                         <div className="claim-info-item">
                                             <span className="claim-info-label">Customer</span>
                                             <span className="claim-info-value">{claim.customer.fullName}</span>
                                         </div>
                                         <div className="claim-info-item">
-                                            <span className="claim-info-label">Product</span>
-                                            <span className="claim-info-value">{claim.product.name}</span>
+                                            <span className="claim-info-label">Serial Number</span>
+                                            <span className="claim-info-value mono">{claim.warranty.serialNumber}</span>
+                                        </div>
+                                        <div className="claim-info-item">
+                                            <span className="claim-info-label">Policy</span>
+                                            <span className="claim-info-value">{claim.warranty.policyName}</span>
+                                        </div>
+                                        <div className="claim-info-item">
+                                            <span className="claim-info-label">Warranty Expiry</span>
+                                            <span className="claim-info-value">{formatDate(claim.warranty.expiryDate)}</span>
                                         </div>
                                         {claim.contactPhone && (
                                             <div className="claim-info-item">
-                                                <span className="claim-info-label">Phone</span>
+                                                <span className="claim-info-label">Contact Phone</span>
                                                 <span className="claim-info-value">{claim.contactPhone}</span>
                                             </div>
                                         )}
                                         <div className="claim-info-item">
-                                            <span className="claim-info-label">Submitted</span>
+                                            <span className="claim-info-label">Submitted At</span>
                                             <span className="claim-info-value">{formatDate(claim.submittedAt)}</span>
                                         </div>
                                     </div>

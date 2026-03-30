@@ -59,11 +59,14 @@ export interface WarrantyClaimDto {
     product: {
         productId: number;
         name: string;
+        sku: string;
+        primaryImage: string | null;
     };
     warranty: {
         warrantyId: number;
         serialNumber: string | null;
         policyName: string;
+        expiryDate: string;
     };
     issueDescription: string;
     contactPhone: string | null;
