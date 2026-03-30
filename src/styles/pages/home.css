@@ -539,7 +539,8 @@
 
 .category-carousel__card:hover::before {
     transform: scaleX(1);
-    animation: gradient-shift 2s ease infinite;
+    /* Animation disabled for performance */
+    /* animation: gradient-shift 2s ease infinite; */
 }
 
 .category-carousel__card--skeleton {
@@ -674,7 +675,8 @@
 }
 
 .flash-deals__icon .material-symbols-outlined {
-    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    /* Animation disabled for performance */
+    /* animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; */
 }
 
 @keyframes pulse-glow {
@@ -1263,7 +1265,8 @@
             rgba(30, 41, 59, 0.75) 50%,
             rgba(15, 23, 42, 0.85) 100%);
     background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
+    /* Animation disabled for performance */
+    /* animation: gradient-shift 8s ease infinite; */
 }
 
 .hero-search__title {
@@ -1344,7 +1347,8 @@
     z-index: -1;
     opacity: 0;
     transition: opacity 0.4s ease;
-    animation: gradient-shift 4s ease infinite;
+    /* Animation disabled for performance */
+    /* animation: gradient-shift 4s ease infinite; */
 }
 
 .category-card:hover::before {
@@ -1455,7 +1459,8 @@
     padding: 2px;
     background: linear-gradient(135deg, #f59e0b, #ef4444, #f59e0b);
     background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
+    /* Animation disabled for performance */
+    /* animation: gradient-shift 3s ease infinite; */
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
@@ -1465,7 +1470,8 @@
 }
 
 .flash-deals__icon {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    /* Animation disabled for performance */
+    /* animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; */
 }
 
 .flash-deals__timer-value {
@@ -1521,7 +1527,8 @@
     background: radial-gradient(circle at center,
             rgba(36, 42, 235, 0.1) 0%,
             transparent 50%);
-    animation: spin-slow 20s linear infinite;
+    /* Animation disabled for performance */
+    /* animation: spin-slow 20s linear infinite; */
 }
 
 .newsletter__background {
@@ -1549,7 +1556,8 @@
     overflow: hidden;
     background: linear-gradient(135deg, #242aeb, #3b82f6);
     background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
+    /* Animation disabled for performance */
+    /* animation: gradient-shift 3s ease infinite; */
     transition: all 0.3s ease;
 }
 
@@ -1804,7 +1812,8 @@
 
 .why-card:hover::before {
     transform: scaleX(1);
-    animation: gradient-shift 2s ease infinite;
+    /* Animation disabled for performance */
+    /* animation: gradient-shift 2s ease infinite; */
 }
 
 .why-card__icon {
@@ -1827,7 +1836,8 @@
 
 .why-card__icon .material-symbols-outlined {
     font-size: 24px;
-    animation: float-subtle 3s ease-in-out infinite;
+    /* Animation disabled for performance */
+    /* animation: float-subtle 3s ease-in-out infinite; */
 }
 
 .why-card__title {
@@ -1893,7 +1903,8 @@
     margin: 0 auto 0.75rem;
     box-shadow: 0 4px 15px rgba(36, 42, 235, 0.3);
     transition: all 0.3s ease;
-    animation: float-subtle 4s ease-in-out infinite;
+    /* Animation disabled for performance */
+    /* animation: float-subtle 4s ease-in-out infinite; */
 }
 
 .how-step:hover .how-step__number {
@@ -1906,7 +1917,8 @@
     color: #242aeb;
     margin-bottom: 0.5rem;
     transition: all 0.3s ease;
-    animation: float-subtle 3s ease-in-out infinite;
+    /* Animation disabled for performance */
+    /* animation: float-subtle 3s ease-in-out infinite; */
 }
 
 .how-step:hover .how-step__icon {
@@ -1992,7 +2004,8 @@
 .brands-strip__track {
     display: flex;
     gap: 3rem;
-    animation: marquee 30s linear infinite;
+    /* Animation disabled for performance */
+    /* animation: marquee 30s linear infinite; */
     width: max-content;
 }
 
@@ -2250,12 +2263,14 @@
     font-size: 28px;
     color: #3b82f6;
     margin-bottom: 0.5rem;
-    animation: float-subtle 4s ease-in-out infinite;
+    /* Animation disabled for performance */
+    /* animation: float-subtle 4s ease-in-out infinite; */
     filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4));
 }
 
 .stat-item:hover .stat-item__icon {
-    animation: float 2s ease-in-out infinite;
+    /* Animation disabled for performance */
+    /* animation: float 2s ease-in-out infinite; */
     color: #06b6d4;
 }
 
