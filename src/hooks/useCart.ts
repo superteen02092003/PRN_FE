@@ -235,6 +235,10 @@ export const useAddToCart = (): UseAddToCartResult => {
             const axiosError = err as any;
             if (axiosError?.response?.data?.message) {
                 errorMessage = axiosError.response.data.message;
+            } else if (axiosError?.response?.status === 400) {
+                errorMessage = 'Cannot add to cart. Please check stock availability.';
+            } else if (axiosError?.response?.status === 500) {
+                errorMessage = 'Cannot add to cart. The requested quantity may exceed available stock.';
             }
 
             console.error('[useAddToCart] Error:', errorMessage, err);

@@ -27,16 +27,18 @@ const CartItem: React.FC<CartItemProps> = ({
     const [isRemoving, setIsRemoving] = useState(false);
 
     const handleQuantityChange = async (newQuantity: number) => {
-        // Validate quantity
-        if (newQuantity < 1) {
-            return;
-        }
-        
+        if (newQuantity < 1) return;
+
         if (newQuantity > item.stockQuantity) {
-            // Show toast error for exceeding stock
             const { toast } = await import('react-toastify');
-            toast.error(`Cannot add more. Only ${item.stockQuantity} items available in stock.`);
-            return;
+            if (newQuantity >= item.quantity) {
+                // User is trying to increase past available stock
+                toast.error(`Only ${item.stockQuantity} items available in stock.`);
+                return;
+            }
+            // User is decreasing but still above stock — snap to max available
+            newQuantity = item.stockQuantity;
+            toast.info(`Quantity adjusted to available stock (${item.stockQuantity}).`);
         }
 
         setIsUpdating(true);
@@ -75,7 +77,12 @@ const CartItem: React.FC<CartItemProps> = ({
                 {!item.inStock && (
                     <span className="cart-item__out-of-stock">Out of Stock</span>
                 )}
-                {item.inStock && item.stockQuantity < 5 && (
+                {item.inStock && item.quantity > item.stockQuantity && (
+                    <span className="cart-item__overstock-warning">
+                        Only {item.stockQuantity} available — please reduce quantity
+                    </span>
+                )}
+                {item.inStock && item.quantity <= item.stockQuantity && item.stockQuantity < 5 && (
                     <span className="cart-item__low-stock">
                         Only {item.stockQuantity} left
                     </span>
