@@ -138,11 +138,18 @@ const HomePage = () => {
 
     // Scroll: progress bar
     useEffect(() => {
+        let ticking = false;
         const handleScroll = () => {
-            const total = document.documentElement.scrollHeight - window.innerHeight;
-            setScrollProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    const total = document.documentElement.scrollHeight - window.innerHeight;
+                    setScrollProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
+                    ticking = false;
+                });
+                ticking = true;
+            }
         };
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 

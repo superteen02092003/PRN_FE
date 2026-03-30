@@ -6,8 +6,10 @@
     z-index: 1000;
     width: 100%;
     border-bottom: 1px solid #e7e8f3;
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    will-change: transform;
     transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 

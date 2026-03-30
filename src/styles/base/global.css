@@ -41,9 +41,6 @@ img {
     max-width: 100%;
     height: auto;
     display: block;
-    /* Improve image rendering and scroll performance */
-    will-change: transform;
-    transform: translateZ(0);
 }
 
 /* Container */
