@@ -92,6 +92,18 @@
     width: fit-content;
 }
 
+.cart-item__overstock-warning {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 4px;
+    margin-top: 0.25rem;
+    width: fit-content;
+}
+
 .cart-item__low-stock {
     display: inline-block;
     padding: 0.25rem 0.5rem;
