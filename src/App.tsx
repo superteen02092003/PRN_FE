@@ -25,6 +25,8 @@ import SubmitClaimPage from './pages/Warranties/SubmitClaimPage';
 import MyClaimsPage from './pages/Warranties/MyClaimsPage';
 import ChatPage from './pages/Chat/ChatPage';
 import StorePage from './pages/Store/StorePage';
+import AboutPage from './pages/About/AboutPage';
+import FAQPage from './pages/FAQ/FAQPage';
 import NotificationPage from './pages/Notification/NotificationPage';
 import { NotificationProvider } from './contexts/NotificationContext';
 import ScrollToTop from './components/common/ScrollToTop/ScrollToTop';
@@ -80,6 +82,16 @@ function App() {
                             <Route path="/store" element={
                                 <PageTransition>
                                     <StorePage />
+                                </PageTransition>
+                            } />
+                            <Route path="/about" element={
+                                <PageTransition>
+                                    <AboutPage />
+                                </PageTransition>
+                            } />
+                            <Route path="/faq" element={
+                                <PageTransition>
+                                    <FAQPage />
                                 </PageTransition>
                             } />
 
