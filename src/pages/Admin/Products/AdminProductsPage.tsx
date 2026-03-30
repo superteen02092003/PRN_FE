@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout/AdminLayout';
-import { getAdminProducts, deleteProduct } from '@/services/adminService';
+import { getAdminProducts, deleteProduct, toggleProductActive } from '@/services/adminService';
 import { getCategories, getBrands } from '@/services/productService';
 import { exportService } from '@/services/exportService';
 import type { AdminProductResponse, AdminProductFilter } from '@/types/admin.types';
@@ -73,6 +73,18 @@ const AdminProductsPage = () => {
             fetchProducts();
         } catch (err) {
             toast.error(err instanceof Error ? err.message : 'Failed to delete product');
+        }
+    };
+
+    const handleToggleActive = async (id: number, name: string, currentlyActive: boolean) => {
+        const action = currentlyActive ? 'deactivate' : 'activate';
+        if (!confirm(`Bạn có chắc chắn muốn ${action} sản phẩm "${name}"?`)) return;
+        try {
+            const { message } = await toggleProductActive(id);
+            toast.success(message);
+            fetchProducts();
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Cập nhật trạng thái thất bại');
         }
     };
 
@@ -222,7 +234,17 @@ const AdminProductsPage = () => {
                                                     <button className="admin-btn ghost" title="Edit" onClick={() => navigate(`/admin/products/${p.productId}/edit`)}>
                                                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
                                                     </button>
-                                                    <button className="admin-btn ghost" title="Delete" onClick={() => handleDelete(p.productId, p.name)} style={{ color: '#dc2626' }}>
+                                                    <button
+                                                        className="admin-btn ghost"
+                                                        title={p.isActive ? 'Deactivate' : 'Activate'}
+                                                        onClick={() => handleToggleActive(p.productId, p.name, p.isActive)}
+                                                        style={{ color: p.isActive ? '#dc2626' : '#16a34a' }}
+                                                    >
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                                                            {p.isActive ? 'toggle_off' : 'toggle_on'}
+                                                        </span>
+                                                    </button>
+                                                    <button className="admin-btn ghost" title="Delete" onClick={() => handleDelete(p.productId, p.name)} style={{ color: '#6b7280' }}>
                                                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
                                                     </button>
                                                 </div>

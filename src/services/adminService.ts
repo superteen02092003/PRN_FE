@@ -111,6 +111,24 @@ export const deleteProduct = async (id: number): Promise<string> => {
     }
 };
 
+export const toggleProductActive = async (id: number): Promise<{ isActive: boolean; message: string }> => {
+    try {
+        const response = await api.patch<AdminApiResponse<boolean>>(`/admin/products/${id}/toggle-active`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to toggle product status');
+        }
+        return {
+            isActive: response.data.data!,
+            message: response.data.message || 'Cập nhật trạng thái thành công',
+        };
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
 export const uploadProductImages = async (
     productId: number,
     files: File[],
