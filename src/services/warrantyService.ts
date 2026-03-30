@@ -10,6 +10,7 @@ import type {
     ResolveClaimRequest,
     ResolveClaimApiResponse,
     SingleWarrantyApiResponse,
+    WarrantyClaimDto,
 } from '../types/warranty.types';
 
 // ===== Customer: Warranty APIs =====
@@ -128,6 +129,21 @@ export const resolveWarrantyClaim = async (
     }
 };
 
+/**
+ * Admin: Get Warranty Claim Detail by ID
+ */
+export const getWarrantyClaimById = async (claimId: number): Promise<WarrantyClaimDto> => {
+    const response = await api.get<{ success: boolean; data: WarrantyClaimDto }>(
+        `/admin/warranty-claims/${claimId}`
+    );
+
+    if (!response.data.success) {
+        throw new Error('Failed to fetch warranty claim details');
+    }
+
+    return response.data.data;
+};
+
 const warrantyService = {
     getMyWarranties,
     getWarrantyById,
@@ -135,6 +151,7 @@ const warrantyService = {
     getMyClaims,
     getAllWarrantyClaims,
     resolveWarrantyClaim,
+    getWarrantyClaimById,
 };
 
 export default warrantyService;
