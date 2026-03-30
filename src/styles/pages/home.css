@@ -1998,8 +1998,7 @@
 .brands-strip__track {
     display: flex;
     gap: 3rem;
-    /* Animation disabled for performance */
-    /* animation: marquee 30s linear infinite; */
+    animation: marquee 30s linear infinite;
     width: max-content;
 }
 
