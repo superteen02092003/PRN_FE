@@ -17,7 +17,7 @@ import AdminReturnRequestsPage from './pages/Admin/ReturnRequests/AdminReturnReq
 import PageTransition from './components/common/PageTransition';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
-import { AdminDashboard, AdminProductsPage, AdminProductFormPage, AdminOrdersPage, AdminOrderDetailPage, AdminUsersPage, AdminBrandsPage, AdminCategoriesPage, AdminReviewsPage, AdminWarrantyClaimsPage } from './pages/Admin';
+import { AdminDashboard, AdminProductsPage, AdminProductFormPage, AdminOrdersPage, AdminOrderDetailPage, AdminUsersPage, AdminBrandsPage, AdminCategoriesPage, AdminReviewsPage, AdminWarrantyClaimsPage, AdminCouponsPage } from './pages/Admin';
 import AdminChatPage from './pages/Admin/Chat/AdminChatPage';
 import ProfilePage from './pages/Profile';
 import MyWarrantiesPage from './pages/Warranties/MyWarrantiesPage';
@@ -261,6 +261,11 @@ function App() {
                             <Route path="/admin/return-requests" element={
                                 <ProtectedRoute allowedRoles={['Admin']}>
                                     <AdminReturnRequestsPage />
+                                </ProtectedRoute>
+                            } />
+                            <Route path="/admin/coupons" element={
+                                <ProtectedRoute allowedRoles={['Admin']}>
+                                    <AdminCouponsPage />
                                 </ProtectedRoute>
                             } />
                             <Route path="/admin/chat" element={

@@ -8,3 +8,4 @@ export { default as AdminBrandsPage } from './Brands/AdminBrandsPage';
 export { default as AdminCategoriesPage } from './Categories/AdminCategoriesPage';
 export { default as AdminReviewsPage } from './Reviews/AdminReviewsPage';
 export { default as AdminWarrantyClaimsPage } from './WarrantyClaims/AdminWarrantyClaimsPage';
+export { default as AdminCouponsPage } from './Coupons/AdminCouponsPage';

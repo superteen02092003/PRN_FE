@@ -18,6 +18,7 @@ const menuItems = [
     { icon: 'reviews', label: 'Reviews', path: '/admin/reviews' },
     { icon: 'shield', label: 'Warranty Claims', path: '/admin/warranty-claims' },
     { icon: 'undo', label: 'Return Requests', path: '/admin/return-requests' },
+    { icon: 'local_offer', label: 'Coupons', path: '/admin/coupons' },
     { icon: 'chat', label: 'Chat', path: '/admin/chat' },
 ];
 

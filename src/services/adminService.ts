@@ -18,6 +18,9 @@ import type {
     AdminCategoryResponse,
     CreateCategoryRequest,
     UpdateCategoryRequest,
+    AdminCouponResponse,
+    CreateCouponRequest,
+    UpdateCouponRequest,
 } from '../types/admin.types';
 
 // ===== Dashboard =====
@@ -486,4 +489,66 @@ export const getWarrantyPolicies = async (): Promise<WarrantyPolicyOption[]> => 
         return [];
     }
     return response.data.data;
+};
+
+// ===== Coupons =====
+
+export const getAdminCoupons = async (): Promise<AdminCouponResponse[]> => {
+    const response = await api.get<AdminApiResponse<AdminCouponResponse[]>>('/admin/coupons');
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Failed to fetch coupons');
+    }
+    return response.data.data;
+};
+
+export const getAdminCoupon = async (id: number): Promise<AdminCouponResponse> => {
+    const response = await api.get<AdminApiResponse<AdminCouponResponse>>(`/admin/coupons/${id}`);
+    if (!response.data.success || !response.data.data) {
+        throw new Error(response.data.message || 'Coupon not found');
+    }
+    return response.data.data;
+};
+
+export const createCoupon = async (data: CreateCouponRequest): Promise<AdminCouponResponse> => {
+    try {
+        const response = await api.post<AdminApiResponse<AdminCouponResponse>>('/admin/coupons', data);
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to create coupon');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+export const updateCoupon = async (id: number, data: UpdateCouponRequest): Promise<AdminCouponResponse> => {
+    try {
+        const response = await api.put<AdminApiResponse<AdminCouponResponse>>(`/admin/coupons/${id}`, data);
+        if (!response.data.success || !response.data.data) {
+            throw new Error(response.data.message || 'Failed to update coupon');
+        }
+        return response.data.data;
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
+};
+
+export const deleteCoupon = async (id: number): Promise<void> => {
+    try {
+        const response = await api.delete<AdminApiResponse<unknown>>(`/admin/coupons/${id}`);
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to delete coupon');
+        }
+    } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const axiosErr = err as any;
+        if (axiosErr?.response?.data?.message) throw new Error(axiosErr.response.data.message);
+        throw err;
+    }
 };

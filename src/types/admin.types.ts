@@ -238,3 +238,45 @@ export interface UpdateCategoryRequest {
     name: string;
     imageUrl?: string;
 }
+
+// ===== Admin Coupon Types =====
+
+export type DiscountType = 'PERCENTAGE' | 'FIXED_AMOUNT';
+
+export interface AdminCouponResponse {
+    couponId: number;
+    code: string;
+    discountType: DiscountType;
+    discountValue: number;
+    minOrderValue: number | null;
+    maxDiscountAmount: number | null;
+    startDate: string;
+    endDate: string;
+    usageLimit: number | null;
+    usedCount: number;
+    createdAt: string | null;
+    orderCount: number;
+    isActive: boolean;
+}
+
+export interface CreateCouponRequest {
+    code: string;
+    discountType: DiscountType;
+    discountValue: number;
+    minOrderValue?: number;
+    maxDiscountAmount?: number;
+    startDate: string;
+    endDate: string;
+    usageLimit?: number;
+}
+
+export interface UpdateCouponRequest {
+    code: string;
+    discountType: DiscountType;
+    discountValue: number;
+    minOrderValue?: number;
+    maxDiscountAmount?: number;
+    startDate: string;
+    endDate: string;
+    usageLimit?: number;
+}
