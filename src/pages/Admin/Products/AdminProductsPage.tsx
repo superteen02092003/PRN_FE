@@ -238,10 +238,10 @@ const AdminProductsPage = () => {
                                                         className="admin-btn ghost"
                                                         title={p.isActive ? 'Deactivate' : 'Activate'}
                                                         onClick={() => handleToggleActive(p.productId, p.name, p.isActive)}
-                                                        style={{ color: p.isActive ? '#dc2626' : '#16a34a' }}
+                                                        style={{ color: p.isActive ? '#16a34a' : '#9ca3af' }}
                                                     >
-                                                        <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                                                            {p.isActive ? 'toggle_off' : 'toggle_on'}
+                                                        <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
+                                                            {p.isActive ? 'toggle_on' : 'toggle_off'}
                                                         </span>
                                                     </button>
                                                     <button className="admin-btn ghost" title="Delete" onClick={() => handleDelete(p.productId, p.name)} style={{ color: '#6b7280' }}>

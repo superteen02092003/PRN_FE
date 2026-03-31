@@ -327,6 +327,8 @@ const Header = () => {
                         </div>
 
                         <Link to="/store" className="header__nav-link">Store</Link>
+                        <Link to="/about" className="header__nav-link">About Us</Link>
+                        <Link to="/faq" className="header__nav-link">FAQ</Link>
                     </nav>
 
                     {/* Inline Search */}
