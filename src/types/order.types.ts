@@ -154,6 +154,8 @@ export interface OrderItemDto {
     unitPrice: number;
     discountAmount: number | null;
     subtotal: number;
+    serialNumbers: string[];
+    hasSerialTracking: boolean;
 }
 
 export interface OrderPaymentDto {
