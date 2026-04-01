@@ -244,6 +244,13 @@ const OrderDetailPage = () => {
                                                     {item.serialNumbers.map(sn => (
                                                         <span key={sn} className="od-serial-badge">{sn}</span>
                                                     ))}
+                                                    <button
+                                                        className="od-serial-copy"
+                                                        title="Copy serial numbers"
+                                                        onClick={() => navigator.clipboard.writeText(item.serialNumbers.join(', '))}
+                                                    >
+                                                        <span className="material-symbols-outlined" style={{ fontSize: 14 }}>content_copy</span>
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
