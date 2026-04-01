@@ -182,9 +182,32 @@ const AdminReturnRequestsPage = () => {
                         zIndex: 1000, boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
                     }} onClick={(e) => e.stopPropagation()}>
                         <h3 style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Process Request #{selected.returnRequestId}</h3>
-                        <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '1.25rem' }}>
+                        <p style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '0.75rem' }}>
                             Order {selected.orderNumber} — {typeLabels[selected.type]}
                         </p>
+
+                        {selected.items?.length > 0 && (
+                            <div style={{ marginBottom: '1rem', background: '#f9fafb', borderRadius: '8px', padding: '0.75rem', border: '1px solid #e5e7eb' }}>
+                                <p style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '0.5rem' }}>Returned Items</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                    {selected.items.map((item) => (
+                                        <div key={item.orderItemId} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                            {item.productImageUrl && (
+                                                <img src={item.productImageUrl} alt={item.productName || ''} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} />
+                                            )}
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <p style={{ fontSize: '0.8rem', fontWeight: 600, margin: 0 }}>{item.productName}</p>
+                                                {item.serialNumbers?.length > 0 && (
+                                                    <p style={{ fontSize: '0.7rem', color: '#6b7280', fontFamily: 'monospace', margin: '2px 0 0' }}>
+                                                        S/N: {item.serialNumbers.join(', ')}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <div style={{ marginBottom: '1rem' }}>
                             <p style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>New Status</p>
