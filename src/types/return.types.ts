@@ -1,6 +1,17 @@
 export type ReturnType = 'RETURN' | 'EXCHANGE';
 export type ReturnStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
 
+export interface ReturnRequestItemDto {
+  orderItemId: number;
+  productId: number;
+  productName: string | null;
+  productSku: string | null;
+  productImageUrl: string | null;
+  quantity: number;
+  unitPrice: number;
+  serialNumbers: string[];
+}
+
 export interface ReturnRequestDto {
   returnRequestId: number;
   orderId: number;
