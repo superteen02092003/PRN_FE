@@ -1742,3 +1742,45 @@
         flex-direction: column;
     }
 }
+
+/* ===== Serial Number ===== */
+.od-serial-section {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.od-serial-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 2px;
+}
+
+.od-serial-badge {
+    font-size: 0.7rem;
+    font-family: monospace;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: #374151;
+}
+
+.od-serial-copy {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    color: #9ca3af;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: color 0.15s;
+}
+
+.od-serial-copy:hover {
+    color: #3b82f6;
+}
