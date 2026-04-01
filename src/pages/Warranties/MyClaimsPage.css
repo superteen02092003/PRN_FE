@@ -254,6 +254,27 @@
     cursor: not-allowed;
 }
 
+.claim-serial-number {
+    display: inline-block;
+    margin-top: 0.25rem;
+    font-size: 0.78rem;
+    font-family: monospace;
+    color: #4b5563;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 1px 6px;
+}
+
+.claim-product-image {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    border: 1px solid #e5e7eb;
+}
+
 @media (max-width: 640px) {
     .customer-claim-card-top {
         flex-direction: column;
