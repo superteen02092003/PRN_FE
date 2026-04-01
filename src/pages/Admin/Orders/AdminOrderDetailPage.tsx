@@ -195,6 +195,7 @@ const AdminOrderDetailPage = () => {
                                 <th>Unit Price</th>
                                 <th>Qty</th>
                                 <th>Subtotal</th>
+                                <th>Serial Numbers</th>
                             </tr>
                         </thead>
                         <tbody>
