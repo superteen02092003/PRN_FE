@@ -215,6 +215,26 @@ const AdminOrderDetailPage = () => {
                                     <td>{formatCurrency(item.unitPrice)}</td>
                                     <td style={{ textAlign: 'center' }}>{item.quantity}</td>
                                     <td style={{ fontWeight: 600 }}>{formatCurrency(item.subtotal)}</td>
+                                    <td>
+                                        {item.serialNumbers?.length > 0 ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                                {item.serialNumbers.map(sn => (
+                                                    <span key={sn} style={{ fontFamily: 'monospace', fontSize: '12px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '4px', padding: '1px 6px', display: 'inline-block' }}>
+                                                        {sn}
+                                                    </span>
+                                                ))}
+                                                <button
+                                                    onClick={() => navigator.clipboard.writeText(item.serialNumbers.join('\n'))}
+                                                    title="Copy serial numbers"
+                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '2px 0', textAlign: 'left', fontSize: '11px' }}
+                                                >
+                                                    <span className="material-symbols-outlined" style={{ fontSize: '13px', verticalAlign: 'middle' }}>content_copy</span> Copy
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <span style={{ color: '#9ca3af', fontSize: '13px' }}>—</span>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
