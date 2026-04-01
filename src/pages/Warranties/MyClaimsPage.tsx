@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header/Header';
 import Footer from '@/components/common/Footer/Footer';
 import { getMyClaims } from '@/services/warrantyService';
-import type { WarrantyClaimDto, ClaimStatus } from '@/types/warranty.types';
+import type { CustomerWarrantyClaimDto, ClaimStatus } from '@/types/warranty.types';
 import { toast } from 'react-toastify';
 import './MyClaimsPage.css';
 
@@ -26,7 +26,7 @@ const statusColors: Record<ClaimStatus, { color: string; bg: string }> = {
 
 const MyClaimsPage = () => {
     const navigate = useNavigate();
-    const [claims, setClaims] = useState<WarrantyClaimDto[]>([]);
+    const [claims, setClaims] = useState<CustomerWarrantyClaimDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
     const [page, setPage] = useState(1);
@@ -128,7 +128,8 @@ const MyClaimsPage = () => {
                                                 <span className="material-symbols-outlined claim-icon">build_circle</span>
                                                 <div>
                                                     <span className="claim-id-label">Claim #{claim.claimId}</span>
-                                                    <h3 className="claim-product">{claim.product.name}</h3>
+                                                    <h3 className="claim-product">{claim.productName}</h3>
+                                                    <span className="claim-serial-number">S/N: {claim.serialNumber}</span>
                                                 </div>
                                             </div>
                                             <span
@@ -145,12 +146,14 @@ const MyClaimsPage = () => {
                                                     <span className="claim-info-label">Submitted On</span>
                                                     <span className="claim-info-value">{formatDate(claim.submittedAt)}</span>
                                                 </div>
-                                                {claim.contactPhone && (
-                                                    <div className="claim-info-item">
-                                                        <span className="claim-info-label">Contact Phone</span>
-                                                        <span className="claim-info-value">{claim.contactPhone}</span>
-                                                    </div>
-                                                )}
+                                                <div className="claim-info-item">
+                                                    <span className="claim-info-label">Warranty Policy</span>
+                                                    <span className="claim-info-value">{claim.policyName}</span>
+                                                </div>
+                                                <div className="claim-info-item">
+                                                    <span className="claim-info-label">Warranty Expires</span>
+                                                    <span className="claim-info-value">{formatDate(claim.warrantyExpiryDate)}</span>
+                                                </div>
                                             </div>
 
                                             <div className="claim-detail-section">
