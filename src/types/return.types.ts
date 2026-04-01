@@ -26,6 +26,7 @@ export interface ReturnRequestDto {
   updatedAt?: string;
   processedAt?: string;
   processedByName?: string;
+  items: ReturnRequestItemDto[];
 }
 
 export interface CreateReturnRequestDto {
