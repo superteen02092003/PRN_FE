@@ -11,6 +11,8 @@ import type {
     ResolveClaimApiResponse,
     SingleWarrantyApiResponse,
     WarrantyClaimDto,
+    CustomerWarrantyClaimPagedResponse,
+    CustomerClaimsApiResponse,
 } from '../types/warranty.types';
 
 // ===== Customer: Warranty APIs =====
@@ -73,9 +75,9 @@ export const submitWarrantyClaim = async (
 export const getMyClaims = async (
     page: number = 1,
     pageSize: number = 10
-): Promise<ClaimsPaginatedResponse> => {
+): Promise<CustomerWarrantyClaimPagedResponse> => {
     const params: Record<string, string | number> = { page, pageSize };
-    const response = await api.get<ClaimsApiResponse>('/warranties/claims', { params });
+    const response = await api.get<CustomerClaimsApiResponse>('/warranties/claims', { params });
 
     if (!response.data.success) {
         throw new Error(response.data.message || 'Failed to fetch your warranty claims');
