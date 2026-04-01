@@ -238,6 +238,14 @@ const OrderDetailPage = () => {
                                             <span className="od-item-qty">
                                                 Qty: {String(item.quantity).padStart(2, '0')}
                                             </span>
+                                            {order.status === 'DELIVERED' && item.serialNumbers?.length > 0 && (
+                                                <div className="od-serial-section">
+                                                    <span className="od-serial-label">S/N:</span>
+                                                    {item.serialNumbers.map(sn => (
+                                                        <span key={sn} className="od-serial-badge">{sn}</span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
