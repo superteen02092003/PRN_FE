@@ -156,6 +156,8 @@ export interface AdminOrderItemResponse {
     unitPrice: number;
     subtotal: number;
     discountAmount: number | null;
+    serialNumbers: string[];
+    hasSerialTracking: boolean;
 }
 
 export interface UpdateOrderStatusRequest {
