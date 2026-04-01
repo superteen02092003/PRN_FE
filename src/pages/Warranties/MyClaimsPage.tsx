@@ -133,7 +133,16 @@ const MyClaimsPage = () => {
                                                 <div>
                                                     <span className="claim-id-label">Claim #{claim.claimId}</span>
                                                     <h3 className="claim-product">{claim.productName}</h3>
-                                                    <span className="claim-serial-number">S/N: {claim.serialNumber}</span>
+                                                    <span className="claim-serial-number">
+                                                        S/N: {claim.serialNumber}
+                                                        <button
+                                                            className="claim-serial-copy"
+                                                            title="Copy serial number"
+                                                            onClick={() => navigator.clipboard.writeText(claim.serialNumber)}
+                                                        >
+                                                            <span className="material-symbols-outlined" style={{ fontSize: 12 }}>content_copy</span>
+                                                        </button>
+                                                    </span>
                                                 </div>
                                             </div>
                                             <span
