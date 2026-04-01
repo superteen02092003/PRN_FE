@@ -121,6 +121,25 @@ const MyReturnRequestsPage = () => {
                                                     <strong>Admin note:</strong> {req.adminNote}
                                                 </p>
                                             )}
+                                            {req.items?.length > 0 && (
+                                                <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                                    {req.items.map(item => (
+                                                        <div key={item.orderItemId} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                                            {item.productImageUrl && (
+                                                                <img src={item.productImageUrl} alt={item.productName || ''} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6 }} />
+                                                            )}
+                                                            <div>
+                                                                <p style={{ fontSize: '0.82rem', fontWeight: 600 }}>{item.productName}</p>
+                                                                {item.serialNumbers?.length > 0 && (
+                                                                    <p style={{ fontSize: '0.72rem', color: '#6b7280', fontFamily: 'monospace' }}>
+                                                                        S/N: {item.serialNumbers.join(', ')}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );
