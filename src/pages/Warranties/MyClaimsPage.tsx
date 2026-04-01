@@ -125,7 +125,11 @@ const MyClaimsPage = () => {
                                     <div key={claim.claimId} className="customer-claim-card">
                                         <div className="customer-claim-card-top">
                                             <div className="claim-id-section">
-                                                <span className="material-symbols-outlined claim-icon">build_circle</span>
+                                                {claim.productImageUrl ? (
+                                                    <img src={claim.productImageUrl} alt={claim.productName} className="claim-product-image" />
+                                                ) : (
+                                                    <span className="material-symbols-outlined claim-icon">build_circle</span>
+                                                )}
                                                 <div>
                                                     <span className="claim-id-label">Claim #{claim.claimId}</span>
                                                     <h3 className="claim-product">{claim.productName}</h3>
