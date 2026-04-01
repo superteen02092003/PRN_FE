@@ -266,6 +266,22 @@
     padding: 1px 6px;
 }
 
+.claim-serial-copy {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 0 0 0 4px;
+    vertical-align: middle;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+.claim-serial-copy:hover {
+    color: #2563eb;
+}
+
 .claim-product-image {
     width: 48px;
     height: 48px;
