@@ -101,3 +101,33 @@ export interface ResolveClaimApiResponse {
     message: string;
     data: unknown;
 }
+
+// ===== Customer Warranty Claim Types =====
+
+export interface CustomerWarrantyClaimDto {
+    claimId: number;
+    serialNumber: string;
+    productName: string;
+    productImageUrl: string | null;
+    policyName: string;
+    warrantyExpiryDate: string;
+    issueDescription: string;
+    status: ClaimStatus;
+    resolutionNote: string | null;
+    submittedAt: string;
+    resolvedDate: string | null;
+}
+
+export interface CustomerWarrantyClaimPagedResponse {
+    items: CustomerWarrantyClaimDto[];
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalItems: number;
+}
+
+export interface CustomerClaimsApiResponse {
+    success: boolean;
+    message: string;
+    data: CustomerWarrantyClaimPagedResponse;
+}
